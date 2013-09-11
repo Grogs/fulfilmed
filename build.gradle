@@ -1,0 +1,56 @@
+
+apply plugin: 'scala'
+apply plugin: 'idea'
+apply plugin: 'application'
+
+version='1.0'
+
+project.targetCompatibility = 1.7
+
+mainClassName = 'me.gregd.cineworld.util.JettyBootstrap'
+
+repositories {
+  mavenCentral()
+  maven { url = 'https://github.com/mandubian/mandubian-mvn/raw/master/snapshots/' }
+  maven { url = 'https://github.com/mandubian/mandubian-mvn/raw/master/releases/' }
+  maven { url = 'http://repo.typesafe.com/typesafe/releases/' }
+  maven { url = 'http://oss.sonatype.org/content/repositories/snapshots/' }
+  maven { url = 'http://oss.sonatype.org/content/repositories/releases' }
+  maven { url = 'http://download.eclipse.org/rt/eclipselink/maven.repo' }
+}
+
+dependencies {
+    compile 'org.scala-lang:scala-library:2.10.0'
+    compile 'org.scala-lang:scala-compiler:2.10.0'
+
+  compile 'com.googlecode.flyway:flyway-core:2.1.1'
+  compile 'com.typesafe:slick_2.10.0-RC1:0.11.2'
+  compile 'com.h2database:h2:1.3.164'
+  compile 'org.threeten:threetenbp:0.7'
+
+  compile 'joda-time:joda-time:2.2'
+  compile 'com.github.nscala-time:nscala-time_2.10:0.4.0'
+
+  compile 'org.scalaj:scalaj-http_2.10:0.3.10'
+  compile 'org.json4s:json4s-native_2.10:3.2.4'
+  compile 'org.json4s:json4s-jackson_2.10:3.2.4'
+
+  compile 'org.eclipse.jetty:jetty-webapp:8.1.0.RC5'
+
+  compile 'org.scalatra:scalatra_2.10:2.2.1'
+  compile 'org.scalatra:scalatra-json_2.10:2.2.1'
+
+  compile 'org.scala-lang:scala-pickling_2.10:0.8.0-SNAPSHOT'
+
+  compile 'com.google.guava:guava:14.0'
+  compile 'com.google.code.findbugs:jsr305:1.3.7'
+  
+  compile 'com.typesafe:scalalogging-slf4j:1.0.1'
+
+  compile 'ch.qos.logback:logback-classic:1.0.13'
+
+  compile 'org.feijoas:mango_2.10:0.9'
+
+  testCompile 'org.scalatest:scalatest_2.10:1.9.1'
+
+}

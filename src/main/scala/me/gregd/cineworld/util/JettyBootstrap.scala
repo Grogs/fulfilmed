@@ -9,7 +9,7 @@ import org.scalatra.servlet.ScalatraListener
  * Date: 30/05/2013
  */
 object JettyBootstrap extends App {
-  var port = 9000
+  var port = 9001
   val server = new Server( port )
 
   val context = new WebAppContext()

@@ -20,11 +20,11 @@ class IMDb(rottenTomatoesApiKey:String) extends IMDbDao with Logging {
   implicit val formats = DefaultFormats
 
   val imdbCache = CacheBuilder.newBuilder()
-      .refreshAfterWrite(1, HOURS)
+      .refreshAfterWrite(3, HOURS)
       .build( imdbRatingAndVotes _ )
 
   val rottenTomatoesCache = CacheBuilder.newBuilder
-      .refreshAfterWrite(1, HOURS)
+      .refreshAfterWrite(4, HOURS)
       .build( getDetailsFromRottenTomatoes _ )
 
   def getId(title:String) = rottenTomatoesCache(title)._1

@@ -1,6 +1,6 @@
 package me.gregd.cineworld.domain
 
-import me.gregd.cineworld.dao.imdb.{IMDbRating, IMDb, IMDbDao}
+import me.gregd.cineworld.dao.imdb.{IMDbRating, Ratings, IMDbDao}
 import me.gregd.cineworld.dao.cineworld.Cineworld
 
 /**

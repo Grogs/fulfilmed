@@ -1,16 +1,17 @@
 package me.gregd.cineworld.rest
 
 import org.scalatra.ScalatraServlet
-import me.gregd.cineworld.dao.cineworld.Cineworld
+import me.gregd.cineworld.dao.cineworld.{Film, Cineworld}
 import org.json4s.DefaultFormats
 import org.scalatra.json.NativeJsonSupport
-import me.gregd.cineworld.dao.imdb.IMDb
+import me.gregd.cineworld.dao.imdb.Ratings
+import com.typesafe.scalalogging.slf4j.Logging
 
 /**
  * Author: Greg Dorrell
  * Date: 10/06/2013
  */
-class CinemaService(dao: Cineworld) extends ScalatraServlet with NativeJsonSupport {
+class CinemaService(dao: Cineworld) extends ScalatraServlet with NativeJsonSupport with Logging {
   protected implicit val jsonFormats = DefaultFormats.withBigDecimal
 
   before() {
@@ -23,13 +24,21 @@ class CinemaService(dao: Cineworld) extends ScalatraServlet with NativeJsonSuppo
   }
 
   get("/cinema/:id") {
-    dao.getMovies(params("id"))(IMDb)
+    dao.getMovies(params("id"))(Ratings)
   }
 
   get("/movie/:id/performances") {
     dao.getPerformances(
       params("id")
     )
+  }
+
+  get("/rating/:title") {
+    logger.info(s"Retrieving rating for ${params("title")}")
+    Film(
+      edi = "Fake ID",
+      title = params("title")
+    ).toMovie
   }
 
 }

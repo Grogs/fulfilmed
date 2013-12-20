@@ -16,7 +16,7 @@ import java.text.NumberFormat
  * Author: Greg Dorrell
  * Date: 11/05/2013
  */
-class IMDb(rottenTomatoesApiKey:String) extends IMDbDao with Logging {
+class Ratings(rottenTomatoesApiKey:String) extends IMDbDao with Logging {
   implicit val formats = DefaultFormats
 
   val imdbCache = CacheBuilder.newBuilder()
@@ -58,12 +58,12 @@ class IMDb(rottenTomatoesApiKey:String) extends IMDbDao with Logging {
 
 
   private def curl = io.Source.fromURL(_:String,"UTF-8").mkString
-  private def encode = java.net.URLEncoder.encode(_:String)
+  private def encode = java.net.URLEncoder.encode(_:String,"UTF-8")
 }
 
-object IMDb extends IMDb(Config.rottenTomatoesApiKey) {}
+object Ratings extends Ratings(Config.rottenTomatoesApiKey) {}
 
 trait IMDbRating { self: {val imdbId:String} =>
-  val rating = IMDb.getIMDbRating(this.imdbId)
-  val votes = IMDb.getVotes(this.imdbId)
+  val rating = Ratings.getIMDbRating(this.imdbId)
+  val votes = Ratings.getVotes(this.imdbId)
 }

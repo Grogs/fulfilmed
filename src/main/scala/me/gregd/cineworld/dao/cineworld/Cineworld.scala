@@ -4,7 +4,7 @@ import me.gregd.cineworld.domain.Format
 import scalaj.http.{HttpOptions, Http}
 import org.json4s._
 import org.json4s.native.JsonMethods._
-import me.gregd.cineworld.dao.imdb.IMDb
+import me.gregd.cineworld.dao.imdb.Ratings
 import me.gregd.cineworld.dao.imdb.IMDbDao
 import me.gregd.cineworld.domain.Movie
 import me.gregd.cineworld.domain.Cinema
@@ -25,7 +25,7 @@ class Cineworld(apiKey:String, implicit val imdb: IMDbDao) extends CineworldDao 
     CacheBuilder.newBuilder()
       .refreshAfterWrite(1, HOURS)
       .build((key: String) => {
-        logger.info(s"Doing value for $key")
+        logger.info(s"Retreiving list of Movies playing at Cineworld Cinema with ID: $key")
         loader(key)
       })
 //      .build[String, List[Movie]]
@@ -66,7 +66,7 @@ class Cineworld(apiKey:String, implicit val imdb: IMDbDao) extends CineworldDao 
   def getPerformances(movie: String): List[Performance] = ???
 
 }
-object Cineworld extends Cineworld(Config.apiKey, IMDb) {}
+object Cineworld extends Cineworld(Config.apiKey, Ratings) {}
 
 case class Film(edi:String, title:String) {
   def toMovie(implicit imdb: IMDbDao = Config.imdb) = {

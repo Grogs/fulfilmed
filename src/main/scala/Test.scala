@@ -1,6 +1,6 @@
-import me.gregd.cineworld.dao.imdb.IMDb
+import me.gregd.cineworld.dao.imdb.Ratings
 
 object Test extends App {
     println("Hello")
-  println(IMDb.getId("Batman Begins"))
+  println(Ratings.getId("Batman Begins"))
 }

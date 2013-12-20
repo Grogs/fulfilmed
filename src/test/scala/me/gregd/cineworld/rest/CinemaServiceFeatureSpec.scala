@@ -12,10 +12,9 @@ import org.json4s.{NoTypeHints, DefaultFormats}
  * Date: 11/09/2013
  */
 class CinemaServiceFeatureSpec extends ScalatraFeatureSpec with ShouldMatchers {
-//  import JsonMethods.parse
   import Serialization.read
   implicit val formats = Serialization.formats(NoTypeHints)
-//  implicit val formats = DefaultFormats
+
   addServlet(Config.webservice, "/*")
 
   feature("Cinemas list") {
@@ -23,7 +22,6 @@ class CinemaServiceFeatureSpec extends ScalatraFeatureSpec with ShouldMatchers {
       get("/cinemas") {
         status should be (200)
         val cinemasOpt = read[Option[List[Cinema]]](body)
-//        val cinemasOpt = parse(body).getAs[List[Cinema]]
         cinemasOpt should be ('defined)
         cinemasOpt.get exists (_.name contains "West India Quay") should be (true)
       }

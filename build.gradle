@@ -63,11 +63,11 @@ task filmsToWatch(type: JavaExec, dependsOn: build) {
     classpath = sourceSets.main.runtimeClasspath
 }
 
-applicationDistribution {
-    main {
-
-    }
-}
+//applicationDistribution {
+//    main {
+//
+//    }
+//}
 
 //
 //task deployToVps(dependsOn: installApp, type: copy) {

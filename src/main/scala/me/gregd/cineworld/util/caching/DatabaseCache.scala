@@ -21,7 +21,7 @@ abstract class DatabaseCache[T] {
   )
   implicit val GetByteArr = GetResult(r => r.nextBytes)
 
-
+  //TODO
 
   def get(key: String): Option[T] = db withSession {
     val row = sql"""
@@ -30,13 +30,14 @@ abstract class DatabaseCache[T] {
         where cache_name = '$cacheName'
           and key = '$key'
       """.as[CacheRow]
-    row.firstOption map (_.value) map deserialise
+//    row.firstOption map (_.value) map deserialise
+    None
   }
 
   def put(key:String)(value: => T): Unit = db withSession {
-    sqlu"""
-      insert into test.cache values ($cacheName, $key, ${serialise(value)}, ${new Date().getTime})
-    """.execute()
+//    sqlu"""
+//      insert into test.cache values ($cacheName, $key, ${serialise(value)}, ${new Date().getTime})
+//    """.execute()
   }
 
   case class CacheRow(cache: String, key: String, value: Array[Byte], updated: Long)

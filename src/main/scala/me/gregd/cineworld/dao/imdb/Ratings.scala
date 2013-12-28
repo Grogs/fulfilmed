@@ -20,12 +20,12 @@ class Ratings(rottenTomatoesApiKey:String) extends IMDbDao with Logging {
   implicit val formats = DefaultFormats
 
   val imdbCache = CacheBuilder.newBuilder()
-      .refreshAfterWrite(3, HOURS)
-      .build( imdbRatingAndVotes _ )
+    .refreshAfterWrite(3, HOURS)
+    .build( imdbRatingAndVotes _ )
 
   val rottenTomatoesCache = CacheBuilder.newBuilder
-      .refreshAfterWrite(4, HOURS)
-      .build( getDetailsFromRottenTomatoes _ )
+    .refreshAfterWrite(4, HOURS)
+    .build( getDetailsFromRottenTomatoes _ )
 
   def getId(title:String) = rottenTomatoesCache(title)._1
   def getIMDbRating(id:String) = imdbCache(id)._1
@@ -35,16 +35,21 @@ class Ratings(rottenTomatoesApiKey:String) extends IMDbDao with Logging {
 
 
   private def getDetailsFromRottenTomatoes(title:String) = {
+    logger.debug(s"Retreiving IMDb ID and Rotten Tomatoes ratings for '$title'")
     val resp = parse(curl(s"http://api.rottentomatoes.com/api/public/v1.0/movies.json?page_limit=1&q=${encode(title)}&apikey=$rottenTomatoesApiKey"))
+    logger.debug(s"Response for $title:\n$resp")
     val imdbId = (resp \ "movies" \ "alternate_ids" \ "imdb").getAs[String].map("tt"+_)
     val audienceRating = (resp \ "movies" \ "ratings" \ "audience_score").getAs[Int]
     val criticRating = (resp \ "movies" \ "ratings" \ "critics_score").getAs[Int]
+    logger.debug(s"$title: $imdbId, $audienceRating, $criticRating")
     (imdbId, audienceRating, criticRating)
   }
 
 
   private def imdbRatingAndVotes(id:String): (Option[Double], Option[Int]) = {
+    logger.debug(s"Retreiving IMDb rating and votes for $id")
     val resp = curl(s"http://www.omdbapi.com/?i=$id")
+    logger.debug(s"Response for $id:\n$resp")
     val rating = Try(
       (parse(resp) \ "imdbRating").extract[String].toDouble
     ).toOption
@@ -53,6 +58,7 @@ class Ratings(rottenTomatoesApiKey:String) extends IMDbDao with Logging {
         case s => NumberFormat.getIntegerInstance.parse(s).intValue
       }
     ).toOption
+    logger.debug(s"$id: $rating with $votes votes")
     (rating,votes)
   }
 

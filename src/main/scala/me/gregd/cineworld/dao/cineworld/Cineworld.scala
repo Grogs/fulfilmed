@@ -58,6 +58,8 @@ class Cineworld(apiKey:String, implicit val imdb: IMDbDao) extends CineworldDao 
       .headers(userAgent)
       .asString
 
+    logger.debug(s"Received listings for $cinema:\n$resp")
+
     (parse(resp) \ "films").children
       .map(_.extract[Film])
       .map(_.toMovie)
@@ -68,8 +70,9 @@ class Cineworld(apiKey:String, implicit val imdb: IMDbDao) extends CineworldDao 
 }
 object Cineworld extends Cineworld(Config.apiKey, Ratings) {}
 
-case class Film(edi:String, title:String) {
+case class Film(edi:String, title:String) extends Logging {
   def toMovie(implicit imdb: IMDbDao = Config.imdb) = {
+    logger.debug(s"Creating movie from $this")
     val (format, title) = Format.split(this.title)
     val id = imdb.getId(title)
     val rating = id flatMap imdb.getIMDbRating

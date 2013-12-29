@@ -37,11 +37,13 @@ class Ratings(rottenTomatoesApiKey:String) extends IMDbDao with Logging {
   private def getDetailsFromRottenTomatoes(title:String) = {
     logger.debug(s"Retreiving IMDb ID and Rotten Tomatoes ratings for '$title'")
     val resp = parse(curl(s"http://api.rottentomatoes.com/api/public/v1.0/movies.json?page_limit=1&q=${encode(title)}&apikey=$rottenTomatoesApiKey"))
-    logger.debug(s"Response for $title:\n$resp")
+    logger.debug(s"Rotten Tomatoes response for $title:\n$resp")
+
     val imdbId = (resp \ "movies" \ "alternate_ids" \ "imdb").getAs[String].map("tt"+_)
     val audienceRating = (resp \ "movies" \ "ratings" \ "audience_score").getAs[Int]
     val criticRating = (resp \ "movies" \ "ratings" \ "critics_score").getAs[Int]
     logger.debug(s"$title: $imdbId, $audienceRating, $criticRating")
+
     (imdbId, audienceRating, criticRating)
   }
 
@@ -49,12 +51,12 @@ class Ratings(rottenTomatoesApiKey:String) extends IMDbDao with Logging {
   private def imdbRatingAndVotes(id:String): (Option[Double], Option[Int]) = {
     logger.debug(s"Retreiving IMDb rating and votes for $id")
     val resp = curl(s"http://www.omdbapi.com/?i=$id")
-    logger.debug(s"Response for $id:\n$resp")
+    logger.debug(s"IMDb response for $id:\n$resp")
     val rating = Try(
       (parse(resp) \ "imdbRating").extract[String].toDouble
     ).toOption
     val votes = Try(
-      (parse(resp) \ "imdbVotes").extract[String] match {
+      (parse(resp) \ "imdbVotes").extract[String] match { //needed as ',' is used as decimal mark
         case s => NumberFormat.getIntegerInstance.parse(s).intValue
       }
     ).toOption

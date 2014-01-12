@@ -3,6 +3,13 @@ apply plugin: 'scala'
 apply plugin: 'idea'
 apply plugin: 'application'
 
+buildscript {
+    repositories { mavenCentral() }
+    dependencies { classpath 'eu.appsatori:gradle-fatjar-plugin:0.2-rc1' }
+}
+
+apply plugin: 'fatjar'
+
 version='1.0'
 
 project.targetCompatibility = 1.7 //Compile to Java 7 bytecode
@@ -17,6 +24,28 @@ repositories {
   maven { url = 'http://oss.sonatype.org/content/repositories/snapshots/' }
   maven { url = 'http://oss.sonatype.org/content/repositories/releases' }
   maven { url = 'http://download.eclipse.org/rt/eclipselink/maven.repo' }
+}
+
+fatJar {
+    exclude 'META-INF/*.SF'
+    exclude 'META-INF/*.DSA'
+    exclude 'META-INF/*.RSA'
+    manifest.attributes('Main-Class': mainClassName)
+}
+
+//Deploy origin/master/HEAD to production using ansible. Expects passwordless login for 'grogs' to be setup.
+task deploy(type:Exec, dependsOn: fatJar) {
+    def archivePath = fatJar.archivePath
+    def archiveName = fatJar.archiveName
+    //environment ANSIBLE_FORCE_COLOR: 'true'
+    workingDir = './ansible'
+    executable = 'ansible-playbook'
+    args = [
+        '--inventory-file=hosts',
+        '--verbose',
+        "--extra-vars=\"archiveName=${archiveName}\" archivePath=${archivePath} ",
+        'deploy.yml'
+    ]
 }
 
 dependencies {

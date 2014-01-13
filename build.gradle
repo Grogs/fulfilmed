@@ -43,7 +43,7 @@ task deploy(type:Exec, dependsOn: fatJar) {
     args = [
         '--inventory-file=hosts',
         '--verbose',
-        "--extra-vars=\"archiveName=${archiveName}\" archivePath=${archivePath} ",
+        "--extra-vars=\"archiveName=${archiveName}\" \"archivePath=${archivePath}\" ",
         'deploy.yml'
     ]
 }

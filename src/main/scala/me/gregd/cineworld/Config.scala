@@ -7,15 +7,17 @@ import me.gregd.cineworld.util.TaskSupport
 import me.gregd.cineworld.util.TaskSupport.TimeDSL
 import grizzled.slf4j.Logging
 import collection.JavaConverters._
+import com.typesafe.config.ConfigFactory
 
 /**
  * Author: Greg Dorrell
  * Date: 09/06/2013
  */
 object Config extends TaskSupport with Logging {
-
-  val apiKey = "***REMOVED***"
-  val rottenTomatoesApiKey = "***REMOVED***"
+  val prop = ConfigFactory.load.getString _
+  
+  val apiKey = prop("cineworld.api-key")
+  val rottenTomatoesApiKey = prop("rotten-tomatoes.api-key")
 
   val imdb = new Ratings(rottenTomatoesApiKey)
   val cineworld = new Cineworld(apiKey, imdb)

@@ -18,16 +18,12 @@ case class Movie (
   criticRating: Option[Int]
 )
 
-class Format {
-  object Default extends Format
-  object `2D` extends Format
-  object `3D` extends Format
+object Format {
   def split(title:String) = {
     title.take(5) match {
-      case "2D - " => ("2D",title.substring(5))
+      case "2D - " | "(2D) " => ("2D",title.substring(5))
       case "3D - " => ("3D",title.substring(5))
       case _       => ("default",title)
     }
   }
 }
-object Format extends Format {}

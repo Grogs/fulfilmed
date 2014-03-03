@@ -28,12 +28,10 @@ class Cineworld(apiKey:String, implicit val imdb: IMDbDao) extends CineworldDao 
         logger.info(s"Retreiving list of Movies playing at Cineworld Cinema with ID: $key")
         loader(key)
       })
-//      .build[String, List[Movie]]
   }
 
 
   implicit val formats = DefaultFormats
-  val userAgent = ("User-Agent","Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.93 Safari/537.36")
 
   def getCinemas(): List[Cinema] = {
     val resp = Http("http://www.cineworld.com/api/quickbook/cinemas")
@@ -55,7 +53,6 @@ class Cineworld(apiKey:String, implicit val imdb: IMDbDao) extends CineworldDao 
         "full" -> "true",
         "cinema"-> cinema
       )
-      .headers(userAgent)
       .asString
 
     logger.debug(s"Received listings for $cinema:\n$resp")

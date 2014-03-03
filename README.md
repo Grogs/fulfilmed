@@ -1,1 +1,2 @@
-#Cineworld Ratings Extension - Backend
+Scala Webservice for retrieving Cineworld movie listings and ratings
+====

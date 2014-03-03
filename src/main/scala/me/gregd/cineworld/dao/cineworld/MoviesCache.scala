@@ -6,9 +6,6 @@ import me.gregd.cineworld.util.caching.{JavaSerialization, LoadingCache, Databas
 import JavaSerialization._
 import java.io.{ByteArrayInputStream, ObjectInputStream}
 
-/**
- * Created by Greg Dorrell on 14/12/2013.
- */
 class MoviesCache(val db: Database, val loader: (String) => List[Movie]) extends DatabaseCache[List[Movie]] with LoadingCache[List[Movie]] {
   val cacheName = "moviesForCinema"
   val deserialise = createDeserializer[List[Movie]]

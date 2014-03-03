@@ -9,10 +9,6 @@ import grizzled.slf4j.Logging
 import collection.JavaConverters._
 import com.typesafe.config.ConfigFactory
 
-/**
- * Author: Greg Dorrell
- * Date: 09/06/2013
- */
 object Config extends TaskSupport with Logging {
   val prop = ConfigFactory.load.getString _
   
@@ -31,11 +27,5 @@ object Config extends TaskSupport with Logging {
     },
     frequency = 5 minutes
   )
-
-
-//  schedule (
-//    task = logger.info("test"),
-//    frequency = 20 seconds
-//  )
 
 }

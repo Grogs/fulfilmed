@@ -3,10 +3,6 @@ package me.gregd.cineworld.domain
 import me.gregd.cineworld.dao.imdb.{IMDbRating, Ratings, IMDbDao}
 import me.gregd.cineworld.dao.cineworld.Cineworld
 
-/**
- * Author: Greg Dorrell
- * Date: 11/05/2013
- */
 case class Movie (
   title: String,
   cineworldId: String,

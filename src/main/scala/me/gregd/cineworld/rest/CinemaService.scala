@@ -7,10 +7,6 @@ import org.scalatra.json.NativeJsonSupport
 import me.gregd.cineworld.dao.imdb.Ratings
 import com.typesafe.scalalogging.slf4j.Logging
 
-/**
- * Author: Greg Dorrell
- * Date: 10/06/2013
- */
 class CinemaService(dao: Cineworld) extends ScalatraServlet with NativeJsonSupport with Logging {
   protected implicit val jsonFormats = DefaultFormats.withBigDecimal
 

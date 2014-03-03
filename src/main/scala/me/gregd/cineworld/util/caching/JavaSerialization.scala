@@ -3,9 +3,6 @@ package me.gregd.cineworld.util.caching
 import java.io.{ByteArrayOutputStream, ObjectOutputStream, ByteArrayInputStream, ObjectInputStream}
 import me.gregd.cineworld.domain.Movie
 
-/**
- * Created by Greg Dorrell on 14/12/2013.
- */
 object JavaSerialization {
 
   def createSerializer[T]: (T) => Array[Byte] = { t =>

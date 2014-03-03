@@ -6,9 +6,6 @@ import Q.interpolation
 import java.util.Date
 import java.sql.{Blob, Timestamp}
 
-/**
- * Created by Greg Dorrell on 14/12/2013.
- */
 abstract class DatabaseCache[T] {
 
   val cacheName: String

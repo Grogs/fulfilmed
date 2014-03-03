@@ -12,10 +12,6 @@ import java.util.concurrent.TimeUnit._
 import grizzled.slf4j.Logging
 import java.text.NumberFormat
 
-/**
- * Author: Greg Dorrell
- * Date: 11/05/2013
- */
 class Ratings(rottenTomatoesApiKey:String) extends IMDbDao with Logging {
   implicit val formats = DefaultFormats
 

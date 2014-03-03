@@ -2,10 +2,6 @@ package me.gregd.cineworld.util
 
 import java.util.{TimerTask, Timer}
 
-/**
- * Author: Greg Dorrell
- * Date: 09/08/2013
- */
 trait TaskSupport {
 
   lazy val defaultTimer = TaskSupport.timer

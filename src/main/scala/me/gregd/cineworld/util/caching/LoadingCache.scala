@@ -1,8 +1,5 @@
 package me.gregd.cineworld.util.caching
 
-/**
- * Created by Greg Dorrell on 14/12/2013.
- */
 trait LoadingCache[T] { self: DatabaseCache[T] =>
 
   val loader: String => T

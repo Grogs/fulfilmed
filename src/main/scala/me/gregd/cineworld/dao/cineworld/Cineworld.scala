@@ -15,10 +15,6 @@ import grizzled.slf4j.Logging
 import me.gregd.cineworld.Config
 
 
-/**
- * Author: Greg Dorrell
- * Date: 11/05/2013
- */
 class Cineworld(apiKey:String, implicit val imdb: IMDbDao) extends CineworldDao with Logging {
   val movieCache : LoadingCache[String, List[Movie]] = {
     val loader = getMoviesUncached(_:String)(imdb)

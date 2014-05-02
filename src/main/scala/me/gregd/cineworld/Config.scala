@@ -6,7 +6,6 @@ import me.gregd.cineworld.dao.imdb.Ratings
 import me.gregd.cineworld.util.TaskSupport
 import me.gregd.cineworld.util.TaskSupport.TimeDSL
 import grizzled.slf4j.Logging
-import collection.JavaConverters._
 import com.typesafe.config.ConfigFactory
 
 object Config extends TaskSupport with Logging {
@@ -21,9 +20,7 @@ object Config extends TaskSupport with Logging {
 
   schedule(
     task = {
-      cineworld.movieCache.asMap foreach { a => Unit
-//        db.
-      }
+      cineworld.movieCache.asMap foreach { a => Unit }
     },
     frequency = 5 minutes
   )

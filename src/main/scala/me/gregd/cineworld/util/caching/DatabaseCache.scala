@@ -1,10 +1,8 @@
 package me.gregd.cineworld.util.caching
 
-import scala.slick.session.{PositionedResult, Database}
+import scala.slick.driver.H2Driver.simple.Database
 import scala.slick.jdbc.{GetResult, StaticQuery => Q}
 import Q.interpolation
-import java.util.Date
-import java.sql.{Blob, Timestamp}
 
 abstract class DatabaseCache[T] {
 

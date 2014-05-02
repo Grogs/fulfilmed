@@ -63,6 +63,8 @@ class Ratings(rottenTomatoesApiKey:String) extends IMDbDao with Logging {
 
   private def curl = io.Source.fromURL(_:String,"UTF-8").mkString
   private def encode = java.net.URLEncoder.encode(_:String,"UTF-8")
+
+
 }
 
 object Ratings extends Ratings(Config.rottenTomatoesApiKey) {}

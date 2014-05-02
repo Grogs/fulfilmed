@@ -9,7 +9,7 @@ import me.gregd.cineworld.dao.imdb.IMDbDao
 import me.gregd.cineworld.domain.Movie
 import me.gregd.cineworld.domain.Cinema
 import me.gregd.cineworld.domain.Performance
-import org.feijoas.mango.common.cache.{Cache, LoadingCache, CacheLoader, CacheBuilder}
+import org.feijoas.mango.common.cache.{LoadingCache, CacheBuilder}
 import java.util.concurrent.TimeUnit._
 import grizzled.slf4j.Logging
 import me.gregd.cineworld.Config
@@ -64,14 +64,22 @@ class Cineworld(apiKey:String, implicit val imdb: IMDbDao) extends CineworldDao 
 object Cineworld extends Cineworld(Config.apiKey, Ratings) {}
 
 case class Film(edi:String, title:String) extends Logging {
+  val textToStrip = List(" - Unlimited Screening", " (English subtitles)", " - Movies for Juniors")
   def toMovie(implicit imdb: IMDbDao = Config.imdb) = {
     logger.debug(s"Creating movie from $this")
     val (format, title) = Format.split(this.title)
-    val id = imdb.getId(title)
+    val cleanTitle = {
+      var cleaned = title
+      textToStrip foreach  { s =>
+        cleaned = cleaned.replace(s,"")
+      }
+      cleaned
+    }
+    val id = imdb.getId(cleanTitle)
     val rating = id flatMap imdb.getIMDbRating
     val votes = id flatMap imdb.getVotes
-    val audienceRating = imdb.getAudienceRating(title)
-    val criticRating = imdb.getCriticRating(title)
+    val audienceRating = imdb.getAudienceRating(cleanTitle)
+    val criticRating = imdb.getCriticRating(cleanTitle)
     Movie(title, this.edi, format, id, rating, votes, audienceRating, criticRating)
   }
 }

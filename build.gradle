@@ -73,6 +73,10 @@ dependencies {
   compile 'org.scala-lang:scala-library:2.10.2'
   compile 'org.scala-lang:scala-compiler:2.10.2'
 
+  //stringmetric for fuzzy string matching
+  compile 'com.rockymadden.stringmetric:stringmetric-core_2.10:0.27.3'
+
+
   //finacle and thrift
   compile 'com.twitter:util-collection_2.10:6.12.1'
   compile 'com.twitter:scrooge-core_2.10:3.12.3'

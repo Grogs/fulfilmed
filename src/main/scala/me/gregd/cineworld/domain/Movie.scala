@@ -1,12 +1,9 @@
 package me.gregd.cineworld.domain
 
-import me.gregd.cineworld.dao.imdb.{IMDbRating, Ratings, IMDbDao}
-import me.gregd.cineworld.dao.cineworld.Cineworld
-
 case class Movie (
   title: String,
-  cineworldId: String,
-  format: String,
+  cineworldId: Option[String],
+  format: Option[String],
   imdbId: Option[String],
   rating: Option[Double],
   votes: Option[Int],

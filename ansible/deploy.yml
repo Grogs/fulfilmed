@@ -8,12 +8,10 @@
     app_name: cineworld-backend
     webapps_dir: /srv/webapps
     #wsgi_file: wsgi.py
-    #wsgi_callable: app
 
   tasks:
     - name: deploy JAR
       action: copy src={{archivePath}} dest=${webapps_dir}/{{archiveName}}
-      remote_user: grogs
       notify:
         - restart app
 

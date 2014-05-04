@@ -4,7 +4,7 @@ import org.scalatra.ScalatraServlet
 import me.gregd.cineworld.dao.cineworld.{Film, Cineworld}
 import org.json4s.DefaultFormats
 import org.scalatra.json.NativeJsonSupport
-import me.gregd.cineworld.dao.imdb.Ratings
+import me.gregd.cineworld.dao.movies.Movies
 import com.typesafe.scalalogging.slf4j.Logging
 
 class CinemaService(dao: Cineworld) extends ScalatraServlet with NativeJsonSupport with Logging {
@@ -14,13 +14,20 @@ class CinemaService(dao: Cineworld) extends ScalatraServlet with NativeJsonSuppo
     contentType = formats("json")
   }
 
+  error {
+    case e => {
+      contentType = "text/html"
+      status = 500
+      s"Unable to process request due to internal server error. Please wait and retry, or contact me at greg@dorrell.me . (Type of error was ${e.getClass.getSimpleName}) "
+    }
+  }
 
   get("/cinemas") {
     dao.getCinemas()
   }
 
   get("/cinema/:id") {
-    dao.getMovies(params("id"))(Ratings)
+    dao.getMovies(params("id"))(Movies)
   }
 
   get("/movie/:id/performances") {

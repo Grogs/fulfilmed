@@ -21,15 +21,9 @@ class Movies(rottenTomatoesApiKey:String) extends MovieDao with Logging {
     .refreshAfterWrite(3, HOURS)
     .build( imdbRatingAndVotes _ )
 
-//  val moviesCache = CacheBuilder.newBuilder
-//    .refreshAfterWrite(4, HOURS)
-//    .build( allMovies() )
-
   def getId(title:String) = find(title).flatMap(_.imdbId)
   def getIMDbRating(id:String) = imdbCache(id )._1
   def getVotes(id:String) = imdbCache(id)._2
-//  def getAudienceRating(title: String) = rottenTomatoesCache(title)._2
-//  def getCriticRating(title: String) = rottenTomatoesCache(title)._3
 
   private var cachedMovies: Option[(Seq[Movie], Long)] = None
   def allMoviesCached() = {
@@ -103,20 +97,6 @@ class Movies(rottenTomatoesApiKey:String) extends MovieDao with Logging {
     acc()
   }
 
-//  private def getDetailsFromRottenTomatoes(title:String) = {
-//    logger.debug(s"Retreiving IMDb ID and Rotten Tomatoes ratings for '$title'")
-//    val resp = parse(curl(s"http://api.rottentomatoes.com/api/public/v1.0/movies.json?page_limit=1&q=${encode(title)}&apikey=$rottenTomatoesApiKey"))
-//    logger.debug(s"Rotten Tomatoes response for $title:\n$resp")
-//
-//    val imdbId = (resp \ "movies" \ "alternate_ids" \ "imdb").getAs[String].map("tt"+_)
-//    val audienceRating = (resp \ "movies" \ "ratings" \ "audience_score").getAs[Int]
-//    val criticRating = (resp \ "movies" \ "ratings" \ "critics_score").getAs[Int]
-//    logger.debug(s"$title: $imdbId, $audienceRating, $criticRating")
-//
-//    (imdbId, audienceRating, criticRating)
-//  }
-
-
   private def imdbRatingAndVotes(id:String): (Option[Double], Option[Int]) = {
     logger.debug(s"Retreiving IMDb rating and votes for $id")
     val resp = curl(s"http://www.omdbapi.com/?i=$id")
@@ -135,14 +115,7 @@ class Movies(rottenTomatoesApiKey:String) extends MovieDao with Logging {
 
 
   private def curl = io.Source.fromURL(_:String,"UTF-8").mkString
-//  private def encode = java.net.URLEncoder.encode(_:String,"UTF-8")
-
 
 }
 
 object Movies extends Movies(Config.rottenTomatoesApiKey) {}
-
-//trait IMDbRating { self: {val imdbId:String} =>
-//  val rating = Ratings.getIMDbRating(this.imdbId)
-//  val votes = Ratings.getVotes(this.imdbId)
-//}

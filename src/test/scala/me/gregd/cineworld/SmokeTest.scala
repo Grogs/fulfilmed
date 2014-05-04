@@ -10,7 +10,7 @@ import org.json4s.DefaultFormats
  * Author: Greg Dorrell
  * Date: 03/05/2014
  */
-object SmokeTest extends ScalatraFunSuite with ShouldMatchers {
+class SmokeTest extends ScalatraFunSuite with ShouldMatchers {
   protected implicit val jsonFormats = DefaultFormats.withBigDecimal
   addServlet(Config.webservice, "/*")
 

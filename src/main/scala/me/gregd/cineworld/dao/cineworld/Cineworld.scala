@@ -13,7 +13,6 @@ import org.feijoas.mango.common.cache.{LoadingCache, CacheBuilder}
 import java.util.concurrent.TimeUnit._
 import grizzled.slf4j.Logging
 import me.gregd.cineworld.Config
-import ch.epfl.lamp.compiler.msil.emit.MultipleFilesILPrinterVisitor
 
 
 class Cineworld(apiKey:String, implicit val imdb: MovieDao) extends CineworldDao with Logging {

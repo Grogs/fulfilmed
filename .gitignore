@@ -1,0 +1,3 @@
+build
+.gradle
+src/gen/scala/me/gregd/cineworld/domain/thrift

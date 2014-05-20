@@ -18,12 +18,12 @@ class Movies(rottenTomatoesApiKey:String) extends MovieDao with Logging {
   implicit val formats = DefaultFormats
 
   val imdbCache = CacheBuilder.newBuilder()
-    .refreshAfterWrite(3, HOURS)
-    .build( imdbRatingAndVotes _ )
+    .refreshAfterWrite(24, HOURS)
+    .build( (id:String) => imdbRatingAndVotes(id) orElse imdbRatingAndVotes_new(id) )
 
   def getId(title:String) = find(title).flatMap(_.imdbId)
-  def getIMDbRating(id:String) = imdbCache(id )._1
-  def getVotes(id:String) = imdbCache(id)._2
+  def getIMDbRating(id:String) = imdbCache(id ).map(_._1)
+  def getVotes(id:String) = imdbCache(id).map(_._2)
 
   private var cachedMovies: Option[(Seq[Movie], Long)] = None
   def allMoviesCached() = {
@@ -45,7 +45,7 @@ class Movies(rottenTomatoesApiKey:String) extends MovieDao with Logging {
   }
 
   def allMovies(): Seq[Movie] = {
-    nowShowingRT() map { rt =>
+    ( nowShowing ++ openingSoon ++ upcoming ) map { rt =>
       Movie(
         rt.title,
         None,
@@ -54,7 +54,8 @@ class Movies(rottenTomatoesApiKey:String) extends MovieDao with Logging {
         None,
         None,
         rt.ratings.audience_score,
-        rt.ratings.critics_score
+        rt.ratings.critics_score,
+        None
       )
     }
   }
@@ -65,7 +66,7 @@ class Movies(rottenTomatoesApiKey:String) extends MovieDao with Logging {
   def find(title: String): Option[Movie] = {
     val matc = allMoviesCached.maxBy( m => compareFunc(title,m.title))
     val weight = compareFunc(title, matc.title)
-    logger.info(s"Identified ${matc.title} as a match for $title  ($weight)")
+    logger.info(s"Best match for $title was  ${matc.title} ($weight) - ${if (weight>minWeight) "ACCEPTED" else "REJECTED"}")
     if (weight > minWeight) Option(matc) else None
   }
 
@@ -76,7 +77,7 @@ class Movies(rottenTomatoesApiKey:String) extends MovieDao with Logging {
    * Rotten tomatoes limits the call to 50 movies per page. So there isa  recursive call to retrieve all pages.
    * @return
    */
-  def nowShowingRT(): Seq[RTMovie] = {
+  def nowShowing(): Seq[RTMovie] = {
     def acc(pageNum:Int = 1): Seq[RTMovie] = {
       logger.debug(s"Retreiving list of movies in threatres according to RT (page $pageNum)")
       val resp = Http("http://api.rottentomatoes.com/api/public/v1.0/lists/movies/in_theaters.json")
@@ -96,11 +97,47 @@ class Movies(rottenTomatoesApiKey:String) extends MovieDao with Logging {
     }
     acc()
   }
+  
+  def upcoming(): Seq[RTMovie] = {
+    def acc(pageNum:Int = 1): Seq[RTMovie] = {
+      logger.debug(s"Retreiving list of upcoming movies according to RT (page $pageNum)")
+      val resp = Http("http://api.rottentomatoes.com/api/public/v1.0/lists/movies/upcoming.json")
+        .option(HttpOptions.connTimeout(30000))
+        .option(HttpOptions.readTimeout(30000))
+        .params(
+          "apikey" -> Config.rottenTomatoesApiKey,
+          "country"-> "uk",
+          "page_limit" -> "50",
+          "page" -> pageNum.toString
+        )
+        .asString
+      logger.debug(s"RT upcoming page $pageNum:\n$resp")
+      val json = parse(resp)
+      val movies = (json \ "movies").extract[Seq[RTMovie]]
+      if (movies.size < 50) movies else movies ++ acc(pageNum+1)
+    }
+    acc()
+  }
 
-  private def imdbRatingAndVotes(id:String): (Option[Double], Option[Int]) = {
+  def openingSoon(): Seq[RTMovie] = {
+      logger.debug(s"Retreiving list of movies opening this coming week according to RT")
+      val resp = Http("http://api.rottentomatoes.com/api/public/v1.0/lists/movies/opening.json")
+        .option(HttpOptions.connTimeout(30000))
+        .option(HttpOptions.readTimeout(30000))
+        .params(
+          "apikey" -> Config.rottenTomatoesApiKey,
+          "country"-> "uk",
+          "limit" -> "50"
+        )
+        .asString
+      logger.debug(s"RT opening:\n$resp")
+      (parse(resp) \ "movies").extract[Seq[RTMovie]]
+  }
+
+  protected[movies] def imdbRatingAndVotes(id:String): (Option[(Double,Int)]) = {
     logger.debug(s"Retreiving IMDb rating and votes for $id")
     val resp = curl(s"http://www.omdbapi.com/?i=$id")
-    logger.debug(s"IMDb response for $id:\n$resp")
+    logger.debug(s"OMDb response for $id:\n$resp")
     val rating = Try(
       (parse(resp) \ "imdbRating").extract[String].toDouble
     ).toOption
@@ -110,7 +147,33 @@ class Movies(rottenTomatoesApiKey:String) extends MovieDao with Logging {
       }
     ).toOption
     logger.debug(s"$id: $rating with $votes votes")
-    (rating,votes)
+    (rating,votes) match {
+      case (Some(r), Some(v)) => Option(r,v)
+      case _ => None
+    }
+  }
+
+  protected[movies] def imdbRatingAndVotes_new(id:String): (Option[(Double,Int)]) = {
+    logger.debug(s"Retreiving IMDb rating (v2) and votes for $id")
+    val resp = Http("http://deanclatworthy.com/imdb/")
+      .option(HttpOptions.connTimeout(10000))
+      .option(HttpOptions.readTimeout(10000))
+      .params(
+        "id" -> id
+      )
+      .asString
+    logger.debug(s"IMDB API response for $id:\n$resp")
+    val rating = Try(
+      (parse(resp) \ "rating").extract[String].toDouble
+    ).toOption
+    val votes = Try(
+      (parse(resp) \ "votes").extract[String].toInt
+    ).toOption
+    logger.debug(s"$id: $rating with $votes votes")
+    (rating,votes) match {
+      case (Some(r), Some(v)) => Option(r,v)
+      case _ => None
+    }
   }
 
 

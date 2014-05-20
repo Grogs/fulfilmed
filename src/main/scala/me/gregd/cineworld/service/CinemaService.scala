@@ -8,7 +8,7 @@ import me.gregd.cineworld.domain.{Movie=>InternalMovie}
 class CinemaService extends TCS.FutureIface {
   override def getMovie(title: String): Future[Movie] = {
     Future({
-      val m = Film("", title).toMovie
+      val m = Film("", title, "").toMovie
       val p = InternalMovie.unapply(m).get
       (Movie.apply _).tupled apply p
       Movie(m.title, m.cineworldId, m.format)

@@ -23,6 +23,7 @@ object TaskSupport extends TaskSupport {
     def seconds = num * 1000
     def minutes = num.seconds * 60
     def hours   = num.minutes * 60
+    def hour = hours
   }
 
 }

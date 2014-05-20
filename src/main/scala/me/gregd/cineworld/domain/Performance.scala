@@ -1,18 +1,6 @@
 package me.gregd.cineworld.domain
 
-import org.joda.time.DateTime
-
 /**
- * Playing about with dates and times, always fun.
- * All Cineworld cinemas are in the same time zone, so afaik I don't have to worry about it.
- * I'll treat is as LocalDate (on US server) but not doing any tricky time stuff or getting times from any other sources.
+ * Created by Greg Dorrell on 10/05/2014.
  */
-case class Performance (
-  movie:Movie,
-  dateandtime: DateTime
-  //subtitled:Boolean = False
-  //audio_described:Boolean = False
-) {
-  val date = dateandtime.toLocalDate
-  val time = dateandtime.toLocalTime
-}
+case class Performance(time:String, available:Boolean, `type`:String, booking_url: String)

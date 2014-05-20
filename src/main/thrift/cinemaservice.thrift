@@ -10,6 +10,7 @@ struct Movie {
   6: optional int votes,
   7: optional int audienceRating,
   8: optional int criticRating,
+  9: optional string posterUrl,
 }
 
 service CinemaService {

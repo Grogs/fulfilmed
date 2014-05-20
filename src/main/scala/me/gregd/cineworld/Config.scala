@@ -20,9 +20,10 @@ object Config extends TaskSupport with Logging {
 
   schedule(
     task = {
-      imdb.allMoviesCached()
+      cineworld.movieCache.refresh("66")
+      cineworld.performanceCache.refresh("66")
     },
-    frequency = 8 hours
+    frequency = 1 hour
   )
 
 }

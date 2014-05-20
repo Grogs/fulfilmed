@@ -8,7 +8,8 @@ case class Movie (
   rating: Option[Double],
   votes: Option[Int],
   audienceRating: Option[Int],
-  criticRating: Option[Int]
+  criticRating: Option[Int],
+  posterUrl: Option[String]
 ) {}
 
 object Format {

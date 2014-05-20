@@ -27,6 +27,18 @@ class CineworldFeatureSpec extends FeatureSpec with ShouldMatchers {
       films should not be (null)
       films.size should be > (0)
     }
+    scenario("Get show times for today") {
+      val localCinema = Cineworld.getCinemas.find(
+        _.name contains "West India Quay"
+      ).get.id
+      val performances = Cineworld.getPerformances(localCinema)
+      performances should not be (null)
+      performances.size should be > (0)
+      performances.find { film =>
+        val performances = film._2
+        performances.isDefined & performances.get.size > 0
+      } should be ('defined)
+    }
   }
 
 }

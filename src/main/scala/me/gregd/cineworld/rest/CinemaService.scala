@@ -30,17 +30,16 @@ class CinemaService(dao: Cineworld) extends ScalatraServlet with NativeJsonSuppo
     dao.getMovies(params("id"))(Movies)
   }
 
-  get("/movie/:id/performances") {
-    dao.getPerformances(
-      params("id")
-    )
+  get("/cinema/:id/performances") {
+    dao.getPerformances(params("id"))
   }
 
   get("/rating/:title") {
     logger.info(s"Retrieving rating for ${params("title")}")
     Film(
       edi = "Fake ID",
-      title = params("title")
+      title = params("title"),
+      ""
     ).toMovie
   }
 

@@ -69,11 +69,16 @@ configure(deploy) {
     description = "Deploy the project as-is to production as a fat JAR"
 }
 
+configurations {
+    repl { extendsFrom runtime }
+}
+
 dependencies {
   compile 'org.scala-lang:scala-library:2.10.2'
   compile 'org.scala-lang:scala-compiler:2.10.2'
+  repl 'org.scala-lang:jline:2.10.2'
 
-  //stringmetric for fuzzy string matching
+    //stringmetric for fuzzy string matching
   compile 'com.rockymadden.stringmetric:stringmetric-core_2.10:0.27.3'
 
 
@@ -119,6 +124,9 @@ dependencies {
 
   compile 'ch.qos.logback:logback-classic:1.0.13'
 
+  //fluent api for ANSI escape codes
+  compile 'org.fusesource.jansi:jansi:1.11'
+
   testCompile 'org.scalatest:scalatest_2.10:1.9.1'
 
 }
@@ -126,6 +134,34 @@ dependencies {
 task filmsToWatch(type: JavaExec, dependsOn: build) {
     main = 'me.gregd.cineworld.util.FilmsToWatch'
     classpath = sourceSets.main.runtimeClasspath
+}
+
+task repl(dependsOn: 'classes') << {
+    if (gradle.startParameter.logLevel < LogLevel.QUIET) {
+        println(
+                'Warning: scala REPL works best in quiet mode ' +
+                        '(gradle -q repl).')
+    }
+    if (Boolean.getBoolean('org.gradle.daemon')) {
+        println('Warning: scala REPL does not run well in Gradle daemon mode.')
+        println('Command completion and history do not work properly.')
+    }
+    javaexec {
+        main = 'scala.tools.nsc.MainGenericRunner'
+        standardInput = System.in
+        args '-usejavacp'
+        bootstrapClasspath System.properties['sun.boot.class.path']
+        bootstrapClasspath configurations.repl
+        classpath configurations.runtime
+        classpath sourceSets.main.output.classesDir
+    }
+    // Restore terminal
+    javaexec {
+        main = 'scala.tools.nsc.MainGenericRunner'
+        args '-e', 'scala.tools.jline.TerminalFactory.get.restore()'
+        bootstrapClasspath System.properties['sun.boot.class.path']
+        bootstrapClasspath configurations.repl
+    }
 }
 
 //applicationDistribution {

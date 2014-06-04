@@ -11,9 +11,9 @@ import java.util.concurrent.TimeUnit._
 import grizzled.slf4j.Logging
 import me.gregd.cineworld.Config
 import org.joda.time.LocalDate
-import scala.collection.parallel.{ForkJoinTaskSupport, ParSeq}
-import scala.concurrent.forkjoin.ForkJoinPool
+import me.gregd.cineworld.util.Implicits._
 import scala.util.Try
+import me.gregd.cineworld.dao.TheMovieDB
 
 
 class Cineworld(apiKey:String, implicit val imdb: MovieDao) extends CineworldDao with Logging {
@@ -100,13 +100,6 @@ class Cineworld(apiKey:String, implicit val imdb: MovieDao) extends CineworldDao
     (getMovies(cinema).threads(10) map (_.cineworldId.get) map ( id => id -> performances(id)) toMap).seq
   }
 
-  implicit class WithThreads[T](s:Seq[T]) {
-    def threads(numThreads:Int): ParSeq[T] = {
-      val parSeq = s.par
-      parSeq.tasksupport = new ForkJoinTaskSupport(new ForkJoinPool( numThreads ))
-      parSeq
-    }
-  }
 
 }
 object Cineworld extends Cineworld(Config.apiKey, Movies) {}
@@ -120,7 +113,7 @@ case class Film(edi:String, title:String, poster_url: String) extends Logging {
     }
     cleaned
   }
-  def toMovie(implicit imdb: MovieDao = Config.imdb) = {
+  def toMovie(implicit imdb: MovieDao = Config.imdb, tmdb: TheMovieDB = Config.tmdb) = {
     logger.debug(s"Creating movie from $this")
     val format = Format.split(this.title)._1
     val movie:Movie = imdb
@@ -138,5 +131,7 @@ case class Film(edi:String, title:String, poster_url: String) extends Logging {
     val rating = id flatMap imdb.getIMDbRating
     val votes = id flatMap imdb.getVotes
     movie.copy(rating = rating, votes = votes)
+    //Use higher res poster for TMDB when available
+    movie.copy(posterUrl = TheMovieDB.posterUrl(movie) orElse movie.posterUrl )
   }
 }

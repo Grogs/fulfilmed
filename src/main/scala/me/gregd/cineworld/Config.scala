@@ -7,16 +7,19 @@ import me.gregd.cineworld.util.TaskSupport
 import me.gregd.cineworld.util.TaskSupport.TimeDSL
 import grizzled.slf4j.Logging
 import com.typesafe.config.ConfigFactory
+import me.gregd.cineworld.dao.TheMovieDB
 
 object Config extends TaskSupport with Logging {
   val prop = ConfigFactory.load.getString _
   
   val apiKey = prop("cineworld.api-key")
   val rottenTomatoesApiKey = prop("rotten-tomatoes.api-key")
+  val tmdbApiKey = prop("themoviedb.api-key")
 
-  val imdb = new Movies(rottenTomatoesApiKey)
-  val cineworld = new Cineworld(apiKey, imdb)
-  val webservice = new CinemaService(cineworld)
+  lazy val tmdb = new TheMovieDB(tmdbApiKey)
+  lazy val imdb = new Movies(rottenTomatoesApiKey, tmdb)
+  lazy val cineworld = new Cineworld(apiKey, imdb)
+  lazy val webservice = new CinemaService(cineworld)
 
   schedule(
     task = {

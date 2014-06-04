@@ -3,18 +3,19 @@ package me.gregd.cineworld.dao.movies
 import scala.util.Try
 import scalaj.http.{HttpOptions, Http}
 import org.json4s._
-import org.json4s.DefaultReaders._
 import org.json4s.native.JsonMethods._
-import scala.collection.mutable
 import me.gregd.cineworld.Config
-import org.feijoas.mango.common.cache.{CacheBuilder, LoadingCache}
+import org.feijoas.mango.common.cache.CacheBuilder
 import java.util.concurrent.TimeUnit._
 import grizzled.slf4j.Logging
 import java.text.NumberFormat
 import com.rockymadden.stringmetric.similarity.DiceSorensenMetric
 import me.gregd.cineworld.domain.Movie
+import me.gregd.cineworld.dao.TheMovieDB
+import me.gregd.cineworld.util.Implicits._
 
-class Movies(rottenTomatoesApiKey:String) extends MovieDao with Logging {
+
+class Movies(rottenTomatoesApiKey:String, tmdb: TheMovieDB) extends MovieDao with Logging {
   implicit val formats = DefaultFormats
 
   val imdbCache = CacheBuilder.newBuilder()
@@ -45,7 +46,7 @@ class Movies(rottenTomatoesApiKey:String) extends MovieDao with Logging {
   }
 
   def allMovies(): Seq[Movie] = {
-    ( nowShowing ++ openingSoon ++ upcoming ) map { rt =>
+    val movies = ( nowShowing ++ openingSoon ++ upcoming ) map { rt =>
       Movie(
         rt.title,
         None,
@@ -58,6 +59,15 @@ class Movies(rottenTomatoesApiKey:String) extends MovieDao with Logging {
         None
       )
     }
+
+    val alternateTitles = movies map ( m => tmdb.alternateTitles(m) map ( alt =>
+      m.copy(title = alt)
+    )) flatten
+
+    logger.trace("alternate titles:")
+    alternateTitles.foreach(logger.trace(_:Movie))
+
+    (movies ++ alternateTitles) distinctBy (_.title) toSeq
   }
 
   val compareFunc: (String,String)=>Double = DiceSorensenMetric(1).compare(_:String,_:String).get
@@ -181,4 +191,4 @@ class Movies(rottenTomatoesApiKey:String) extends MovieDao with Logging {
 
 }
 
-object Movies extends Movies(Config.rottenTomatoesApiKey) {}
+object Movies extends Movies(Config.rottenTomatoesApiKey, Config.tmdb) {}

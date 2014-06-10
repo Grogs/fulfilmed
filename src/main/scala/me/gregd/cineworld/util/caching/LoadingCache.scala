@@ -14,3 +14,4 @@ trait LoadingCache[T] { self: DatabaseCache[T] =>
   }
 
 }
+

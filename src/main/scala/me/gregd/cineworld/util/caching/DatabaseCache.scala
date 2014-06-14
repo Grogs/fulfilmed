@@ -11,16 +11,16 @@ class DatabaseCache[T](
 ) {
   import DatabaseCache.cacheEntries
 
-  //  implicit val mapper = GetResult[CacheRow]( rs =>
-  //    CacheRow( rs.<<, rs.<<, rs.nextBytes(), rs.<< )
-  //  )
-  //  implicit val GetByteArr = GetResult(r => r.nextBytes)
+  /**
+   * Hook for subclasses/traits to provide additional criteria by which a cache entry may be invalid
+   */
+  def predicate(e: CacheEntry): Boolean = true
 
   def get(key: String): Option[T] = db withSession { implicit session =>
     val row = cacheEntries.filter( e =>
       e.cache === cacheName &&
         e.key === key
-    ).take(1).firstOption
+    ).take(1).firstOption.filter(predicate)
     row map (_.data) map deserialise
   }
 
@@ -29,13 +29,6 @@ class DatabaseCache[T](
   }
 
 }
-
-//class SimpleDatabaseCache[T](name:String, db:Database) extends DatabaseCache(name,db,deserialiser,serialiser)
-//object SimpleDatabaseCache {
-//  def deserializer[T] = {
-//
-//  }
-//}
 
 object DatabaseCache {
   val cacheEntries = TableQuery[CacheEntries]

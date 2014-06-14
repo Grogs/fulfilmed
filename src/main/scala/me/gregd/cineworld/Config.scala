@@ -8,6 +8,13 @@ import me.gregd.cineworld.util.TaskSupport.TimeDSL
 import grizzled.slf4j.Logging
 import com.typesafe.config.ConfigFactory
 import me.gregd.cineworld.dao.TheMovieDB
+import scala.slick.driver.H2Driver.simple.Database
+import me.gregd.cineworld.util.caching.DatabaseCache
+import me.gregd.cineworld.domain.Movie
+import scala.pickling._
+import json._
+import scala.util.Try
+
 
 object Config extends TaskSupport with Logging {
   val prop = ConfigFactory.load.getString _
@@ -15,6 +22,16 @@ object Config extends TaskSupport with Logging {
   val apiKey = prop("cineworld.api-key")
   val rottenTomatoesApiKey = prop("rotten-tomatoes.api-key")
   val tmdbApiKey = prop("themoviedb.api-key")
+  val dbUrl = Try(prop("database.caching")) getOrElse "jdbc:h2:mem:caching;DB_CLOSE_DELAY=-1"
+  logger.info(s"Using the following url for the caching DB:\n$dbUrl")
+
+  lazy val cacheDB = {
+    val db = Database forURL dbUrl
+    DatabaseCache createIn db
+    db
+  }
+
+  lazy val moviesCache = new DatabaseCache[Seq[Movie]]("movies",cacheDB,new String(_:Array[Byte], "UTF-8").unpickle[Seq[Movie]],_.pickle.value.getBytes)
 
   lazy val tmdb = new TheMovieDB(tmdbApiKey)
   lazy val imdb = new Movies(rottenTomatoesApiKey, tmdb)

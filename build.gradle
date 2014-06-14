@@ -8,9 +8,11 @@ buildscript {
     repositories { mavenCentral() }
     dependencies { classpath 'eu.appsatori:gradle-fatjar-plugin:0.2-rc1' }
     dependencies { classpath 'com.github.iamsteveholmes:scrooge-gradle-plugin:0.5' }
+    dependencies { classpath group: 'net.coacoas.gradle', name: 'gradle-ensime', version: '0.1.8'}
 }
 
 apply plugin: 'fatjar'
+apply plugin: 'ensime'
 
 compileScrooge {
     thriftFiles = fileTree(dir: "src/main/thrift", include: "**/*.thrift")
@@ -20,7 +22,7 @@ compileScrooge {
 
 version='1.0'
 
-project.targetCompatibility = 1.7 
+project.targetCompatibility = 1.7
 
 mainClassName = 'me.gregd.cineworld.util.JettyBootstrap' //Starts webservice on port 9001 by default
 
@@ -37,7 +39,7 @@ repositories {
 sourceSets {
     main {
         scala {
-            srcDir 'src/gen/scala'
+            srcDir 'src/gen/scala' //thrift generated sources
         }
     }
 }
@@ -53,7 +55,7 @@ fatJar {
 task deploy(type:Exec, dependsOn: fatJar) {
     def archivePath = fatJar.archivePath
     def archiveName = fatJar.archiveName
-    //environment ANSIBLE_FORCE_COLOR: 'true'
+    //environment ANSIBLE_FORCE_COLOR: 'true'  //TODO: Add conditional logic for when using color terminal
     workingDir = './ansible'
     executable = 'ansible-playbook'
     args = [
@@ -74,8 +76,8 @@ configurations {
 }
 
 dependencies {
-  compile 'org.scala-lang:scala-library:2.10.2'
-  compile 'org.scala-lang:scala-compiler:2.10.2'
+  compile 'org.scala-lang:scala-library:2.10.4'
+  compile 'org.scala-lang:scala-compiler:2.10.4'
   repl 'org.scala-lang:jline:2.10.2'
 
     //stringmetric for fuzzy string matching
@@ -93,9 +95,12 @@ dependencies {
   compile 'com.chuusai:shapeless_2.10.2:2.0.0-M1'
 
 
+  //pickling/serialization
+  compile "org.scala-lang:scala-pickling_2.10:0.8.0"
+
     //Database libraries
   compile 'com.googlecode.flyway:flyway-core:2.1.1'
-  compile 'com.typesafe.slick:slick_2.10:2.0.1'
+  compile 'com.typesafe.slick:slick_2.10:2.1.0-M2'
   compile 'com.h2database:h2:1.3.164'
 
   //compile 'org.threeten:threetenbp:0.7'
@@ -163,18 +168,3 @@ task repl(dependsOn: 'classes') << {
         bootstrapClasspath configurations.repl
     }
 }
-
-//applicationDistribution {
-//    main {
-//
-//    }
-//}
-
-//
-//task deployToVps(dependsOn: installApp, type: copy) {
-//    from
-//}
-//
-//task deploy(dependsOn: installApp) << {
-//    println "deployed"
-//}

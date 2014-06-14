@@ -6,6 +6,8 @@ import org.json4s.DefaultFormats
 import org.scalatra.json.NativeJsonSupport
 import me.gregd.cineworld.dao.movies.Movies
 import com.typesafe.scalalogging.slf4j.Logging
+import org.fusesource.jansi.Ansi._
+import org.fusesource.jansi.Ansi.Color._
 
 class CinemaService(dao: Cineworld) extends ScalatraServlet with NativeJsonSupport with Logging {
   protected implicit val jsonFormats = DefaultFormats.withBigDecimal
@@ -28,6 +30,28 @@ class CinemaService(dao: Cineworld) extends ScalatraServlet with NativeJsonSuppo
 
   get("/cinema/:id") {
     dao.getMovies(params("id"))(Movies)
+  }
+
+  get("/cinema/:id.curl") {
+//    val colors = new  {
+//      def f(c:Int) = new {
+//        def toString = s"\e[3$cm"
+//      }
+//      val reset = f(9)
+//      val black = f(0)
+//      val red = f(1)
+//      val green = f(2)
+//      val yellow = f(3)
+//      val blue = f(4)
+//      val magenta = f(5)
+//      val cyan = f(6)
+//      val lGrey = f(7)
+
+//      val reset = f(9)
+//    }
+    dao.getMovies(params("id"))(Movies).map{ m =>
+      ansi.fg(GREEN).a(m.title)
+    }.mkString("\n")
   }
 
   get("/cinema/:id/performances") {

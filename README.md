@@ -1,14 +1,25 @@
 Cineworld movie listings and ratings webservice
 ====
-The Cineworld Unlimited card is pretty awesome, but I always find myself checking every films IMDb rating. Too manual; I want to see the ratings inline. So I created a Chrome extension: [Cineworld Ratings](https://chrome.google.com/webstore/detail/cineworld-ratings/aeihmofihjacjlkecnjpoicmaaandnnc). This is the RESTful backend for that extension.
+
+A RESTful webservice to wrap a few APIs and provide a nicer now-showing API for cineworld cinemas. Used by [gregd.me/cineworld][http://greg.me/cineworld/] and an older Chrome extension: [Cineworld Ratings](https://chrome.google.com/webstore/detail/cineworld-ratings/aeihmofihjacjlkecnjpoicmaaandnnc) I wrote.
 
 
 Getting Started
 ====
-Get an API key for Rotten Tomatoes and Cineworld. Modify application.conf to include your API keys.
+Configuration
+----
+The application requires API keys for; Rotten Tomatoes, Cineworld, and The Movie Database.
+After obtaining the API keys, you'll need to modify src/main/resources/application.conf to include them.
+
+Running locally
+----
 If you have gradle installed, type 'gradle run' in your terminal. If not, './gradlew run'.
 
 Check it's working by browsing to the listings for [my local cinema](http://localhost:9001/api/cinema/66).
+
+Making Changes
+----
+When call 'gradle run', 'JettyBootstrap' is executed - which is using the 'Config' object where all the main components of the service are setup.
 
 License (GPLv3)
 ----

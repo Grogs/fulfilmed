@@ -14,7 +14,7 @@ import org.joda.time.LocalDate
 import me.gregd.cineworld.util.Implicits._
 import scala.util.Try
 import me.gregd.cineworld.dao.TheMovieDB
-
+import me.gregd.cineworld.util.caching.DatabaseCache
 
 class Cineworld(apiKey:String, implicit val imdb: MovieDao) extends CineworldDao with Logging {
   val movieCache : LoadingCache[String, List[Movie]] = {
@@ -36,7 +36,6 @@ class Cineworld(apiKey:String, implicit val imdb: MovieDao) extends CineworldDao
         loader(key)
       })
   }
-
 
   implicit val formats = DefaultFormats
 

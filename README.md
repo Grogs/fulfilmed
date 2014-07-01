@@ -1,7 +1,7 @@
 UK Cinema movie listings and ratings webservice
 ====
 
-A RESTful webservice to wrap a few APIs and provide a nicer now-showing API for Cineworld & Odeon cinemas. Used by [gregd.me/cineworld](http://greg.me/cineworld/) and an older Chrome extension: [Cineworld Ratings](https://chrome.google.com/webstore/detail/cineworld-ratings/aeihmofihjacjlkecnjpoicmaaandnnc) I wrote.
+A RESTful webservice to wrap a few APIs and provide a nicer now-showing API for Cineworld & Odeon cinemas. Used by [gregd.me/cineworld](http://gregd.me/cineworld/) and an older Chrome extension: [Cineworld Ratings](https://chrome.google.com/webstore/detail/cineworld-ratings/aeihmofihjacjlkecnjpoicmaaandnnc) I wrote.
 
 
 Getting Started

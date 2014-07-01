@@ -34,8 +34,12 @@ class TheMovieDB(apiKey: String) extends Logging {
   }
 
   def alternateTitles(imdbId: String): Seq[String] = Try {
-    val json = get(s"movie/$imdbId/alternative_titles")
-    (json \ "titles" \ "title").extract[Seq[String]]
+    val json = get(s"movie/tt$imdbId/alternative_titles")
+    val titles = json \ "titles" \ "title"
+    titles
+      .extractOrElse[Seq[String]](
+        Seq(titles.extract[String])
+      )
   }
     .onFailure(logger.error(s"Unable to retrieve alternate titles for $imdbId from TMDB",_:Throwable))
     .getOrElse(Nil)

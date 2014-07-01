@@ -3,6 +3,7 @@ package me.gregd.cineworld.util
 import scala.collection.parallel.{ForkJoinTaskSupport, ParSeq}
 import scala.concurrent.forkjoin.ForkJoinPool
 import scala.util.{Failure, Success, Try}
+import scala.util.matching.Regex
 
 /**
  * Created by Greg Dorrell on 26/05/2014.
@@ -31,4 +32,9 @@ object Implicits {
       t
     }
   }
+
+  implicit class RegexContext(sc: StringContext) {
+    def r = new Regex(sc.parts.mkString(""), sc.parts.tail.map(_ => "x"): _*)
+  }
+
 }

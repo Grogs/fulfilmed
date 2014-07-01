@@ -14,6 +14,7 @@ import me.gregd.cineworld.domain.Movie
 import scala.pickling._
 import json._
 import scala.util.Try
+import org.joda.time.LocalDate
 
 
 object Config extends TaskSupport with Logging {
@@ -40,8 +41,12 @@ object Config extends TaskSupport with Logging {
 
   schedule(
     task = {
-      cineworld.movieCache.refresh("66")
-      cineworld.performanceCache.refresh("66")
+      val today = new LocalDate
+      cineworld.movieCache.refresh("66", today)
+      cineworld.performanceCache.refresh("66", today)
+      val tomorrow = today plusDays 1
+      cineworld.movieCache.refresh("66", tomorrow)
+      cineworld.performanceCache.refresh("66", tomorrow)
     },
     frequency = 1 hour
   )

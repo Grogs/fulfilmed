@@ -2,27 +2,29 @@ apply plugin: 'java'
 apply plugin: 'scala'
 apply plugin: 'idea'
 apply plugin: 'application'
-apply plugin: 'scrooge-gradle-plugin'
 
 buildscript {
-    repositories { mavenCentral() }
-    dependencies { classpath 'eu.appsatori:gradle-fatjar-plugin:0.2-rc1' }
-    dependencies { classpath 'com.github.iamsteveholmes:scrooge-gradle-plugin:0.5' }
-    dependencies { classpath group: 'net.coacoas.gradle', name: 'gradle-ensime', version: '0.1.8'}
+    repositories {
+        jcenter()
+//        mavenCentral()
+    }
+    dependencies { classpath 'eu.appsatori:gradle-fatjar-plugin:0.3' }
+ //   dependencies { classpath 'com.github.iamsteveholmes:scrooge-gradle-plugin:0.5' }
+ //   dependencies { classpath group: 'net.coacoas.gradle', name: 'gradle-ensime', version: '0.1.8'}
 }
 
-apply plugin: 'fatjar'
-apply plugin: 'ensime'
-
-compileScrooge {
-    thriftFiles = fileTree(dir: "src/main/thrift", include: "**/*.thrift")
-    dest = file("src/gen/scala")
-    opts = ["--finagle"]
-}
+//classpath 'eu.appsatori:gradle-fatjar-plugin:0.3'
+//apply plugin: 'ensime'
+//
+//compileScrooge {
+//    thriftFiles = fileTree(dir: "src/main/thrift", include: "**/*.thrift")
+//    dest = file("src/gen/scala")
+//    opts = ["--finagle"]
+//}
 
 version='1.0'
 
-project.targetCompatibility = 1.7
+project.targetCompatibility = 1.8
 
 mainClassName = 'me.gregd.cineworld.util.JettyBootstrap' //Starts webservice on port 9001 by default
 
@@ -52,121 +54,121 @@ fatJar {
 }
 
 //Deploy origin/master/HEAD to production using ansible. Expects passwordless login for 'grogs' to be setup.
-task deploy(type:Exec, dependsOn: fatJar) {
-    def archivePath = fatJar.archivePath
-    def archiveName = fatJar.archiveName
-    //environment ANSIBLE_FORCE_COLOR: 'true'  //TODO: Add conditional logic for when using color terminal
-    workingDir = './ansible'
-    executable = 'ansible-playbook'
-    args = [
-        '--inventory-file=hosts',
-        '--verbose',
-        "--extra-vars=\"archiveName=${archiveName}\" \"archivePath=${archivePath}\" ",
-        'deploy.yml'
-    ]
-}
+//task deploy(type:Exec, dependsOn: fatJar) {
+//    def archivePath = fatJar.archivePath
+//    def archiveName = fatJar.archiveName
+//    //environment ANSIBLE_FORCE_COLOR: 'true'  //TODO: Add conditional logic for when using color terminal
+//    workingDir = './ansible'
+//    executable = 'ansible-playbook'
+//    args = [
+//        '--inventory-file=hosts',
+//        '--verbose',
+//        "--extra-vars=\"archiveName=${archiveName}\" \"archivePath=${archivePath}\" ",
+//        'deploy.yml'
+//    ]
+//}
 
-configure(deploy) {
-    group = "Deployment"
-    description = "Deploy the project as-is to production as a fat JAR"
-}
+//configure(deploy) {
+//    group = "Deployment"
+//    description = "Deploy the project as-is to production as a fat JAR"
+//}
 
 configurations {
     repl { extendsFrom runtime }
 }
 
 dependencies {
-  compile 'org.scala-lang:scala-library:2.10.4'
-  compile 'org.scala-lang:scala-compiler:2.10.4'
-  repl 'org.scala-lang:jline:2.10.2'
+  compile 'org.scala-lang:scala-library:2.11.7'
+  compile 'org.scala-lang:scala-compiler:2.11.7'
+  repl 'org.scala-lang:jline:2.11.7'
 
     //stringmetric for fuzzy string matching
-  compile 'com.rockymadden.stringmetric:stringmetric-core_2.10:0.27.3'
+  compile 'com.rockymadden.stringmetric:stringmetric-core_2.11:0.27.4'
 
 
   //finacle and thrift
-  compile 'com.twitter:util-collection_2.10:6.12.1'
-  compile 'com.twitter:scrooge-core_2.10:3.12.3'
-  compile 'com.twitter:finagle-core_2.10:6.12.1'
-  compile 'com.twitter:finagle-thrift_2.10:6.12.1'
-  compile 'org.apache.thrift:libthrift:0.9.1'
+//  compile 'com.twitter:util-collection_2.11:6.12.1'
+//  compile 'com.twitter:scrooge-core_2.11:3.12.3'
+//  compile 'com.twitter:finagle-core_2.11:6.12.1'
+//  compile 'com.twitter:finagle-thrift_2.11:6.12.1'
+//  compile 'org.apache.thrift:libthrift:0.9.1'
 
   //shapeless for convertion
-  compile 'com.chuusai:shapeless_2.10.2:2.0.0-M1'
+  compile 'com.chuusai:shapeless_2.11:2.2.4'
 
 
-  //pickling/serialization
-  compile "org.scala-lang:scala-pickling_2.10:0.8.0"
+    //pickling/serialization
+//  compile "org.scala-lang:scala-pickling_2.11:0.9.1"
 
     //Database libraries
-  compile 'com.googlecode.flyway:flyway-core:2.1.1'
-  compile 'com.typesafe.slick:slick_2.10:2.1.0-M2'
+//  compile 'com.googlecode.flyway:flyway-core:2.1.1'
+  compile 'com.typesafe.slick:slick_2.11:2.1.0'
   compile 'com.h2database:h2:1.3.164'
 
   //compile 'org.threeten:threetenbp:0.7'
   //compile 'joda-time:joda-time:2.2'
   //compile 'com.github.nscala-time:nscala-time_2.10:0.4.0'
 
-  compile 'org.scalaj:scalaj-http_2.10:0.3.10' //Simple HTTP client
+  compile 'org.scalaj:scalaj-http_2.11:1.1.5' //Simple HTTP client
 
-  compile 'org.json4s:json4s-native_2.10:3.2.4'
-  compile 'org.json4s:json4s-jackson_2.10:3.2.4'
+  compile 'org.json4s:json4s-native_2.11:3.2.11'
+  compile 'org.json4s:json4s-jackson_2.11:3.2.11'
 
   compile 'org.eclipse.jetty:jetty-webapp:8.1.10.v20130312'
 
-  compile 'org.scalatra:scalatra_2.10:2.2.1'
-  testCompile 'org.scalatra:scalatra-scalatest_2.10:2.2.1'
-  compile 'org.scalatra:scalatra-json_2.10:2.2.1'
+  compile 'org.scalatra:scalatra_2.11:2.3.1'
+  testCompile 'org.scalatra:scalatra-scalatest_2.11:2.3.1'
+  compile 'org.scalatra:scalatra-json_2.11:2.3.1'
 
   //For Guava caching and a scala wrapper
   compile 'com.google.guava:guava:14.0'
-  compile('org.feijoas:mango_2.10:0.9') {
+  compile('org.feijoas:mango_2.11:0.11') {
       exclude module: 'jsr305'
   }
   compile 'com.google.code.findbugs:jsr305:1.3.7'
   
-  compile 'com.typesafe:scalalogging-slf4j_2.10:1.0.1'
+  compile 'com.typesafe.scala-logging:scala-logging-slf4j_2.11:2.1.2'
 
-  compile 'ch.qos.logback:logback-classic:1.0.13'
+    compile 'ch.qos.logback:logback-classic:1.0.13'
 
   //fluent api for ANSI escape codes
   compile 'org.fusesource.jansi:jansi:1.11'
 
-  testCompile 'org.scalatest:scalatest_2.10:1.9.1'
+  testCompile 'org.scalatest:scalatest_2.11:1.9.1'
 
   compile 'org.jsoup:jsoup:1.7.3'
 
 }
 
-task filmsToWatch(type: JavaExec, dependsOn: build) {
-    main = 'me.gregd.cineworld.util.FilmsToWatch'
-    classpath = sourceSets.main.runtimeClasspath
-}
-
-task repl(dependsOn: 'classes') << {
-    if (gradle.startParameter.logLevel < LogLevel.QUIET) {
-        println(
-                'Warning: scala REPL works best in quiet mode ' +
-                        '(gradle -q repl).')
-    }
-    if (Boolean.getBoolean('org.gradle.daemon')) {
-        println('Warning: scala REPL does not run well in Gradle daemon mode.')
-        println('Command completion and history do not work properly.')
-    }
-    javaexec {
-        main = 'scala.tools.nsc.MainGenericRunner'
-        standardInput = System.in
-        args '-usejavacp'
-        bootstrapClasspath System.properties['sun.boot.class.path']
-        bootstrapClasspath configurations.repl
-        classpath configurations.runtime
-        classpath sourceSets.main.output.classesDir
-    }
-    // Restore terminal
-    javaexec {
-        main = 'scala.tools.nsc.MainGenericRunner'
-        args '-e', 'scala.tools.jline.TerminalFactory.get.restore()'
-        bootstrapClasspath System.properties['sun.boot.class.path']
-        bootstrapClasspath configurations.repl
-    }
-}
+//task filmsToWatch(type: JavaExec, dependsOn: build) {
+//    main = 'me.gregd.cineworld.util.FilmsToWatch'
+//    classpath = sourceSets.main.runtimeClasspath
+//}
+//
+//task repl(dependsOn: 'classes') << {
+//    if (gradle.startParameter.logLevel < LogLevel.QUIET) {
+//        println(
+//                'Warning: scala REPL works best in quiet mode ' +
+//                        '(gradle -q repl).')
+//    }
+//    if (Boolean.getBoolean('org.gradle.daemon')) {
+//        println('Warning: scala REPL does not run well in Gradle daemon mode.')
+//        println('Command completion and history do not work properly.')
+//    }
+//    javaexec {
+//        main = 'scala.tools.nsc.MainGenericRunner'
+//        standardInput = System.in
+//        args '-usejavacp'
+//        bootstrapClasspath System.properties['sun.boot.class.path']
+//        bootstrapClasspath configurations.repl
+//        classpath configurations.runtime
+//        classpath sourceSets.main.output.classesDir
+//    }
+//    // Restore terminal
+//    javaexec {
+//        main = 'scala.tools.nsc.MainGenericRunner'
+//        args '-e', 'scala.tools.jline.TerminalFactory.get.restore()'
+//        bootstrapClasspath System.properties['sun.boot.class.path']
+//        bootstrapClasspath configurations.repl
+//    }
+//}

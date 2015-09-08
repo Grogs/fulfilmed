@@ -99,7 +99,7 @@ class Movies(rottenTomatoesApiKey:String, tmdb: TheMovieDB) extends MovieDao wit
           "page_limit" -> "50",
           "page" -> pageNum.toString
         )
-        .asString
+        .asString.body
       logger.debug(s"RT in_theaters page $pageNum:\n$resp")
       val json = parse(resp)
       val movies = (json \ "movies").extract[Seq[RTMovie]]
@@ -120,7 +120,7 @@ class Movies(rottenTomatoesApiKey:String, tmdb: TheMovieDB) extends MovieDao wit
           "page_limit" -> "50",
           "page" -> pageNum.toString
         )
-        .asString
+        .asString.body
       logger.debug(s"RT upcoming page $pageNum:\n$resp")
       val json = parse(resp)
       val movies = (json \ "movies").extract[Seq[RTMovie]]
@@ -139,7 +139,7 @@ class Movies(rottenTomatoesApiKey:String, tmdb: TheMovieDB) extends MovieDao wit
           "country"-> "uk",
           "limit" -> "50"
         )
-        .asString
+        .asString.body
       logger.debug(s"RT opening:\n$resp")
       (parse(resp) \ "movies").extract[Seq[RTMovie]]
   }
@@ -171,7 +171,7 @@ class Movies(rottenTomatoesApiKey:String, tmdb: TheMovieDB) extends MovieDao wit
       .params(
         "id" -> id
       )
-      .asString
+      .asString.body
     logger.debug(s"IMDB API response for $id:\n$resp")
     val rating = Try(
       (parse(resp) \ "rating").extract[String].toDouble

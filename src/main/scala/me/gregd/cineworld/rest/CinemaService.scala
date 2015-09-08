@@ -1,15 +1,15 @@
 package me.gregd.cineworld.rest
 
+import com.typesafe.scalalogging.slf4j.StrictLogging
 import org.scalatra.ScalatraServlet
 import me.gregd.cineworld.dao.cineworld.{Film, Cineworld}
 import org.json4s.DefaultFormats
 import org.scalatra.json.NativeJsonSupport
 import me.gregd.cineworld.dao.movies.Movies
-import com.typesafe.scalalogging.slf4j.Logging
 import org.fusesource.jansi.Ansi._
 import org.fusesource.jansi.Ansi.Color._
 
-class CinemaService(dao: Cineworld) extends ScalatraServlet with NativeJsonSupport with Logging {
+class CinemaService(dao: Cineworld) extends ScalatraServlet with NativeJsonSupport with StrictLogging {
   protected implicit val jsonFormats = DefaultFormats.withBigDecimal
 
   before() {

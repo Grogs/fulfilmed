@@ -2,7 +2,7 @@ package me.gregd.cineworld.util.caching
 
 import org.scalatest.{SequentialNestedSuiteExecution, FunSuite}
 import scala.slick.driver.H2Driver.simple._
-import org.scalatest.matchers.MustMatchers
+import org.scalatest.MustMatchers
 
 
 /**

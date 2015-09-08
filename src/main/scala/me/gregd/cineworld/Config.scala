@@ -11,8 +11,6 @@ import me.gregd.cineworld.dao.TheMovieDB
 import scala.slick.driver.H2Driver.simple.Database
 import me.gregd.cineworld.util.caching.DatabaseCache
 import me.gregd.cineworld.domain.Movie
-import scala.pickling._
-import json._
 import scala.util.Try
 import org.joda.time.LocalDate
 
@@ -32,7 +30,7 @@ object Config extends TaskSupport with Logging {
     db
   }
 
-  lazy val moviesCache = new DatabaseCache[Seq[Movie]]("movies",cacheDB,new String(_:Array[Byte], "UTF-8").unpickle[Seq[Movie]],_.pickle.value.getBytes)
+//  lazy val moviesCache = new DatabaseCache[Seq[Movie]]("movies",cacheDB,new String(_:Array[Byte], "UTF-8").unpickle[Seq[Movie]],_.pickle.value.getBytes)
 
   lazy val tmdb = new TheMovieDB(tmdbApiKey)
   lazy val imdb = new Movies(rottenTomatoesApiKey, tmdb)

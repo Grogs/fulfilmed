@@ -1,14 +1,14 @@
 package me.gregd.cineworld.dao.cineworld
 
+import com.typesafe.scalalogging.slf4j.StrictLogging
 import me.gregd.cineworld.domain.{Performance, Format, Movie, Cinema}
-import scalaj.http.{HttpOptions, Http}
+import scalaj.http.{HttpResponse, HttpOptions, Http}
 import org.json4s._
 import org.json4s.native.JsonMethods._
 import me.gregd.cineworld.dao.movies.Movies
 import me.gregd.cineworld.dao.movies.MovieDao
 import org.feijoas.mango.common.cache.{LoadingCache, CacheBuilder}
 import java.util.concurrent.TimeUnit._
-import grizzled.slf4j.Logging
 import me.gregd.cineworld.Config
 import org.joda.time.{Days, LocalDate}
 import me.gregd.cineworld.util.Implicits._
@@ -16,10 +16,11 @@ import scala.util.Try
 import me.gregd.cineworld.dao.TheMovieDB
 import org.jsoup.Jsoup
 import collection.JavaConverters._
-import java.net.URLDecoder.decode
 import org.jsoup.nodes.Element
 
-class Cineworld(apiKey:String, implicit val imdb: MovieDao) extends CineworldDao with Logging {
+class Cineworld(apiKey:String, implicit val imdb: MovieDao) extends CineworldDao with StrictLogging {
+  val decode = java.net.URLDecoder.decode(_:String, "UTF-8")
+
   val movieCache : LoadingCache[(String,LocalDate), List[Movie]] = {
     val loader = getMoviesUncached(_:String,_: LocalDate)(imdb)
     CacheBuilder.newBuilder()
@@ -43,12 +44,13 @@ class Cineworld(apiKey:String, implicit val imdb: MovieDao) extends CineworldDao
   implicit val formats = DefaultFormats
 
   def getCinemas(): List[Cinema] = {
-    val resp = Http("http://www.cineworld.com/api/quickbook/cinemas")
+    val resp = Http("http://www2.cineworld.co.uk/api/quickbook/cinemas")
       .option(HttpOptions.connTimeout(30000))
       .option(HttpOptions.readTimeout(30000))
       .params("key" -> apiKey)
       .asString
-    (parse(resp) \ "cinemas").children.map(_.extract[Cinema])
+    if (!resp.isSuccess) logger.error(s"Unable to retreive cinemas, received: $resp")
+    (parse(resp.body) \ "cinemas").children.map(_.extract[Cinema])
   }
 
 
@@ -106,7 +108,7 @@ class Cineworld(apiKey:String, implicit val imdb: MovieDao) extends CineworldDao
   }
 
   def getFilms(cinema: String, dates: Seq[LocalDate] = Seq(new LocalDate)): List[Film] = {
-    val req = Http("http://www.cineworld.com/api/quickbook/films")
+    val req = Http("http://www2.cineworld.co.uk/api/quickbook/films")
       .option(HttpOptions.connTimeout(30000))
       .option(HttpOptions.readTimeout(30000))
       .params(
@@ -116,14 +118,16 @@ class Cineworld(apiKey:String, implicit val imdb: MovieDao) extends CineworldDao
           "key" -> apiKey,
           "full" -> "true",
           "cinema" -> cinema
-        ) : _*
+        )
       )
 
     val resp = req.asString
+    if (!resp.isSuccess) logger.error(s"Unable to retreive films, received: $resp")
+    val respStr = resp.body
 
-    logger.debug(s"Received listings for $cinema:\n$resp")
+    logger.debug(s"Received listings for $cinema:\n$respStr")
 
-    (parse(resp) \ "films").children
+    (parse(respStr) \ "films").children
       .map(_.extract[Film])
   }
 
@@ -147,7 +151,7 @@ class Cineworld(apiKey:String, implicit val imdb: MovieDao) extends CineworldDao
 
   def getCineworldPerformances(cinema: String, date: LocalDate): Map[String, Option[List[Performance]]] = {
     def performances(filmEdi: String) = Try {
-      val resp = Http("http://www.cineworld.com/api/quickbook/performances")
+      val resp = Http("http://www2.cineworld.co.uk/api/quickbook/performances")
         .option(HttpOptions.connTimeout(30000))
         .option(HttpOptions.readTimeout(30000))
         .params(
@@ -157,8 +161,10 @@ class Cineworld(apiKey:String, implicit val imdb: MovieDao) extends CineworldDao
           "cinema" -> cinema
         )
         .asString
-      logger.debug(s"Received performance for $filmEdi on $date at $cinema:\n$resp")
-      (parse(resp) \ "performances").children map (_.extract[Performance])
+      if (!resp.isSuccess) logger.error(s"Unable to retreive performances, received: $resp")
+      val respStr = resp.body
+      logger.debug(s"Received performance for $filmEdi on $date at $cinema:\n$respStr")
+      (parse(respStr) \ "performances").children map (_.extract[Performance])
     }.toOption
 
     (getMovies(cinema).threads(10) map (_.cineworldId.get) map (id => id -> performances(id)) toMap).seq
@@ -166,7 +172,7 @@ class Cineworld(apiKey:String, implicit val imdb: MovieDao) extends CineworldDao
 }
 object Cineworld extends Cineworld(Config.apiKey, Movies) {}
 
-case class Film(edi:String, title:String, poster_url: String) extends Logging {
+case class Film(edi:String, title:String, poster_url: String) extends StrictLogging {
   val textToStrip = List(" - Unlimited Screening", " (English subtitles)", " - Movies for Juniors", "Take 2 - ", "3D - ", "2D - ", "Autism Friendly Screening: ", " for Juniors", " (English dubbed version)", " (Japanese with English subtitles)")
   def cleanTitle = {
     var cleaned = title

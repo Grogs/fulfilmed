@@ -1,6 +1,6 @@
 package me.gregd.cineworld.dao
 
-import scalaj.http.{HttpOptions, Http}
+import scalaj.http.{HttpOptions, Http, HttpRequest}
 import org.json4s._
 import org.json4s.native.JsonMethods._
 import me.gregd.cineworld.domain.Movie
@@ -21,7 +21,7 @@ class TheMovieDB(apiKey: String) extends Logging {
     (json \ "images" \ "base_url").extract[String] + "w300"
   }
 
-  protected def get(path:String, transform: Http.Request => Http.Request = (m=>m)): JValue = {
+  protected def get(path:String, transform: HttpRequest => HttpRequest = (m=>m)): JValue = {
     val resp = transform(
         Http(s"$baseUrl/$path")
         .option(HttpOptions.connTimeout(30000))
@@ -30,7 +30,7 @@ class TheMovieDB(apiKey: String) extends Logging {
         .param("api_key", apiKey)
       )
       .asString
-    parse(resp)
+    parse(StringInput(resp.body))
   }
 
   def alternateTitles(imdbId: String): Seq[String] = Try {

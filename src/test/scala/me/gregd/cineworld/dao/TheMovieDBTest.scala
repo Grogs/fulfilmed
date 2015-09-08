@@ -1,13 +1,12 @@
 package me.gregd.cineworld.dao
 
-import org.scalatest.FunSuite
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.{Matchers, FunSuite}
 import me.gregd.cineworld.Config
 
 /**
  * Created by Greg Dorrell on 25/05/2014.
  */
-class TheMovieDBTest extends FunSuite with ShouldMatchers {
+class TheMovieDBTest extends FunSuite with Matchers {
 
   test("Initialisation") {
     new TheMovieDB(Config.tmdbApiKey)

@@ -1,13 +1,12 @@
 package me.gregd.cineworld.dao.cineworld
 
-import org.scalatest.{GivenWhenThen, FeatureSpec}
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.{Matchers, FeatureSpec}
 
 /**
  * Author: Greg Dorrell
  * Date: 03/09/2013
  */
-class CineworldFeatureSpec extends FeatureSpec with ShouldMatchers {
+class CineworldFeatureSpec extends FeatureSpec with Matchers {
 
   info("I should be able to get a list of films showing at my local cinema")
 

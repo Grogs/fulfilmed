@@ -1,13 +1,13 @@
 package me.gregd.cineworld.dao.cineworld
 
 import org.scalatest.FunSuite
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.Matchers
 import org.joda.time.LocalDate
 
 /**
  * Created by Greg Dorrell on 01/07/2014.
  */
-class CineworldOdeonCinemasTest extends FunSuite with ShouldMatchers {
+class CineworldOdeonCinemasTest extends FunSuite with Matchers {
   val cineworld = new Cineworld(null,null)
 
   test("getOdeonCinemas should be non-empty") {

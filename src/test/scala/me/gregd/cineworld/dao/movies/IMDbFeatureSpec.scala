@@ -1,13 +1,12 @@
 package me.gregd.cineworld.dao.movies
 
-import org.scalatest.FeatureSpec
-import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.{Matchers, FeatureSpec}
 
 /**
  * Author: Greg Dorrell
  * Date: 11/09/2013
  */
-class IMDbFeatureSpec extends FeatureSpec with ShouldMatchers {
+class IMDbFeatureSpec extends FeatureSpec with Matchers {
 
   info("I should be able to to get ratings for films")
 

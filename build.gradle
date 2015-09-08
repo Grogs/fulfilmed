@@ -46,12 +46,12 @@ sourceSets {
     }
 }
 
-fatJar {
-    exclude 'META-INF/*.SF'
-    exclude 'META-INF/*.DSA'
-    exclude 'META-INF/*.RSA'
-    manifest.attributes('Main-Class': mainClassName)
-}
+//fatJar {
+//    exclude 'META-INF/*.SF'
+//    exclude 'META-INF/*.DSA'
+//    exclude 'META-INF/*.RSA'
+//    manifest.attributes('Main-Class': mainClassName)
+//}
 
 //Deploy origin/master/HEAD to production using ansible. Expects passwordless login for 'grogs' to be setup.
 //task deploy(type:Exec, dependsOn: fatJar) {

@@ -1,6 +1,7 @@
 package me.gregd.cineworld.rest
 
 import com.typesafe.scalalogging.slf4j.StrictLogging
+import org.joda.time.LocalDate
 import org.scalatra.ScalatraServlet
 import me.gregd.cineworld.dao.cineworld.{Film, Cineworld}
 import org.json4s.DefaultFormats
@@ -28,34 +29,19 @@ class CinemaService(dao: Cineworld) extends ScalatraServlet with NativeJsonSuppo
     dao.getCinemas()
   }
 
-  get("/cinema/:id") {
-    dao.getMovies(params("id"))(Movies)
+  def getDate(s: String): LocalDate = s match {
+    case "today" => new LocalDate
+    case "tomorrow" => new LocalDate() plusDays 1
+    case other => new LocalDate(other)
   }
 
-  get("/cinema/:id.curl") {
-//    val colors = new  {
-//      def f(c:Int) = new {
-//        def toString = s"\e[3$cm"
-//      }
-//      val reset = f(9)
-//      val black = f(0)
-//      val red = f(1)
-//      val green = f(2)
-//      val yellow = f(3)
-//      val blue = f(4)
-//      val magenta = f(5)
-//      val cyan = f(6)
-//      val lGrey = f(7)
-
-//      val reset = f(9)
-//    }
-    dao.getMovies(params("id"))(Movies).map{ m =>
-      ansi.fg(GREEN).a(m.title)
-    }.mkString("\n")
+  get("/cinema/:id/films/:date") {
+    dao.getMovies(params("id"), getDate(params("date")))(Movies)
   }
 
-  get("/cinema/:id/performances") {
-    dao.getPerformances(params("id"))
+
+  get("/cinema/:id/performances/:date") {
+    dao.getPerformances(params("id"), getDate(params("date")))
   }
 
   get("/rating/:title") {

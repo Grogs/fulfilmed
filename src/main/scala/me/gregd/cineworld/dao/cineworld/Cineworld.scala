@@ -164,7 +164,7 @@ class Cineworld(apiKey:String, implicit val imdb: MovieDao) extends CineworldDao
       if (!resp.isSuccess) logger.error(s"Unable to retreive performances, received: $resp")
       val respStr = resp.body
       logger.debug(s"Received performance for $filmEdi on $date at $cinema:\n$respStr")
-      (parse(respStr) \ "performances").children map (_.extract[Performance])
+      (parse(respStr) \ "performances").children map (_.extract[Performance]) filterNot (_.`type` == "star")
     }.toOption
 
     (getMovies(cinema).threads(10) map (_.cineworldId.get) map (id => id -> performances(id)) toMap).seq

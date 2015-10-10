@@ -13,6 +13,8 @@ buildscript {
  //   dependencies { classpath group: 'net.coacoas.gradle', name: 'gradle-ensime', version: '0.1.8'}
 }
 
+apply plugin: 'eu.appsatori.fatjar'
+
 //classpath 'eu.appsatori:gradle-fatjar-plugin:0.3'
 //apply plugin: 'ensime'
 //
@@ -46,12 +48,12 @@ sourceSets {
     }
 }
 
-//fatJar {
-//    exclude 'META-INF/*.SF'
-//    exclude 'META-INF/*.DSA'
-//    exclude 'META-INF/*.RSA'
-//    manifest.attributes('Main-Class': mainClassName)
-//}
+fatJar {
+    exclude 'META-INF/*.SF'
+    exclude 'META-INF/*.DSA'
+    exclude 'META-INF/*.RSA'
+    manifest.attributes('Main-Class': mainClassName)
+}
 
 //Deploy origin/master/HEAD to production using ansible. Expects passwordless login for 'grogs' to be setup.
 //task deploy(type:Exec, dependsOn: fatJar) {
@@ -129,7 +131,7 @@ dependencies {
   
   compile 'com.typesafe.scala-logging:scala-logging-slf4j_2.11:2.1.2'
 
-    compile 'ch.qos.logback:logback-classic:1.0.13'
+  compile 'ch.qos.logback:logback-classic:1.0.13'
 
   //fluent api for ANSI escape codes
   compile 'org.fusesource.jansi:jansi:1.11'

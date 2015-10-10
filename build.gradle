@@ -6,23 +6,12 @@ apply plugin: 'application'
 buildscript {
     repositories {
         jcenter()
-//        mavenCentral()
     }
     dependencies { classpath 'eu.appsatori:gradle-fatjar-plugin:0.3' }
- //   dependencies { classpath 'com.github.iamsteveholmes:scrooge-gradle-plugin:0.5' }
- //   dependencies { classpath group: 'net.coacoas.gradle', name: 'gradle-ensime', version: '0.1.8'}
 }
 
 apply plugin: 'eu.appsatori.fatjar'
 
-//classpath 'eu.appsatori:gradle-fatjar-plugin:0.3'
-//apply plugin: 'ensime'
-//
-//compileScrooge {
-//    thriftFiles = fileTree(dir: "src/main/thrift", include: "**/*.thrift")
-//    dest = file("src/gen/scala")
-//    opts = ["--finagle"]
-//}
 
 version='1.0'
 
@@ -75,32 +64,19 @@ fatJar {
 //    description = "Deploy the project as-is to production as a fat JAR"
 //}
 
-configurations {
-    repl { extendsFrom runtime }
-}
 
 dependencies {
   compile 'org.scala-lang:scala-library:2.11.7'
   compile 'org.scala-lang:scala-compiler:2.11.7'
-  repl 'org.scala-lang:jline:2.11.7'
 
     //stringmetric for fuzzy string matching
   compile 'com.rockymadden.stringmetric:stringmetric-core_2.11:0.27.4'
 
 
-  //finacle and thrift
-//  compile 'com.twitter:util-collection_2.11:6.12.1'
-//  compile 'com.twitter:scrooge-core_2.11:3.12.3'
-//  compile 'com.twitter:finagle-core_2.11:6.12.1'
-//  compile 'com.twitter:finagle-thrift_2.11:6.12.1'
-//  compile 'org.apache.thrift:libthrift:0.9.1'
-
   //shapeless for convertion
   compile 'com.chuusai:shapeless_2.11:2.2.4'
 
 
-    //pickling/serialization
-//  compile "org.scala-lang:scala-pickling_2.11:0.9.1"
 
     //Database libraries
 //  compile 'com.googlecode.flyway:flyway-core:2.1.1'
@@ -142,35 +118,3 @@ dependencies {
 
 }
 
-//task filmsToWatch(type: JavaExec, dependsOn: build) {
-//    main = 'me.gregd.cineworld.util.FilmsToWatch'
-//    classpath = sourceSets.main.runtimeClasspath
-//}
-//
-//task repl(dependsOn: 'classes') << {
-//    if (gradle.startParameter.logLevel < LogLevel.QUIET) {
-//        println(
-//                'Warning: scala REPL works best in quiet mode ' +
-//                        '(gradle -q repl).')
-//    }
-//    if (Boolean.getBoolean('org.gradle.daemon')) {
-//        println('Warning: scala REPL does not run well in Gradle daemon mode.')
-//        println('Command completion and history do not work properly.')
-//    }
-//    javaexec {
-//        main = 'scala.tools.nsc.MainGenericRunner'
-//        standardInput = System.in
-//        args '-usejavacp'
-//        bootstrapClasspath System.properties['sun.boot.class.path']
-//        bootstrapClasspath configurations.repl
-//        classpath configurations.runtime
-//        classpath sourceSets.main.output.classesDir
-//    }
-//    // Restore terminal
-//    javaexec {
-//        main = 'scala.tools.nsc.MainGenericRunner'
-//        args '-e', 'scala.tools.jline.TerminalFactory.get.restore()'
-//        bootstrapClasspath System.properties['sun.boot.class.path']
-//        bootstrapClasspath configurations.repl
-//    }
-//}

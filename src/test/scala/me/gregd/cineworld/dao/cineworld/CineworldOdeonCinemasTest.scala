@@ -11,15 +11,15 @@ class CineworldOdeonCinemasTest extends FunSuite with Matchers {
   val cineworld = new Cineworld(null,null)
 
   test("getOdeonCinemas should be non-empty") {
-    cineworld.getOdeonCinemas() should not be ('empty)
+    cineworld.retrieveOdeonCinemas() should not be ('empty)
   }
 
   test("getOdeonFilms should be non-empty") {
-    cineworld.getOdeonFilms(7167.toString, new LocalDate) should not be ('empty)
+    cineworld.retrieveOdeonFilms(7167.toString, new LocalDate) should not be ('empty)
   }
 
   test("getOdeonPerformances should be non-empty") {
-    cineworld.getOdeonPerformances(7167.toString, new LocalDate) should not be ('empty)
+    cineworld.retrieveOdeonPerformances(7167.toString, new LocalDate) should not be ('empty)
   }
 
 }

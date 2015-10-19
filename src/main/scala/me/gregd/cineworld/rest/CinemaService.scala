@@ -7,8 +7,6 @@ import me.gregd.cineworld.dao.cineworld.{Film, Cineworld}
 import org.json4s.DefaultFormats
 import org.scalatra.json.NativeJsonSupport
 import me.gregd.cineworld.dao.movies.Movies
-import org.fusesource.jansi.Ansi._
-import org.fusesource.jansi.Ansi.Color._
 
 class CinemaService(dao: Cineworld) extends ScalatraServlet with NativeJsonSupport with StrictLogging {
   protected implicit val jsonFormats = DefaultFormats.withBigDecimal
@@ -26,7 +24,10 @@ class CinemaService(dao: Cineworld) extends ScalatraServlet with NativeJsonSuppo
   }
 
   get("/cinemas") {
-    dao.getCinemas()
+    dao.retrieveCinemas()
+  }
+  get("/cinemas/cinemacity") {
+    dao.retrieveCinemaCityCinemas()
   }
 
   def getDate(s: String): LocalDate = s match {
@@ -36,12 +37,12 @@ class CinemaService(dao: Cineworld) extends ScalatraServlet with NativeJsonSuppo
   }
 
   get("/cinema/:id/films/:date") {
-    dao.getMovies(params("id"), getDate(params("date")))(Movies)
+    dao.retrieveMovies(params("id"), getDate(params("date")))(Movies)
   }
 
 
   get("/cinema/:id/performances/:date") {
-    dao.getPerformances(params("id"), getDate(params("date")))
+    dao.retrievePerformances(params("id"), getDate(params("date")))
   }
 
   get("/rating/:title") {

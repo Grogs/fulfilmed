@@ -45,8 +45,10 @@ object Config extends TaskSupport with Logging {
       val tomorrow = today plusDays 1
       cineworld.movieCache.refresh("66", tomorrow)
       cineworld.performanceCache.refresh("66", tomorrow)
+      cineworld.refreshCinemaCity()
     },
-    frequency = 1 hour
+    frequency = 1.hour,
+    delay = 5.minutes
   )
 
 }

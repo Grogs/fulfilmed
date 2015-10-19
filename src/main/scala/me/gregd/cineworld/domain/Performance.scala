@@ -1,6 +1,8 @@
 package me.gregd.cineworld.domain
 
+import java.time.LocalDate
+
 /**
  * Created by Greg Dorrell on 10/05/2014.
  */
-case class Performance(time:String, available:Boolean, `type`:String, booking_url: String)
+case class Performance(time:String, available:Boolean, `type`:String, booking_url: String, date: Option[LocalDate] = None)

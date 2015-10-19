@@ -12,25 +12,25 @@ class CineworldFeatureSpec extends FeatureSpec with Matchers {
 
   feature("Cineworld DAO") {
     scenario("Get list of cinemas:") {
-      val cinemas = Cineworld.getCinemas
+      val cinemas = Cineworld.retrieveCinemas
       assert(cinemas.size > 0 )
       assert(cinemas.find(
         _.name contains "West India Quay"
       ).isDefined)
     }
     scenario("Get listings for my local cinema:") {
-      val localCinema = Cineworld.getCinemas.find(
+      val localCinema = Cineworld.retrieveCinemas.find(
         _.name contains "West India Quay"
       ).get
-      val films = Cineworld.getMovies(localCinema.id)
+      val films = Cineworld.retrieveMovies(localCinema.id)
       films should not be (null)
       films.size should be > (0)
     }
     scenario("Get show times for today") {
-      val localCinema = Cineworld.getCinemas.find(
+      val localCinema = Cineworld.retrieveCinemas.find(
         _.name contains "West India Quay"
       ).get.id
-      val performances = Cineworld.getPerformances(localCinema)
+      val performances = Cineworld.retrievePerformances(localCinema)
       performances should not be (null)
       performances.size should be > (0)
       performances.find { film =>

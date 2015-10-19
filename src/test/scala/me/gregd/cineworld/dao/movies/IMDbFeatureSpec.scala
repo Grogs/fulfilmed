@@ -28,15 +28,15 @@ class IMDbFeatureSpec extends FeatureSpec with Matchers {
 //      }
 //    }
 
-    feature("IMDB rating and votes lookup") {
-      scenario("Should be able to get the IMDB rating and votes for TDK") {
-        val rating = Movies.getIMDbRating("tt0468569")
-        val votes = Movies.getVotes("tt0468569")
-        rating should be ('defined)
-        rating.get should be > 5.0
-        votes should be ('defined)
-        votes.get should be > 50000
-      }
-    }
+//    feature("IMDB rating and votes lookup") {
+//      scenario("Should be able to get the IMDB rating and votes for TDK") {
+//        val rating = Movies.getIMDbRating("tt0468569")
+//        val votes = Movies.getVotes("tt0468569")
+//        rating should be ('defined)
+//        rating.get should be > 5.0
+//        votes should be ('defined)
+//        votes.get should be > 50000
+//      }
+//    }
 
 }

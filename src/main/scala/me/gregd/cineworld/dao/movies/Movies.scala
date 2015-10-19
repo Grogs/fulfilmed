@@ -60,17 +60,16 @@ class Movies(rottenTomatoesApiKey:String, tmdb: TheMovieDB) extends MovieDao wit
       )
     }
 
-    val alternateTitles = movies map ( m => tmdb.alternateTitles(m) map ( alt =>
-      m.copy(title = alt)
-    )) flatten
+    val alternateTitles = for {
+      m <- movies
+      altTitle <- tmdb.alternateTitles(m)
+      _=logger.trace(s"Alternative title for ${m.title}: $altTitle")
+    } yield m.copy(title = altTitle)
 
-    logger.trace("alternate titles:")
-    alternateTitles.foreach(logger.trace(_:Movie))
-
-    (movies ++ alternateTitles) distinctBy (_.title) toSeq
+    (movies ++ alternateTitles) distinctBy (_.title)
   }
 
-  val compareFunc: (String,String)=>Double = DiceSorensenMetric(1).compare(_:String,_:String).get
+  val compareFunc = DiceSorensenMetric(1).compare(_:String,_:String).get
   val minWeight = 0.8
 
   def find(title: String): Option[Movie] = {
@@ -187,7 +186,10 @@ class Movies(rottenTomatoesApiKey:String, tmdb: TheMovieDB) extends MovieDao wit
   }
 
 
-  private def curl = io.Source.fromURL(_:String,"UTF-8").mkString
+  private def curl(url: String) = Http(url)
+    .option(HttpOptions.connTimeout(30000))
+    .option(HttpOptions.readTimeout(30000))
+    .asString.body
 
 }
 

@@ -19,7 +19,7 @@ object Implicits {
 
   implicit class DistinctBy[T](s:Seq[T]) {
     def distinctBy[K](func: T => K) = {
-      s.groupBy(func).map(_._2.head)
+      s.groupBy(func).map(_._2.head).toSeq
     }
   }
 

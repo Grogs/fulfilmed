@@ -275,7 +275,15 @@ case class Film(edi:String, title:String, poster_url: String) extends StrictLogg
     movie
       .copy(rating = rating, votes = votes)
       //Use higher res poster for TMDB when available
-      .copy(posterUrl = Try(TheMovieDB.posterUrl(movie)).toOption.flatten orElse movie.posterUrl )
+      .copy(
+        posterUrl = try {
+          TheMovieDB.posterUrl(movie)
+        } catch {
+          case e =>
+            logger.error("TMDB Failure",e)
+            movie.posterUrl
+        }
+      )
   }
 }
 

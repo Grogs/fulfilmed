@@ -8,9 +8,11 @@ lazy val root = (project in file(".")).
   settings(commonSettings: _*).
   settings(
     name := "fulfilmed-backend"
-  )
+  ).
+  enablePlugins(PlayScala).
+  disablePlugins(PlayLayoutPlugin)
 
-mainClass in (Compile,run) := Some("me.gregd.cineworld.util.JettyBootstrap")
+//mainClass in (Compile,run) := Some("me.gregd.cineworld.util.JettyBootstrap")
 
 resolvers += "Sonatype OSS Releases" at  "http://oss.sonatype.org/content/groups/public"
 

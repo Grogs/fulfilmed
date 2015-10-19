@@ -1,5 +1,7 @@
 package me.gregd.cineworld.dao.movies
 
+import javax.inject.{Inject, Singleton}
+
 import scala.util.Try
 import scalaj.http.{HttpOptions, Http}
 import org.json4s._
@@ -14,8 +16,8 @@ import me.gregd.cineworld.domain.Movie
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.util.Implicits._
 
-
-class Movies(rottenTomatoesApiKey:String, tmdb: TheMovieDB) extends MovieDao with Logging {
+@Singleton
+class Movies @Inject() (rottenTomatoesApiKey:String = Config.rottenTomatoesApiKey, tmdb: TheMovieDB) extends MovieDao with Logging {
   implicit val formats = DefaultFormats
 
   val imdbCache = CacheBuilder.newBuilder()
@@ -193,4 +195,4 @@ class Movies(rottenTomatoesApiKey:String, tmdb: TheMovieDB) extends MovieDao wit
 
 }
 
-object Movies extends Movies(Config.rottenTomatoesApiKey, Config.tmdb) {}
+//object Movies extends Movies(Config.rottenTomatoesApiKey, Config.tmdb) {}

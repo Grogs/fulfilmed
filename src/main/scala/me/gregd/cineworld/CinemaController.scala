@@ -1,8 +1,10 @@
 package me.gregd.cineworld
 
-import me.gregd.cineworld.Config.cineworld
+import javax.inject.Inject
+
+import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.cineworld.{Cineworld, Film}
-import me.gregd.cineworld.dao.movies.Movies
+import me.gregd.cineworld.dao.movies.{MovieDao}
 import me.gregd.cineworld.domain.{Movie, Performance, Cinema}
 import org.joda.time.LocalDate
 import play.api.mvc.Action
@@ -10,10 +12,8 @@ import play.api.libs.json.{Writes, Json}
 import play.mvc.Controller
 import play.api.mvc.Results.Ok
 
-import scala.reflect.ClassTag
 
-class CinemaController(dao: Cineworld) extends Controller {
-
+class CinemaController @Inject() (dao: Cineworld, implicit val movies: MovieDao, implicit val  tmdb: TheMovieDB) extends Controller {
 
   implicit val cinemaWrites = Json.writes[Cinema]
   implicit val performanceWrites = Json.writes[Performance]
@@ -35,7 +35,7 @@ class CinemaController(dao: Cineworld) extends Controller {
   }
 
   def getFilms(id: String, date: String) = returnJson {
-    dao.retrieveMovies(id, getDate(date))(Movies)
+    dao.retrieveMovies(id, getDate(date))
   }
 
 
@@ -54,5 +54,3 @@ class CinemaController(dao: Cineworld) extends Controller {
 
 
 }
-
-object CinemaController extends CinemaController(cineworld)

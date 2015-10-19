@@ -5,6 +5,6 @@ import me.gregd.cineworld.rest.CinemaService
 
 class ScalatraBootstrap extends LifeCycle {
   override def init(context: ServletContext) {
-    context mount (Config.webservice, "/api/*")
+//    context mount (Config.webservice, "/api/*")
   }
 }

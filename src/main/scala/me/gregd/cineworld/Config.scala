@@ -32,23 +32,24 @@ object Config extends TaskSupport with Logging {
 
 //  lazy val moviesCache = new DatabaseCache[Seq[Movie]]("movies",cacheDB,new String(_:Array[Byte], "UTF-8").unpickle[Seq[Movie]],_.pickle.value.getBytes)
 
-  lazy val tmdb = new TheMovieDB(tmdbApiKey)
-  lazy val imdb = new Movies(rottenTomatoesApiKey, tmdb)
-  lazy val cineworld = new Cineworld(apiKey, imdb)
-  lazy val webservice = new CinemaService(cineworld)
+//  lazy val tmdb = new TheMovieDB(tmdbApiKey)
+//  lazy val imdb = new Movies(rottenTomatoesApiKey, tmdb)
+//  lazy val cineworld = new Cineworld(apiKey, imdb, tmdb)
+//  lazy val webservice = new CinemaService(cineworld)
 
-  schedule(
-    task = {
-      val today = new LocalDate
-      cineworld.movieCache.refresh("66", today)
-      cineworld.performanceCache.refresh("66", today)
-      val tomorrow = today plusDays 1
-      cineworld.movieCache.refresh("66", tomorrow)
-      cineworld.performanceCache.refresh("66", tomorrow)
-      cineworld.refreshCinemaCity()
-    },
-    frequency = 1.hour,
-    delay = 5.minutes
-  )
+  //TODO refresh
+//  schedule(
+//    task = {
+//      val today = new LocalDate
+//      cineworld.movieCache.refresh("66", today)
+//      cineworld.performanceCache.refresh("66", today)
+//      val tomorrow = today plusDays 1
+//      cineworld.movieCache.refresh("66", tomorrow)
+//      cineworld.performanceCache.refresh("66", tomorrow)
+//      cineworld.refreshCinemaCity()
+//    },
+//    frequency = 1.hour,
+//    delay = 5.minutes
+//  )
 
 }

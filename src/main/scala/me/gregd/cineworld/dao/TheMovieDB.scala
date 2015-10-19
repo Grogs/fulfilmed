@@ -1,5 +1,7 @@
 package me.gregd.cineworld.dao
 
+import javax.inject.{Inject, Singleton}
+
 import scalaj.http.{HttpOptions, Http, HttpRequest}
 import org.json4s._
 import org.json4s.native.JsonMethods._
@@ -12,7 +14,11 @@ import me.gregd.cineworld.Config
 /**
  * Created by Greg Dorrell on 22/05/2014.
  */
-class TheMovieDB(apiKey: String) extends Logging {
+@Singleton
+class TheMovieDB (apiKey: String = Config.tmdbApiKey) extends Logging {
+
+  def this() = this(Config.tmdbApiKey) //For dependency injection :(
+
   protected implicit val formats = DefaultFormats
 
   val baseUrl="http://api.themoviedb.org/3"
@@ -59,4 +65,4 @@ class TheMovieDB(apiKey: String) extends Logging {
 
 }
 
-object TheMovieDB extends TheMovieDB(Config.tmdbApiKey) {}
+//object TheMovieDB extends TheMovieDB(Config.tmdbApiKey) {}

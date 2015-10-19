@@ -12,6 +12,8 @@ lazy val root = (project in file(".")).
   enablePlugins(PlayScala).
   disablePlugins(PlayLayoutPlugin)
 
+routesGenerator := InjectedRoutesGenerator
+
 //mainClass in (Compile,run) := Some("me.gregd.cineworld.util.JettyBootstrap")
 
 resolvers += "Sonatype OSS Releases" at  "http://oss.sonatype.org/content/groups/public"

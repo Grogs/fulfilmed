@@ -1,5 +1,7 @@
 package me.gregd.cineworld.dao.cineworld
 
+import javax.inject.{Inject, Singleton}
+
 import com.typesafe.scalalogging.slf4j.StrictLogging
 import me.gregd.cineworld.domain.{Performance, Format, Movie, Cinema}
 import scalaj.http.{HttpResponse, HttpOptions, Http}
@@ -21,7 +23,8 @@ import org.json4s.DefaultReaders.StringReader
 import java.time.{LocalDate=>JavaLocalDate}
 
 
-class Cineworld(apiKey:String, implicit val imdb: MovieDao) extends CineworldDao with StrictLogging {
+@Singleton
+class Cineworld @Inject() (apiKey:String = Config.apiKey, implicit val imdb: MovieDao, implicit val tmdb: TheMovieDB) extends CineworldDao with StrictLogging {
   val decode = java.net.URLDecoder.decode(_:String, "UTF-8")
 
   val movieCache : LoadingCache[(String,LocalDate), List[Movie]] = {
@@ -244,7 +247,7 @@ class Cineworld(apiKey:String, implicit val imdb: MovieDao) extends CineworldDao
     (retrieveMovies(cinema).threads(10) map (_.cineworldId.get) map (id => id -> performances(id)) toMap).seq
   }
 }
-object Cineworld extends Cineworld(Config.apiKey, Movies) {}
+//object Cineworld extends Cineworld(Config.apiKey, Movies) {}
 
 case class Film(edi:String, title:String, poster_url: String) extends StrictLogging {
   val textToStrip = List(" - Unlimited Screening", " (English subtitles)", " - Movies for Juniors", "Take 2 - ", "3D - ", "2D - ", "Autism Friendly Screening: ", " for Juniors", " (English dubbed version)", " (Japanese with English subtitles)")
@@ -255,7 +258,7 @@ case class Film(edi:String, title:String, poster_url: String) extends StrictLogg
     }
     cleaned
   }
-  def toMovie(implicit imdb: MovieDao = Config.imdb, tmdb: TheMovieDB = Config.tmdb) = {
+  def toMovie(implicit imdb: MovieDao, tmdb: TheMovieDB) = {
     logger.debug(s"Creating movie from $this")
     val format = Format.split(this.title)._1
     val movie:Movie = imdb
@@ -275,15 +278,7 @@ case class Film(edi:String, title:String, poster_url: String) extends StrictLogg
     movie
       .copy(rating = rating, votes = votes)
       //Use higher res poster for TMDB when available
-      .copy(
-        posterUrl = try {
-          TheMovieDB.posterUrl(movie)
-        } catch {
-          case e =>
-            logger.error("TMDB Failure",e)
-            movie.posterUrl
-        }
-      )
+      .copy(posterUrl = Try(tmdb.posterUrl(movie)).toOption.flatten orElse movie.posterUrl )
   }
 }
 

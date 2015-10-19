@@ -1,14 +1,15 @@
 package me.gregd.cineworld.rest
 
 import com.typesafe.scalalogging.slf4j.StrictLogging
+import me.gregd.cineworld.dao.TheMovieDB
 import org.joda.time.LocalDate
 import org.scalatra.ScalatraServlet
 import me.gregd.cineworld.dao.cineworld.{Film, Cineworld}
 import org.json4s.DefaultFormats
 import org.scalatra.json.NativeJsonSupport
-import me.gregd.cineworld.dao.movies.Movies
+import me.gregd.cineworld.dao.movies.{MovieDao, Movies}
 
-class CinemaService(dao: Cineworld) extends ScalatraServlet with NativeJsonSupport with StrictLogging {
+class CinemaService(dao: Cineworld, implicit val movies: MovieDao, implicit val tmdb: TheMovieDB) extends ScalatraServlet with NativeJsonSupport with StrictLogging {
   protected implicit val jsonFormats = DefaultFormats.withBigDecimal
 
   before() {
@@ -37,7 +38,7 @@ class CinemaService(dao: Cineworld) extends ScalatraServlet with NativeJsonSuppo
   }
 
   get("/cinema/:id/films/:date") {
-    dao.retrieveMovies(params("id"), getDate(params("date")))(Movies)
+    dao.retrieveMovies(params("id"), getDate(params("date")))
   }
 
 

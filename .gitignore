@@ -1,3 +1,18 @@
+### Intellij ###
+.idea/
+*.iml
+*.ipr
+*.iws
+
+
+### SBT ###
+target/
+lib_managed/
+src_managed/
+project/boot/
+.history
+.cache
+
+### Gradle ###
 build
 .gradle
-src/gen/scala/me/gregd/cineworld/domain/thrift

@@ -21,7 +21,7 @@ class CinemaController @Inject() (dao: Cineworld, implicit val movies: MovieDao,
 
   def returnJson[T:Writes](t: => T) = Action(Ok(Json.toJson(t)))
 
-  def cinemas() = {
+  def cinemas() = returnJson {
     dao.retrieveCinemas()
   }
   def cinemas_cinemacity() = returnJson {

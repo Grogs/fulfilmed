@@ -4,6 +4,10 @@ lazy val commonSettings = Seq(
   scalaVersion := "2.11.7"
 )
 
+scalacOptions += "-target:jvm-1.7" //my vps is stuck on java 7 for the moment
+
+javacOptions ++= Seq("-source", "1.7", "-target", "1.7")
+
 lazy val root = (project in file(".")).
   settings(commonSettings: _*).
   settings(

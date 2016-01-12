@@ -15,7 +15,7 @@ class CinemaServiceFeatureSpec extends ScalatraFeatureSpec with Matchers {
   import Serialization.read
   implicit val formats = Serialization.formats(NoTypeHints)
 
-  addServlet(Config.webservice, "/*")
+//  addServlet(Config.webservice, "/*")
 
   feature("Cinemas list") {
     scenario("Get list of cinemas") {

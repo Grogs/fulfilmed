@@ -12,7 +12,7 @@ import org.json4s.DefaultFormats
  */
 class SmokeTest extends ScalatraFunSuite {
   protected implicit val jsonFormats = DefaultFormats.withBigDecimal
-  addServlet(Config.webservice, "/*")
+//  addServlet(Config.webservice, "/*")
 
   test("Get list of cinemas") {
     get("/cinema/66") {

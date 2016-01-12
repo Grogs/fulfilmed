@@ -1,5 +1,8 @@
 package me.gregd.cineworld.dao.movies
 
+import com.google.inject.Guice
+import me.gregd.cineworld.Config
+import me.gregd.cineworld.dao.cineworld.Cineworld
 import org.scalatest.{Matchers, FeatureSpec}
 
 /**
@@ -7,12 +10,13 @@ import org.scalatest.{Matchers, FeatureSpec}
  * Date: 11/09/2013
  */
 class IMDbFeatureSpec extends FeatureSpec with Matchers {
+  val movies = Guice.createInjector(Config).getInstance(classOf[Movies])
 
   info("I should be able to to get ratings for films")
 
     feature("IMDB ID lookup") {
       scenario("Lookup id for The Dark Knight") {
-        val id = Movies.getId("The Dark Knight")
+        val id = movies.getId("The Dark Knight")
         id should be (Some("tt0468569"))
       }
     }

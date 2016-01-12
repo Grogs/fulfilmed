@@ -18,6 +18,8 @@ lazy val root = (project in file(".")).
 
 routesGenerator := InjectedRoutesGenerator
 
+test in assembly := {}
+
 //mainClass in (Compile,run) := Some("me.gregd.cineworld.util.JettyBootstrap")
 
 resolvers += "Sonatype OSS Releases" at  "http://oss.sonatype.org/content/groups/public"

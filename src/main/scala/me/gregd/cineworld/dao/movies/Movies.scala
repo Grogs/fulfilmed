@@ -1,6 +1,6 @@
 package me.gregd.cineworld.dao.movies
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Named=>named, Inject, Singleton}
 
 import scala.util.Try
 import scalaj.http.{HttpOptions, Http}
@@ -17,7 +17,7 @@ import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.util.Implicits._
 
 @Singleton
-class Movies @Inject() (rottenTomatoesApiKey:String = Config.rottenTomatoesApiKey, tmdb: TheMovieDB) extends MovieDao with Logging {
+class Movies @Inject() (@named("rotten-tomatoes.api-key") rottenTomatoesApiKey:String, tmdb: TheMovieDB) extends MovieDao with Logging {
   implicit val formats = DefaultFormats
 
   val imdbCache = CacheBuilder.newBuilder()
@@ -95,7 +95,7 @@ class Movies @Inject() (rottenTomatoesApiKey:String = Config.rottenTomatoesApiKe
         .option(HttpOptions.connTimeout(30000))
         .option(HttpOptions.readTimeout(30000))
         .params(
-          "apikey" -> Config.rottenTomatoesApiKey,
+          "apikey" -> rottenTomatoesApiKey,
           "country"-> "uk",
           "page_limit" -> "50",
           "page" -> pageNum.toString
@@ -116,7 +116,7 @@ class Movies @Inject() (rottenTomatoesApiKey:String = Config.rottenTomatoesApiKe
         .option(HttpOptions.connTimeout(30000))
         .option(HttpOptions.readTimeout(30000))
         .params(
-          "apikey" -> Config.rottenTomatoesApiKey,
+          "apikey" -> rottenTomatoesApiKey,
           "country"-> "uk",
           "page_limit" -> "50",
           "page" -> pageNum.toString
@@ -136,7 +136,7 @@ class Movies @Inject() (rottenTomatoesApiKey:String = Config.rottenTomatoesApiKe
         .option(HttpOptions.connTimeout(30000))
         .option(HttpOptions.readTimeout(30000))
         .params(
-          "apikey" -> Config.rottenTomatoesApiKey,
+          "apikey" -> rottenTomatoesApiKey,
           "country"-> "uk",
           "limit" -> "50"
         )

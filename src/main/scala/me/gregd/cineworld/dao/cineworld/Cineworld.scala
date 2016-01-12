@@ -1,6 +1,6 @@
 package me.gregd.cineworld.dao.cineworld
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Named, Inject, Singleton}
 
 import com.typesafe.scalalogging.slf4j.StrictLogging
 import me.gregd.cineworld.domain.{Performance, Format, Movie, Cinema}
@@ -24,7 +24,7 @@ import java.time.{LocalDate=>JavaLocalDate}
 
 
 @Singleton
-class Cineworld @Inject() (apiKey:String = Config.apiKey, implicit val imdb: MovieDao, implicit val tmdb: TheMovieDB) extends CineworldDao with StrictLogging {
+class Cineworld @Inject() (@Named("cineworld.api-key") apiKey:String, implicit val imdb: MovieDao, implicit val tmdb: TheMovieDB) extends CineworldDao with StrictLogging {
   val decode = java.net.URLDecoder.decode(_:String, "UTF-8")
 
   val movieCache : LoadingCache[(String,LocalDate), List[Movie]] = {
@@ -33,7 +33,7 @@ class Cineworld @Inject() (apiKey:String = Config.apiKey, implicit val imdb: Mov
       .refreshAfterWrite(1, HOURS)
       .build((key: (String, LocalDate)) => {
         logger.info(s"Retreiving list of Movies playing at Cineworld Cinema with ID: $key")
-        loader.tupled(key)
+        (loader.tupled)(key)
       })
   }
 
@@ -43,7 +43,7 @@ class Cineworld @Inject() (apiKey:String = Config.apiKey, implicit val imdb: Mov
       .refreshAfterWrite(1, HOURS)
       .build((key: (String,LocalDate)) => {
         logger.info(s"Retreiving performances at $key today")
-        loader.tupled(key)
+        (loader.tupled)(key)
       })
   }
 

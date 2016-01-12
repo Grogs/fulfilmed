@@ -1,5 +1,8 @@
 package me.gregd.cineworld
 
+import javax.inject.{Named=>named}
+
+import com.google.inject.{Provides=>provides, AbstractModule}
 import me.gregd.cineworld.rest.CinemaService
 import me.gregd.cineworld.dao.cineworld.Cineworld
 import me.gregd.cineworld.dao.movies.Movies
@@ -15,12 +18,12 @@ import scala.util.Try
 import org.joda.time.LocalDate
 
 
-object Config extends TaskSupport with Logging {
+class Config extends AbstractModule with TaskSupport with Logging {
   val prop = ConfigFactory.load.getString _
   
-  val apiKey = prop("cineworld.api-key")
-  val rottenTomatoesApiKey = prop("rotten-tomatoes.api-key")
-  val tmdbApiKey = prop("themoviedb.api-key")
+  @provides@named("cineworld.api-key") def apiKey = prop("cineworld.api-key")
+  @provides@named("rotten-tomatoes.api-key") def rottenTomatoesApiKey = prop("rotten-tomatoes.api-key")
+  @provides@named("themoviedb.api-key") def tmdbApiKey = prop("themoviedb.api-key")
   val dbUrl = Try(prop("database.caching")) getOrElse "jdbc:h2:mem:caching;DB_CLOSE_DELAY=-1"
   logger.info(s"Using the following url for the caching DB:\n$dbUrl")
 
@@ -29,7 +32,6 @@ object Config extends TaskSupport with Logging {
     DatabaseCache createIn db
     db
   }
-
 //  lazy val moviesCache = new DatabaseCache[Seq[Movie]]("movies",cacheDB,new String(_:Array[Byte], "UTF-8").unpickle[Seq[Movie]],_.pickle.value.getBytes)
 
 //  lazy val tmdb = new TheMovieDB(tmdbApiKey)
@@ -51,5 +53,7 @@ object Config extends TaskSupport with Logging {
 //    frequency = 1.hour,
 //    delay = 5.minutes
 //  )
-
+  override def configure() = {}
 }
+
+object Config extends Config

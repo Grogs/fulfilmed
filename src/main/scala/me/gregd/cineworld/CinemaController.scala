@@ -6,7 +6,7 @@ import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.cineworld.{Cineworld, Film}
 import me.gregd.cineworld.dao.movies.{MovieDao}
 import me.gregd.cineworld.domain.{Movie, Performance, Cinema}
-import me.gregd.cineworld.pages.Index
+import me.gregd.cineworld.pages.{Films, Index}
 import org.joda.time.LocalDate
 import play.api.mvc.Action
 import play.api.libs.json.{Writes, Json}
@@ -26,6 +26,12 @@ class CinemaController @Inject() (dao: Cineworld, implicit val movies: MovieDao,
     case Prod => "fulfilmed-scala-frontend-fullopt.js"
     case Test => throw new IllegalArgumentException("Shouldn't be used in Test mode")
   })
+
+  def films() = Action(
+    Ok(
+      Films().render
+    ).as("text/html")
+  )
 
   def index() = Action(
     Ok(

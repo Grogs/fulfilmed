@@ -70,4 +70,8 @@ libraryDependencies ++= Seq(
   "com.lihaoyi" %% "scalatags" % "0.5.4"
 )
 
-
+//Webjars
+libraryDependencies ++= Seq(
+  "org.webjars" %% "webjars-play" % "2.4.0-1",
+  "org.webjars" % "font-awesome" % "4.5.0"
+)

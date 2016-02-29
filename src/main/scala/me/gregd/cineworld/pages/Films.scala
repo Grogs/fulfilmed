@@ -1,11 +1,17 @@
-import scalatags.JsDom.all._
-import scalatags.JsDom.tags2.{title=>titleElem}
+package me.gregd.cineworld.pages
+
+import controllers.Assets
+
+import scalatags.Text.all._
+import scalatags.Text.tags2.{title => titleElem}
 
 class Films {
   def apply() =
     html(
       head(
-        titleElem("Films")
+        titleElem("Fulfilmed"),
+        link(rel:="stylesheet", href:="webjars/font-awesome/4.5.0/css/font-awesome.min.css"),
+        link(rel:="stylesheet", href:="assets/films.css")
       ),
       body(
         header(
@@ -29,7 +35,11 @@ class Films {
             )
           )
         ),
-        div(/*TODO*/)
+        //CONTENT GOES HERE
+        div(id:="films"),
+        div(id:="attribution",
+          "Powered by: ", a(href:="http://www.cineworld.co.uk/", "Cineworld's API"),", ",  a(href:="http://www.omdbapi.com/","The OMDb API"),", ",  a(href:="http://www.themoviedb.org/","TheMovieDB")," and ", a(href:="http://www.rottentomatoes.com/","Rotten Tomatoes")
+        )
       )
     )
 }

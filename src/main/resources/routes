@@ -1,4 +1,5 @@
 GET     /index                          me.gregd.cineworld.CinemaController.index()
+GET     /films                          me.gregd.cineworld.CinemaController.films()
 
 GET     /cinemas                        me.gregd.cineworld.CinemaController.cinemas()
 GET     /cinemas/cinemacity             me.gregd.cineworld.CinemaController.cinemas_cinemacity()
@@ -6,4 +7,6 @@ GET     /cinema/:id/films/:date         me.gregd.cineworld.CinemaController.getF
 GET     /cinema/:id/performances/:date  me.gregd.cineworld.CinemaController.getPerformances(id: String, date: String)
 GET     /rating/:title                  me.gregd.cineworld.CinemaController.getRating(title: String)
 
-GET  /assets/*file        controllers.Assets.at(path="/public", file)
+GET     /assets/*file                   controllers.Assets.at(path="/public", file)
+GET     /webjars/*file                  controllers.WebJarAssets.at(file)
+

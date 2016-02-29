@@ -5,16 +5,26 @@ lazy val commonSettings = Seq(
 )
 
 scalacOptions += "-target:jvm-1.7" //my vps is stuck on java 7 for the moment
-
 javacOptions ++= Seq("-source", "1.7", "-target", "1.7")
 
-lazy val root = (project in file(".")).
-  settings(commonSettings: _*).
-  settings(
+scalacOptions ++= Seq("-Xfatal-warnings","-feature")
+
+lazy val `scala-frontend`: Project = project
+  .settings(
+    Seq(fastOptJS, fullOptJS) map {
+      packageJSKey =>
+        crossTarget in (Compile, packageJSKey) := (resourceDirectory in root in Assets).value
+    }:_*
+  )
+  .enablePlugins(ScalaJSPlugin)
+
+lazy val root: Project = (project in file("."))
+  .settings(commonSettings: _*)
+  .settings(
     name := "fulfilmed-backend"
-  ).
-  enablePlugins(PlayScala).
-  disablePlugins(PlayLayoutPlugin)
+  )
+  .enablePlugins(PlayScala)
+  .disablePlugins(PlayLayoutPlugin)
 
 routesGenerator := InjectedRoutesGenerator
 
@@ -49,14 +59,15 @@ libraryDependencies ++= Seq(
   "org.eclipse.jetty" % "jetty-webapp" % "8.1.10.v20130312",
   "org.scalatra" % "scalatra_2.11" % "2.3.1",
   "org.scalatra" % "scalatra-json_2.11" % "2.3.1",
-  "com.google.guava" % "guava" % "14.0",
-  "com.google.code.findbugs" % "jsr305" % "1.3.7",
+  "com.google.guava" % "guava" % "16.0.1",
+  "com.google.code.findbugs" % "jsr305" % "3.0.1",
   "com.typesafe.scala-logging" % "scala-logging-slf4j_2.11" % "2.1.2",
   "ch.qos.logback" % "logback-classic" % "1.0.13",
   "org.jsoup" % "jsoup" % "1.7.3",
   "org.feijoas" % "mango_2.11" % "0.11",// exclude("jsr305"),
   "org.scalatra" % "scalatra-scalatest_2.11" % "2.3.1" % "test",
-  "org.scalatest" % "scalatest_2.11" % "1.9.1" % "test"
+  "org.scalatest" % "scalatest_2.11" % "1.9.1" % "test",
+  "com.lihaoyi" %% "scalatags" % "0.5.4"
 )
 
 

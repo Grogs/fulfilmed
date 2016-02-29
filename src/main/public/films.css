@@ -1,0 +1,109 @@
+#films {
+    text-align: center;
+    margin: 8px;
+
+}
+body {
+    background-color: #111;
+    margin: 0px;
+}
+#attribution {
+    color: #999;
+    font-family: HelveticaNeue, Verdana, Arial, sans-serif;
+    text-align: center;
+}
+#attribution > a {
+    color: #bbb;
+}
+
+div.menu-group {
+    display: inline-block;
+    padding-left: 20px;
+}
+select.menu, x-filter {
+    padding: 8px 30px 8px 10px;
+    margin: 7px 7px 7px 1px;
+    border-radius: 10px;
+    /* Rectangle 1: */
+    background: #610404;
+    border: 1px solid #7F1717;
+
+    font-family: Calibri, Verdana, Arial, sans-serif;
+    font-size: 16px;
+    color: #FFFFFF;
+    line-height: 20px;
+
+    color: white;
+    min-width: 190px;
+    -webkit-appearance: none;
+    background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='50px' height='50px'><polyline points='46.139,15.518 25.166,36.49 4.193,15.519' fill='white'/></svg>") right no-repeat;
+    background-color: #640F0F;
+    background-position: right 10px top 9px;
+    background-size: 18px 18px;
+}
+
+select#filter {
+    background: none;
+    direction: rtl;
+    padding-right: 10px;
+    min-width: 30px;
+}
+
+@media only screen and (max-device-width: 480px) {
+    div.menu-group {
+        padding-left: 10px;
+    }
+    select.menu {
+        font-size: 24px;
+        line-height: 24px;
+        padding-right: 0;
+        margin-left: 2px;
+        min-width: 120px;
+    }
+}
+
+body {
+    margin-top: 0px;
+}
+
+header {
+    width: 100%;
+    /*height: 52px;*/
+    background-color: #690B0B;
+    text-align: center;
+}
+
+
+/*-----  FILM CARD CSS ------*/
+.film-container {
+    width: 296px;
+    height: 434px;
+    position: relative;
+}
+
+.title {
+    font-family: HelveticaNeue-Bold;
+    font-size: 36px;
+    color: #E5E5E5;
+    line-height: 44px;
+    text-align: center;
+}
+
+.film,
+.film-background {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.film {
+    background: rgba(0,0,0,0.5);
+    z-index: -9;
+}
+
+.film-background {
+    z-index: -10;
+    -webkit-filter: blur(7px)
+}

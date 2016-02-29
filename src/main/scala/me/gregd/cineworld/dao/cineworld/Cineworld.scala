@@ -244,7 +244,7 @@ class Cineworld @Inject() (@Named("cineworld.api-key") apiKey:String, implicit v
       (parse(respStr) \ "performances").children map (_.extract[Performance]) filterNot (_.`type` == "star")
     }.toOption
 
-    (retrieveMovies(cinema).threads(10) map (_.cineworldId.get) map (id => id -> performances(id)) toMap).seq
+    (retrieveMovies(cinema).threads(10) map (_.cineworldId.get) map (id => id -> performances(id))).toMap.seq
   }
 }
 //object Cineworld extends Cineworld(Config.apiKey, Movies) {}

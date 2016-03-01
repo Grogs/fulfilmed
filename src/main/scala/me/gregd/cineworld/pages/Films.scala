@@ -6,6 +6,7 @@ import scalatags.Text.all._
 import scalatags.Text.tags2.{title => titleElem}
 
 class Films {
+  def contentDivId = "films"
   def apply() =
     html(
       head(
@@ -35,8 +36,7 @@ class Films {
             )
           )
         ),
-        //CONTENT GOES HERE
-        div(id:="films"),
+        div(id:=contentDivId),
         div(id:="attribution",
           "Powered by: ", a(href:="http://www.cineworld.co.uk/", "Cineworld's API"),", ",  a(href:="http://www.omdbapi.com/","The OMDb API"),", ",  a(href:="http://www.themoviedb.org/","TheMovieDB")," and ", a(href:="http://www.rottentomatoes.com/","Rotten Tomatoes")
         )

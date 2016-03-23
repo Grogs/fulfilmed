@@ -4,16 +4,16 @@ import javax.inject.Inject
 
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.cineworld.{Cineworld, Film}
-import me.gregd.cineworld.dao.movies.{MovieDao}
-import me.gregd.cineworld.domain.{Movie, Performance, Cinema}
+import me.gregd.cineworld.dao.movies.MovieDao
+import me.gregd.cineworld.domain.{Cinema, Movie, Performance}
 import me.gregd.cineworld.pages.{Films, Index}
 import org.joda.time.LocalDate
-import play.api.{Environment, Application}
-import play.api.mvc.Action
-import play.api.libs.json.{Writes, Json}
-import play.mvc.Controller
-import play.api.mvc.Results.Ok
+import play.api.Environment
 import play.api.Mode._
+import play.api.libs.json.{Json, Writes}
+import play.api.mvc.Action
+import play.api.mvc.Results.Ok
+import play.mvc.Controller
 
 
 class CinemaController @Inject() (env: Environment, dao: Cineworld, implicit val movies: MovieDao, implicit val  tmdb: TheMovieDB) extends Controller {

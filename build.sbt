@@ -21,6 +21,7 @@ lazy val `scala-frontend`: Project = project
 lazy val root: Project = (project in file("."))
   .settings(commonSettings: _*)
   .settings(
+    //compile in Compile <<= (compile in Compile) dependsOn (fastOptJS in (`scala-frontend`, Compile)),
     name := "fulfilmed-backend"
   )
   .enablePlugins(PlayScala)

@@ -15,8 +15,24 @@ lazy val client: Project = project
       packageJSKey =>
         crossTarget in (Compile, packageJSKey) := (resourceDirectory in server in Assets).value
     }:_*
-  )
+  ).settings(
+    libraryDependencies ++= Seq(
+      "com.github.japgolly.scalajs-react" %%% "core" % "0.10.4"
+    ),
+    jsDependencies ++= Seq(
+      "org.webjars.bower" % "react" % "0.14.3"
+        /        "react-with-addons.js"
+        minified "react-with-addons.min.js"
+        commonJSName "React",
+      "org.webjars.bower" % "react" % "0.14.3"
+        /         "react-dom.js"
+        minified  "react-dom.min.js"
+        dependsOn "react-with-addons.js"
+        commonJSName "ReactDOM"
+    )
+)
   .enablePlugins(ScalaJSPlugin)
+  .dependsOn(sharedJs)
 
 lazy val server: Project = project
   .settings(commonSettings: _*)

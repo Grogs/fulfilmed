@@ -30,7 +30,7 @@ class CinemaController @Inject() (env: Environment, dao: Cineworld, implicit val
 
   def films() = Action(
     Ok(
-      Films().render
+      Films(scriptPath).render
     ).as("text/html")
   )
 

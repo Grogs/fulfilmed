@@ -16,6 +16,7 @@ lazy val client: Project = project
         crossTarget in (Compile, packageJSKey) := (resourceDirectory in server in Assets).value
     }:_*
   ).settings(
+    skip in packageJSDependencies := false,
     libraryDependencies ++= Seq(
       "com.github.japgolly.scalajs-react" %%% "core" % "0.10.4"
     ),

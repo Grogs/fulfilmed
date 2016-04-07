@@ -1,6 +1,6 @@
 package me.gregd.cineworld.frontend
 
-import japgolly.scalajs.react.React
+import japgolly.scalajs.react.{React, ReactDOM}
 import org.scalajs.dom._
 
 import scala.scalajs.js.JSApp
@@ -16,7 +16,9 @@ object Main extends JSApp {
   @JSExport
   def films(): Unit = {
     val state = views.FilmsState(true, Map.empty)
-    React.render(views.FilmsList(state), document.getElementById("films"))
+    val filmList = views.FilmsList(state)
+    ReactDOM.render(filmList, document.getElementById("films"))
+    filmList.setState(state.copy(isLoading = false))
   }
 
 }

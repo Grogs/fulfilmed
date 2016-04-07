@@ -35,8 +35,14 @@ package object views {
   }
 
   val FilmsList = {
-    def spinner = <.div()
-    def frown = <.div()
+    def icon(faClasses: String, message: String) = {
+      <.div(^.margin := "50px 0 50px 0", ^.color.white,
+        <.i(^.`class` := s"fa $faClasses fa-5x"),
+        <.div(^.`class`:="label", message)
+      )
+    }
+    def spinner = icon("fa-refresh fa-spin", "Loading movies")
+    def frown = icon("fa-frown-o", "No movies found!")
     ReactComponentB[FilmsState]("FilmsList")
     .initialState(FilmsState(true, Map.empty))
     .render_P{

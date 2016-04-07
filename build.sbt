@@ -11,9 +11,9 @@ scalacOptions ++= Seq("-Xfatal-warnings","-feature")
 
 lazy val client: Project = project
   .settings(
-    Seq(fastOptJS, fullOptJS) map {
+    Seq(fastOptJS, fullOptJS, packageJSDependencies) map {
       packageJSKey =>
-        crossTarget in (Compile, packageJSKey) := (resourceDirectory in server in Assets).value
+        crossTarget in packageJSKey := (resourceDirectory in server in Assets).value
     }:_*
   ).settings(
     skip in packageJSDependencies := false,
@@ -32,7 +32,7 @@ lazy val client: Project = project
         commonJSName "ReactDOM"
     )
 )
-  .enablePlugins(ScalaJSPlugin)
+  .enablePlugins(ScalaJSPlugin, ScalaJSPlay)
   .dependsOn(sharedJs)
 
 lazy val server: Project = project

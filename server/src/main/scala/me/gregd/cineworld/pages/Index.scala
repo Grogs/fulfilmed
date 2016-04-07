@@ -5,13 +5,13 @@ import scalatags.Text.tags2.{title=>titleElem}
 
 class Index {
 
-  def apply(scalaJsPath: String) =
+  def apply(scriptPaths: List[String]) =
     html(
       head(
         titleElem("Fulfilmed")
       ),
       body(
-        script(`type`:="text/javascript", src:=scalaJsPath),
+        for (p <- scriptPaths) yield script(`type`:="text/javascript", src:=p),
         script("Main().main()")
       )
     )

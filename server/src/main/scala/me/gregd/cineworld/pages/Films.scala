@@ -7,7 +7,7 @@ import scalatags.Text.tags2.{title => titleElem}
 
 class Films {
   def contentDivId = "films"
-  def apply(scalaJsPath: String) =
+  def apply(scriptPaths: List[String]) =
     html(
       head(
         titleElem("Fulfilmed"),
@@ -40,8 +40,7 @@ class Films {
         div(id:="attribution",
           "Powered by: ", a(href:="http://www.cineworld.co.uk/", "Cineworld's API"),", ",  a(href:="http://www.omdbapi.com/","The OMDb API"),", ",  a(href:="http://www.themoviedb.org/","TheMovieDB")," and ", a(href:="http://www.rottentomatoes.com/","Rotten Tomatoes")
         ),
-        script(`type`:="text/javascript", src:="webjars/"),
-        script(`type`:="text/javascript", src:=scalaJsPath),
+        for (p <- scriptPaths) yield script(`type`:="text/javascript", src:=p ),
         script("me.gregd.cineworld.frontend.Main().films()")
       )
     )

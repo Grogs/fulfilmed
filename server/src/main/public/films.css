@@ -107,3 +107,10 @@ header {
     z-index: -10;
     -webkit-filter: blur(7px)
 }
+
+div.label {
+    color: white;
+    font-family: Calibri, Verdana, Arial, sans-serif;
+    font-size: 30px;
+    margin-top: 12px;
+}

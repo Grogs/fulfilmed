@@ -3,7 +3,6 @@ package me.gregd.cineworld
 import javax.inject.{Named=>named}
 
 import com.google.inject.{Provides=>provides, AbstractModule}
-import me.gregd.cineworld.rest.CinemaService
 import me.gregd.cineworld.dao.cineworld.Cineworld
 import me.gregd.cineworld.dao.movies.Movies
 import me.gregd.cineworld.util.TaskSupport

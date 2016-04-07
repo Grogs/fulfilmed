@@ -22,21 +22,24 @@ class CinemaController @Inject() (env: Environment, dao: Cineworld, implicit val
   implicit val performanceWrites = Json.writes[Performance]
   implicit val movieWrites = Json.writes[Movie]
 
-  def scriptPath = "assets/fulfilmed-scala-frontend-" + (env.mode match {
-    case Dev => "fastopt.js"
-    case Prod => "fullopt.js"
-    case Test => throw new IllegalArgumentException("Shouldn't be used in Test mode")
-  })
+  val scriptPaths  = List(
+    "assets/fulfilmed-scala-frontend-jsdeps.js",
+    "assets/fulfilmed-scala-frontend-" + (env.mode match {
+      case Dev => "fastopt.js"
+      case Prod => "fullopt.js"
+      case Test => throw new IllegalArgumentException("Shouldn't be used in Test mode")
+    })
+  )
 
   def films() = Action(
     Ok(
-      Films(scriptPath).render
+      Films(scriptPaths).render
     ).as("text/html")
   )
 
   def index() = Action(
     Ok(
-      Index(scriptPath).render
+      Index(scriptPaths).render
     ).as("text/html")
   )
 

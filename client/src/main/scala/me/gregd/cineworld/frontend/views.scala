@@ -58,12 +58,10 @@ package object views {
   val FilmPage = {
     ReactComponentB[FilmsState]("FilmPage")
       .render_P{ s =>
-
-        val disabled = ^.disabled := "disabled"
-        val sort = <.div(^.`class` := "menu-group",
+        val sortSelection = <.div(^.`class` := "menu-group",
           <.i(^.`class` := "fa fa-sort-alpha-asc fa-lg", ^.color.white),
           <.select(^.id := "ordering", ^.`class` := "menu", ^.onChange := "TODO",
-            <.option(^.value := "?", ^.selected := "selected", disabled, "Order by..."),
+            <.option(^.value := "?", ^.selected := "selected", ^.disabled := "disabled", "Order by..."),
             <.option(^.value := "imdb", "IMDb Rating (Descending)"),
             <.option(^.value := "critic", "RT Critic Rating (Descending)"),
             <.option(^.value := "audience", "RT Audience Rating (Descending)"),
@@ -73,9 +71,13 @@ package object views {
           <.select(^.id := "date", ^.`class` := "menu", ^.onChange := "TODO",
             <.option(^.value := "today", ^.selected := "selected", "Today"),
             <.option(^.value := "tomorrow", "Tomorrow")))
-        val menu = <.header(<.div(^.`class` := "menu", dateSelection, sort))
+        val menu = <.header(<.div(^.`class` := "menu", dateSelection, sortSelection))
         val attribution = <.div(^.id := "attribution",
-          "Powered by: ", <.a(^.href := "http://www.cineworld.co.uk/", "Cineworld's API"), ", ", <.a(^.href := "http://www.omdbapi.com/", "The OMDb API"), ", ", <.a(^.href := "http://www.themoviedb.org/", "TheMovieDB"), " and ", <.a(^.href := "http://www.rottentomatoes.com/", "Rotten Tomatoes"))
+          "Powered by: ",
+          <.a(^.href := "http://www.cineworld.co.uk/", "Cineworld's API"), ", ",
+          <.a(^.href := "http://www.omdbapi.com/", "The OMDb API"), ", ",
+          <.a(^.href := "http://www.themoviedb.org/", "TheMovieDB"), " and ",
+          <.a(^.href := "http://www.rottentomatoes.com/", "Rotten Tomatoes"))
 
         <.div( ^.id:="films",
           menu,

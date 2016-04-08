@@ -2,10 +2,12 @@ package me.gregd.cineworld
 
 import javax.inject.Inject
 
+import autowire.Core.Request
+import grizzled.slf4j.Logging
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.cineworld.{Cineworld, Film}
 import me.gregd.cineworld.dao.movies.MovieDao
-import me.gregd.cineworld.domain.{Cinema, Movie, Performance}
+import me.gregd.cineworld.domain.{Cinema, CinemaApi, Movie, Performance}
 import me.gregd.cineworld.pages.{Films, Index}
 import org.joda.time.LocalDate
 import play.api.Environment
@@ -14,9 +16,13 @@ import play.api.libs.json.{Json, Writes}
 import play.api.mvc.Action
 import play.api.mvc.Results.Ok
 import play.mvc.Controller
+import upickle.Js
+import upickle.Js.Obj
+import upickle.default.{Reader, Writer}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class CinemaController @Inject() (env: Environment, dao: Cineworld, implicit val movies: MovieDao, implicit val  tmdb: TheMovieDB) extends Controller {
+class CinemaController @Inject() (env: Environment, dao: Cineworld, cinemaService: CinemaService, implicit val movies: MovieDao, implicit val  tmdb: TheMovieDB) extends Controller with Logging {
 
   implicit val cinemaWrites = Json.writes[Cinema]
   implicit val performanceWrites = Json.writes[Performance]
@@ -30,6 +36,23 @@ class CinemaController @Inject() (env: Environment, dao: Cineworld, implicit val
       case Test => throw new IllegalArgumentException("Shouldn't be used in Test mode")
     })
   )
+
+  object ApiServer extends autowire.Server[Js.Value, Reader, Writer] {
+    def read[Result: Reader](p: Js.Value) = upickle.default.readJs[Result](p)
+    def write[Result: Writer](r: Result) = upickle.default.writeJs(r)
+  }
+
+  def api(pathRaw: String) = Action.async { implicit request =>
+    logger.debug(s"API request: $pathRaw")
+    val path = pathRaw.split("/")
+    val body = request.body.asText.getOrElse("")
+    val args = upickle.json.read(body).asInstanceOf[Obj].value.toMap
+    ApiServer.route[CinemaApi](cinemaService)(
+      Request(path, args)
+    ).map( res =>
+      Ok(upickle.json.write(res))
+    )
+  }
 
   def films() = Action(
     Ok(

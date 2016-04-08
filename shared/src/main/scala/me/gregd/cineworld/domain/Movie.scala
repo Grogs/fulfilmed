@@ -10,7 +10,7 @@ case class Movie (
   audienceRating: Option[Int],
   criticRating: Option[Int],
   posterUrl: Option[String]
-) {}
+)
 
 object Format {
   def split(title:String) = {

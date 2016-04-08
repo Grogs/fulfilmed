@@ -1,30 +1,28 @@
 package me.gregd.cineworld.dao.cineworld
 
-import javax.inject.{Named, Inject, Singleton}
+import java.util.concurrent.TimeUnit._
+import javax.inject.{Inject, Named, Singleton}
 
-import com.typesafe.scalalogging.slf4j.StrictLogging
-import me.gregd.cineworld.domain.{Performance, Format, Movie, Cinema}
-import scalaj.http.{HttpResponse, HttpOptions, Http}
+import grizzled.slf4j.Logging
+import me.gregd.cineworld.dao.TheMovieDB
+import me.gregd.cineworld.dao.movies.MovieDao
+import me.gregd.cineworld.domain.{Cinema, Format, Movie, Performance}
+import me.gregd.cineworld.util.Implicits._
+import org.feijoas.mango.common.cache.{CacheBuilder, LoadingCache}
+import org.joda.time.{Days, LocalDate}
+import org.json4s.DefaultReaders.StringReader
 import org.json4s._
 import org.json4s.native.JsonMethods._
-import me.gregd.cineworld.dao.movies.Movies
-import me.gregd.cineworld.dao.movies.MovieDao
-import org.feijoas.mango.common.cache.{LoadingCache, CacheBuilder}
-import java.util.concurrent.TimeUnit._
-import me.gregd.cineworld.Config
-import org.joda.time.{LocalDate, Days}
-import me.gregd.cineworld.util.Implicits._
-import scala.util.Try
-import me.gregd.cineworld.dao.TheMovieDB
 import org.jsoup.Jsoup
-import collection.JavaConverters._
 import org.jsoup.nodes.Element
-import org.json4s.DefaultReaders.StringReader
-import java.time.{LocalDate=>JavaLocalDate}
+
+import scala.collection.JavaConverters._
+import scala.util.Try
+import scalaj.http.{Http, HttpOptions}
 
 
 @Singleton
-class Cineworld @Inject() (@Named("cineworld.api-key") apiKey:String, implicit val imdb: MovieDao, implicit val tmdb: TheMovieDB) extends CineworldDao with StrictLogging {
+class Cineworld @Inject() (@Named("cineworld.api-key") apiKey:String, implicit val imdb: MovieDao, implicit val tmdb: TheMovieDB) extends CineworldDao with Logging {
   val decode = java.net.URLDecoder.decode(_:String, "UTF-8")
 
   val movieCache : LoadingCache[(String,LocalDate), List[Movie]] = {
@@ -142,7 +140,7 @@ class Cineworld @Inject() (@Named("cineworld.api-key") apiKey:String, implicit v
     cinemaCity(cinema)
       .mapValues(
         _.filter(
-          _.date.map(date.equals)
+          _.date.map(date.toString("yyyy-MM-dd").equals)
             .getOrElse(true)
         )
       ).toSeq
@@ -159,8 +157,7 @@ class Cineworld @Inject() (@Named("cineworld.api-key") apiKey:String, implicit v
       Film(id, title, img) -> (json \ "pr").children.map(getPerformance)
     }
     def getPerformance(json: JValue) = {
-      val dateStr = (json \ "dt").as[String].take(10).replaceAll("/","-")
-      val date = JavaLocalDate.parse(dateStr)
+      val date = (json \ "dt").as[String].take(10).replaceAll("/","-")
       Performance((json \ "tm").as[String], available = true, "", "http://www.cinemacity.hu/", Option(date))
     }
     val req = Http("http://www.cinemacity.hu/en/presentationsJSON")
@@ -180,7 +177,6 @@ class Cineworld @Inject() (@Named("cineworld.api-key") apiKey:String, implicit v
 
     (parse(respStr) \ "sites").children.map(getCinema).toMap
   }
-
 
 
   def retrieveFilms(cinema: String, dates: Seq[LocalDate] = Seq(new LocalDate)): List[Film] = {
@@ -249,7 +245,7 @@ class Cineworld @Inject() (@Named("cineworld.api-key") apiKey:String, implicit v
 }
 //object Cineworld extends Cineworld(Config.apiKey, Movies) {}
 
-case class Film(edi:String, title:String, poster_url: String) extends StrictLogging {
+case class Film(edi:String, title:String, poster_url: String) extends Logging {
   val textToStrip = List(" - Unlimited Screening", " (English subtitles)", " - Movies for Juniors", "Take 2 - ", "3D - ", "2D - ", "Autism Friendly Screening: ", " for Juniors", " (English dubbed version)", " (Japanese with English subtitles)")
   def cleanTitle = {
     var cleaned = title

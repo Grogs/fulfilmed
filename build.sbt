@@ -18,7 +18,8 @@ lazy val client: Project = project
   ).settings(
     skip in packageJSDependencies := false,
     libraryDependencies ++= Seq(
-      "com.github.japgolly.scalajs-react" %%% "core" % "0.10.4"
+      "com.github.japgolly.scalajs-react" %%% "core" % "0.10.4",
+      "org.scala-js" %%% "scalajs-java-time" % "0.1.0"
     ),
     jsDependencies ++= Seq(
       "org.webjars.bower" % "react" % "0.14.3"

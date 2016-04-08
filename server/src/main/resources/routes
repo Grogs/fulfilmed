@@ -7,6 +7,9 @@ GET     /cinema/:id/films/:date         me.gregd.cineworld.CinemaController.getF
 GET     /cinema/:id/performances/:date  me.gregd.cineworld.CinemaController.getPerformances(id: String, date: String)
 GET     /rating/:title                  me.gregd.cineworld.CinemaController.getRating(title: String)
 
+GET     /api/*path                      me.gregd.cineworld.CinemaController.api(path)
+POST    /api/*path                      me.gregd.cineworld.CinemaController.api(path)
+
 GET     /assets/*file                   controllers.Assets.at(path="/public", file)
 GET     /webjars/*file                  controllers.WebJarAssets.at(file)
 

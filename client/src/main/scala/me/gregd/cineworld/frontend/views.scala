@@ -7,9 +7,6 @@ import japgolly.scalajs.react.vdom.prefix_<^._
 
 package object views {
 
-
-  case class FilmsState(isLoading: Boolean, films: Map[Movie, List[Performance]])
-
   val FilmCard = {
     ReactComponentB[(Movie, List[Performance])]("FilmCard")
       .render_P{ case (m, pl) =>
@@ -44,7 +41,6 @@ package object views {
     def spinner = icon("fa-refresh fa-spin", "Loading movies")
     def frown = icon("fa-frown-o", "No movies found!")
     ReactComponentB[FilmsState]("FilmsList")
-    .initialState(FilmsState(true, Map.empty))
     .render_P{
       case FilmsState(loading, movies) =>
         if (loading)
@@ -57,6 +53,37 @@ package object views {
           )
     }
     .build
+  }
+
+  val FilmPage = {
+    ReactComponentB[FilmsState]("FilmPage")
+      .render_P{ s =>
+
+        val disabled = ^.disabled := "disabled"
+        val sort = <.div(^.`class` := "menu-group",
+          <.i(^.`class` := "fa fa-sort-alpha-asc fa-lg", ^.color.white),
+          <.select(^.id := "ordering", ^.`class` := "menu", ^.onChange := "TODO",
+            <.option(^.value := "?", ^.selected := "selected", disabled, "Order by..."),
+            <.option(^.value := "imdb", "IMDb Rating (Descending)"),
+            <.option(^.value := "critic", "RT Critic Rating (Descending)"),
+            <.option(^.value := "audience", "RT Audience Rating (Descending)"),
+            <.option(^.value := "showtime", "Next Showing")))
+        val dateSelection = <.div(^.`class` := "menu-group",
+          <.i(^.`class` := "fa fa-calendar fa-lg", ^.color.white),
+          <.select(^.id := "date", ^.`class` := "menu", ^.onChange := "TODO",
+            <.option(^.value := "today", ^.selected := "selected", "Today"),
+            <.option(^.value := "tomorrow", "Tomorrow")))
+        val menu = <.header(<.div(^.`class` := "menu", dateSelection, sort))
+        val attribution = <.div(^.id := "attribution",
+          "Powered by: ", <.a(^.href := "http://www.cineworld.co.uk/", "Cineworld's API"), ", ", <.a(^.href := "http://www.omdbapi.com/", "The OMDb API"), ", ", <.a(^.href := "http://www.themoviedb.org/", "TheMovieDB"), " and ", <.a(^.href := "http://www.rottentomatoes.com/", "Rotten Tomatoes"))
+
+        <.div( ^.id:="films",
+          menu,
+          FilmsList(s),
+          attribution
+        )
+      }
+      .build
   }
 
 }

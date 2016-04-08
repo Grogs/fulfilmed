@@ -6,7 +6,6 @@ import scalatags.Text.all._
 import scalatags.Text.tags2.{title => titleElem}
 
 class Films {
-  def contentDivId = "films"
   def apply(scriptPaths: List[String]) =
     html(
       head(
@@ -15,31 +14,7 @@ class Films {
         link(rel:="stylesheet", href:="assets/films.css")
       ),
       body(
-        header(
-          div( `class`:= "menu",
-            div(`class`:="menu-group",
-              i(`class`:="fa fa-calendar fa-lg", style:="color: white;"),
-              select(id:="date", `class`:="menu", onchange:="TODO",
-                option(value:="today", selected:="selected", "Today"),
-                option(value:="tomorrow", "Tomorrow")
-              )
-            ),
-            div(`class`:="menu-group",
-              i(`class`:="fa fa-sort-alpha-asc fa-lg", style:="color: white;"),
-              select(id:="ordering", `class`:="menu", onchange:="TODO",
-                option(value:="?", selected:="selected", disabled, "Order by..."),
-                option(value:="imdb",     "IMDb Rating (Descending)"),
-                option(value:="critic",   "RT Critic Rating (Descending)"),
-                option(value:="audience", "RT Audience Rating (Descending)"),
-                option(value:="showtime", "Next Showing")
-              )
-            )
-          )
-        ),
-        div(id:=contentDivId),
-        div(id:="attribution",
-          "Powered by: ", a(href:="http://www.cineworld.co.uk/", "Cineworld's API"),", ",  a(href:="http://www.omdbapi.com/","The OMDb API"),", ",  a(href:="http://www.themoviedb.org/","TheMovieDB")," and ", a(href:="http://www.rottentomatoes.com/","Rotten Tomatoes")
-        ),
+        div( id:="content"),
         for (p <- scriptPaths) yield script(`type`:="text/javascript", src:=p ),
         script("me.gregd.cineworld.frontend.Main().films()")
       )

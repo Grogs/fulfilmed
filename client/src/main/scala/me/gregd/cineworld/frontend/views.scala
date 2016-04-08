@@ -14,7 +14,7 @@ package object views {
           <.div( ^.classSet1("film", "threedee" -> (m.format == "3D")),
             <.div(^.`class` := "title", m.title),
             <.div(^.`class` := "ratings",
-              <.div(^.`class` := "rating imdb", m.rating),
+              <.div(^.`class` := "rating imdb", <.a(^.href:=m.imdbId.map("http://www.imdb.com/title/tt" + _), m.rating)),
               <.div(^.`class` := "rating rt", m.criticRating),
               <.div(^.`class` := "rating rtAudience", m.audienceRating)
             ),

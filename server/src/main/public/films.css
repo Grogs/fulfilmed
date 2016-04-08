@@ -1,4 +1,4 @@
-#films {
+.films-list-container {
     text-align: center;
     margin: 8px;
 
@@ -114,3 +114,114 @@ div.label {
     font-size: 30px;
     margin-top: 12px;
 }
+
+
+
+/* Film card styling */
+
+
+a { color: white; }
+
+.film-container:hover {
+    -webkit-transform: scale(1.05,1.07);
+}
+
+.film-container {
+    width: 296px;
+    height: 434px;
+    position: relative;
+    border: solid 4px #690B0B;
+    overflow: hidden;
+    margin: 5px;
+    display: inline-block;
+    transition: all ease 0.2s;
+}
+
+.title {
+    font-family: "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    font-weight: bold;
+    font-size: 36px;
+    color: #E5E5E5;
+    line-height: 44px;
+    text-shadow: 0px 2px 6px rgba(0,0,0,0.5);
+    text-align: center;
+    margin-top: 20px;
+}
+
+.film,
+.film-background {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.film {
+    background: rgba(0,0,0,0.5);
+    /*z-index: -9;*/
+}
+
+.threedee.film {
+    background: url('http://localhost:8000/3d.png') no-repeat 100% 0,  rgba(0,0,0,0.5);
+    right: 0px;
+}
+
+.film-background {
+    z-index: -10;
+    /* blur caused performance issues - found a source for higher-res images instead
+    -webkit-filter: blur(3px);
+    -webkit-transform: translate3d(0, 0, 0);
+    */
+    margin: 0 -1px 0 0;
+}
+
+.ratings {
+    margin-top: 30px;
+    text-align: center;
+}
+.rating {
+    font-family: "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    font-weight: bold;
+    font-size: 26px;
+    color: #FFFFFF;
+    line-height: 32px;
+    /* imdb rating: */
+    margin: 10px;
+    display: inline-block;
+}
+.rt {
+    background-image: url('http://localhost:8000/rt-icon.svg');
+    background-repeat: no-repeat;
+    padding-left: 37px;
+}
+.rtAudience {
+    background-image: url('http://localhost:8000/rt-audience-icon.png');
+    background-repeat: no-repeat;
+    padding-left: 37px;
+}
+.imdb {
+    background-image: url('http://localhost:8000/imdb-icon.png');
+    background-repeat: no-repeat;
+    padding-left: 46px;
+}
+
+.times {
+    margin: 30px 20px 0 20px;
+    text-align: left;
+}
+.time {
+    font-family: "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    font-weight: bold;
+    font-size: 20px;
+    color: #E5E5E5;
+    line-height: 25px;
+    padding: 4px;
+    border-radius: 10px;
+    background: #2A353F;
+    border: 2px solid #00ADFF;
+    display: inline-block;
+    margin-right: 10px;
+    margin-bottom: 8px;
+}
+

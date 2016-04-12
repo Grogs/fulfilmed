@@ -271,10 +271,15 @@ case class Film(edi:String, title:String, poster_url: String) extends Logging {
     val id = movie.imdbId map ("tt"+_)
     val rating = id flatMap imdb.getIMDbRating
     val votes = id flatMap imdb.getVotes
+    val posterUrl = Try(tmdb.posterUrl(movie)).toOption.flatten
+    posterUrl match {
+      case Some(newUrl) => logger.debug(s"Found highres poster in TMDD for '${movie.title}': $newUrl")
+      case None => logger.debug(s"Didn't find poster in TMDB postUrl for ${movie.title}")
+    }
     movie
       .copy(rating = rating, votes = votes)
       //Use higher res poster for TMDB when available
-      .copy(posterUrl = Try(tmdb.posterUrl(movie)).toOption.flatten orElse movie.posterUrl )
+      .copy(posterUrl = posterUrl orElse movie.posterUrl )
   }
 }
 

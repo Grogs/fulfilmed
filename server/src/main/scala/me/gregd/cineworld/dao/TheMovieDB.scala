@@ -15,7 +15,7 @@ import me.gregd.cineworld.Config
  * Created by Greg Dorrell on 22/05/2014.
  */
 @Singleton
-class TheMovieDB @Inject() (@named("themoviedb.api-key")apiKey: String = Config.tmdbApiKey) extends Logging {
+class TheMovieDB @Inject() (@named("themoviedb.api-key")apiKey: String) extends Logging {
 
   protected implicit val formats = DefaultFormats
 
@@ -26,14 +26,15 @@ class TheMovieDB @Inject() (@named("themoviedb.api-key")apiKey: String = Config.
   }
 
   protected def get(path:String, transform: HttpRequest => HttpRequest = m => m): JValue = {
-    val resp = transform(
-        Http(s"$baseUrl/$path")
+    val req = transform(
+      Http(s"$baseUrl/$path")
         .option(HttpOptions.connTimeout(30000))
         .option(HttpOptions.readTimeout(30000))
         .header("Accept", "application/json")
         .param("api_key", apiKey)
-      )
-      .asString
+    )
+    logger.debug(s"Getting: ${req.url} with params ${req.params}")
+    val resp = req.asString
     parse(StringInput(resp.body))
   }
 
@@ -55,6 +56,7 @@ class TheMovieDB @Inject() (@named("themoviedb.api-key")apiKey: String = Config.
 
   def posterUrl(imdbId: String): Option[String] = Try {
     val json = get(s"find/tt$imdbId", _.param("external_source","imdb_id"))
+    logger.debug(json \ "movie_results" \ "poster_path")
     val imageName = (json \ "movie_results" \ "poster_path").extract[String]
     s"$baseImageUrl$imageName"
   }

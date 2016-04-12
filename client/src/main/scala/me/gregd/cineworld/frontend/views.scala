@@ -33,7 +33,7 @@ package object views {
 
   val FilmsList = {
     def icon(faClasses: String, message: String) = {
-      <.div(^.margin := "50px 0 50px 0", ^.color.white,
+      <.div(^.margin := "50px 0 50px 0", ^.color.white, ^.textAlign.center,
         <.i(^.`class` := s"fa $faClasses fa-5x"),
         <.div(^.`class`:="label", message)
       )

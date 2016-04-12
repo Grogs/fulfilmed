@@ -12,4 +12,8 @@ class TheMovieDBTest extends FunSuite with Matchers {
     new TheMovieDB(Config.tmdbApiKey)
   }
 
+  test("Get poster for tt2381991 (The Huntsmen sequel)") {
+    new TheMovieDB(Config.tmdbApiKey).posterUrl("2381991")
+  }
+
 }

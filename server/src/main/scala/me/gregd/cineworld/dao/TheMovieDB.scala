@@ -57,7 +57,7 @@ class TheMovieDB @Inject() (@named("themoviedb.api-key")apiKey: String) extends 
   def posterUrl(imdbId: String): Option[String] = Try {
     val json = get(s"find/tt$imdbId", _.param("external_source","imdb_id"))
     logger.debug(json \ "movie_results" \ "poster_path")
-    val imageName = (json \ "movie_results" \ "poster_path").extract[String]
+    val JString(imageName) = json \ "movie_results" \ "poster_path"
     s"$baseImageUrl$imageName"
   }
     .onFailure(logger.error(s"Unable to retrieve poster for $imdbId from TMDB",_:Throwable))

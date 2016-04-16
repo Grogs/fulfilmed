@@ -1,21 +1,46 @@
-package me.gregd.cineworld.frontend
+package me.gregd.cineworld.frontend.components
 
-import autowire._
-import japgolly.scalajs.react.vdom.prefix_<^._
 import japgolly.scalajs.react.{BackendScope, Callback, ReactComponentB, SyntheticEvent}
+import japgolly.scalajs.react.vdom.prefix_<^._
 import me.gregd.cineworld.domain.{CinemaApi, Movie, Performance}
+import me.gregd.cineworld.frontend._
 import org.scalajs.dom.html.Select
+import autowire._
 
+import scala.collection.immutable.List
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
+object FilmPageComponent {
 
-package object views {
+  def apply() = components.FilmPage(())
 
-  val FilmCard = {
-    ReactComponentB[(Movie, List[Performance])]("FilmCard")
-      .render_P{ case (m, pl) =>
+  object model {
+    case class State(
+      isLoading: Boolean,
+      cinema: String,
+      films: Map[Movie, List[Performance]],
+      sorts: List[Sort] = List(NextShowing, ImdbRating, RTCriticRating, RTAudienceRating),
+      selectedSort: Sort = NextShowing,
+      dates: List[Date] = List(Today, Tomorrow),
+      selectedDate: Date = Today
+    )
+
+    case class Sort(key: String, description: String, ordering: Ordering[Entry])
+    object NextShowing extends Sort("showtime", "Next Showing", Ordering.by{case (_, performances) => if (performances.isEmpty) "99:99" else performances.map(_.time).min})
+    object ImdbRating extends Sort("imdb", "IMDb Rating (Descending)", Ordering.by{ e: Entry => e._1.rating.getOrElse(0.0)}.reverse)
+    object RTCriticRating extends Sort("critic", "RT Critic Rating (Descending)", Ordering.by{ e: Entry => e._1.criticRating.getOrElse(0)}.reverse)
+    object RTAudienceRating extends Sort("audience", "RT Audience Rating (Descending)", Ordering.by{ e: Entry => e._1.audienceRating.getOrElse(0)}.reverse)
+
+    case class Date(key: String, text: String)
+    object Today extends Date("today", "Today")
+    object Tomorrow extends Date("tomorrow", "Tomorrow")
+  }
+
+  object components {
+    val FilmCard = ReactComponentB[(Movie, List[Performance])]("FilmCard").render_P{
+      case (m, pl) =>
         <.div( ^.className := "film-container",
-          <.div( ^.classSet1("film", "threedee" -> (m.format == "3D")),
+          <.div( ^.classSet1("film", "threedee" -> m.format.contains("3D")),
             <.div(^.`class` := "title", m.title),
             <.div(^.`class` := "ratings",
               <.div(^.`class` := "rating imdb", <.a(^.href:=m.imdbId.map("http://www.imdb.com/title/tt" + _), m.rating)),
@@ -31,38 +56,39 @@ package object views {
           ),
           <.img( ^.`class`:="film-background", ^.src := m.posterUrl)
         )
-      }
-      .build
-  }
+    }.build
 
-  val FilmsList = {
-    def icon(faClasses: String, message: String) = {
-      <.div(^.margin := "50px 0 50px 0", ^.color.white, ^.textAlign.center,
-        <.i(^.`class` := s"fa $faClasses fa-5x"),
-        <.div(^.`class`:="label", message)
-      )
-    }
-    def spinner = icon("fa-refresh fa-spin", "Loading movies")
-    def frown = icon("fa-frown-o", "No movies found!")
-    ReactComponentB[FilmsState]("FilmsList")
-    .render_P{
-      state =>
-        val movies = state.films.toSeq.sorted(state.selectedSort.ordering)
-        if (movies.isEmpty)
-          if (state.isLoading)
-            spinner
+    val FilmsList =
+      ReactComponentB[(Boolean, model.Sort, Map[Movie, List[Performance]])]("FilmsList").render_P{
+        case (loading, sort, films) =>
+          def icon(faClasses: String, message: String) = {
+            <.div(^.margin := "50px 0 50px 0", ^.color.white, ^.textAlign.center,
+              <.i(^.`class` := s"fa $faClasses fa-5x"),
+              <.div(^.`class`:="label", message)
+            )
+          }
+          def spinner = icon("fa-refresh fa-spin", "Loading movies")
+          def frown = icon("fa-frown-o", "No movies found!")
+          val movies = films.toSeq.sorted(sort.ordering)
+          if (movies.isEmpty)
+            if (loading) spinner else frown
           else
-            frown
-        else
-          <.div( ^.className := "films-list-container",
-            for (m <- movies)
-              yield FilmCard(m)
-          )
+            <.div( ^.className := "films-list-container",
+              for (m <- movies) yield FilmCard(m))
+      }.build
+
+    val FilmPage = {
+      ReactComponentB[Unit]("FilmPage")
+        .initialState(model.State(isLoading = true, "", Map.empty))
+        .renderBackend[Backend]
+        .componentDidMount(_.backend.start())
+        .build
     }
-    .build
+
   }
 
-  class FilmsBackend($: BackendScope[Unit, FilmsState]) {
+
+  class Backend($: BackendScope[Unit, model.State]) {
 
     def updateSort(event: SyntheticEvent[Select]) = {
       val sortKey = event.target.value
@@ -82,12 +108,12 @@ package object views {
       } yield ()
     }
 
-    def sortBy(sort: Sort) = $.modState(_.copy(selectedSort = sort))
+    def sortBy(sort: model.Sort) = $.modState(_.copy(selectedSort = sort))
 
-    def loadDate(date: Date) = $.state.map(_.cinema) >>= (cinema => load(date, cinema))
+    def loadDate(date: model.Date) = $.state.map(_.cinema) >>= (cinema => load(date, cinema))
     def loadCinema(cinema: String) = $.state.map(_.selectedDate) >>= (date => load(date, cinema))
 
-    def load(date: Date, cinema: String) = {
+    def load(date: model.Date, cinema: String) = {
       val clearAndUpdate = $.modState(_.copy(
         isLoading = true, films = Map.empty,
         selectedDate = date, cinema = cinema
@@ -98,9 +124,9 @@ package object views {
       clearAndUpdate >> Callback.future(updateMovies)
     }
 
-    def start() = load(Today, "66")
+    def start() = load(model.Today, "66")
 
-    def render(state: FilmsState) = {
+    def render(state: model.State) = {
       val sortSelection = <.div(^.`class` := "menu-group",
         <.i(^.`class` := "fa fa-sort-alpha-asc fa-lg", ^.color.white),
         <.select(^.id := "ordering", ^.`class` := "menu", ^.value := state.selectedSort.key, ^.onChange ==> updateSort,
@@ -121,18 +147,12 @@ package object views {
 
       <.div( ^.id:="films",
         menu,
-        FilmsList(state),
+        components.FilmsList((state.isLoading, state.selectedSort, state.films)),
         attribution
       )
     }
   }
 
-  val FilmPage = {
-    ReactComponentB[Unit]("FilmPage")
-      .initialState(FilmsState(isLoading = true, "", Map.empty))
-      .renderBackend[FilmsBackend]
-      .componentDidMount(_.backend.start())
-      .build
-  }
+
 
 }

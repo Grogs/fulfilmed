@@ -18,7 +18,7 @@ object Main extends JSApp {
   def films(): Unit = {
 
     ReactDOM.render(
-      views.FilmPage(()),
+      components.FilmPageComponent(),
       document.getElementById("content")
     )
 

@@ -2,8 +2,9 @@ package me.gregd.cineworld.frontend
 
 import autowire._
 import japgolly.scalajs.react.vdom.prefix_<^._
-import japgolly.scalajs.react.{BackendScope, Callback, ReactComponentB}
+import japgolly.scalajs.react.{BackendScope, Callback, ReactComponentB, SyntheticEvent}
 import me.gregd.cineworld.domain.{CinemaApi, Movie, Performance}
+import org.scalajs.dom.html.Select
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
@@ -45,10 +46,10 @@ package object views {
     def frown = icon("fa-frown-o", "No movies found!")
     ReactComponentB[FilmsState]("FilmsList")
     .render_P{
-      case FilmsState(loading, cienma, unorderedMovie, sort, dates, selectedDate) =>
-        val movies = unorderedMovie.toSeq.sorted(sort.ordering)
-        if (unorderedMovie.isEmpty)
-          if (loading)
+      state =>
+        val movies = state.films.toSeq.sorted(state.selectedSort.ordering)
+        if (movies.isEmpty)
+          if (state.isLoading)
             spinner
           else
             frown
@@ -63,35 +64,53 @@ package object views {
 
   class FilmsBackend($: BackendScope[Unit, FilmsState]) {
 
-    def sortBy(sort: Sort) = $.modState(_.copy(sort = sort))
+    def updateSort(event: SyntheticEvent[Select]) = {
+      val sortKey = event.target.value
+      for {
+        state <- $.state
+        sort = state.sorts.find(_.key == sortKey).get
+        _ <- $.modState(_.copy(selectedSort = sort))
+      } yield ()
+    }
+
+    def updateDate(event: SyntheticEvent[Select]) = {
+      val dateKey = event.target.value
+      for {
+        state <- $.state
+        date = state.dates.find(_.key == dateKey).get
+        _ <- loadDate(date)
+      } yield ()
+    }
+
+    def sortBy(sort: Sort) = $.modState(_.copy(selectedSort = sort))
 
     def loadDate(date: Date) = $.state.map(_.cinema) >>= (cinema => load(date, cinema))
     def loadCinema(cinema: String) = $.state.map(_.selectedDate) >>= (date => load(date, cinema))
 
     def load(date: Date, cinema: String) = {
-      val clear = $.modState(_.copy(isLoading = true, films = Map.empty))
-      val updateDate = $.modState(_.copy(selectedDate = date))
-      val res = Client[CinemaApi].getMoviesAndPerformances("66", "tomorrow").call()
-      val updateMovies = for (movies <- res) yield $.modState(_.copy(isLoading = false, films = movies))
-      clear >> updateDate >> Callback.future(updateMovies)
+      val clearAndUpdate = $.modState(_.copy(
+        isLoading = true, films = Map.empty,
+        selectedDate = date, cinema = cinema
+      ))
+      val res = Client[CinemaApi].getMoviesAndPerformances(cinema, date.key).call()
+      val updateMovies = for (movies <- res)
+        yield $.modState(_.copy(isLoading = false, films = movies))
+      clearAndUpdate >> Callback.future(updateMovies)
     }
 
-    def start() = load(Tomorrow, "66")
+    def start() = load(Today, "66")
 
     def render(state: FilmsState) = {
       val sortSelection = <.div(^.`class` := "menu-group",
         <.i(^.`class` := "fa fa-sort-alpha-asc fa-lg", ^.color.white),
-        <.select(^.id := "ordering", ^.`class` := "menu", ^.value := state.sort.key//, ^.onChange := "TODO"
-          ,
-          <.option(^.value := "showtime", "Next Showing", ^.onClick --> sortBy(NextShowing)),
-          <.option(^.value := "imdb", "IMDb Rating (Descending)", ^.onClick --> sortBy(ImdbRating)),
-          <.option(^.value := "critic", "RT Critic Rating (Descending)", ^.onClick --> sortBy(RTCriticRating)),
-          <.option(^.value := "audience", "RT Audience Rating (Descending)", ^.onClick --> sortBy(RTAudienceRating))))
+        <.select(^.id := "ordering", ^.`class` := "menu", ^.value := state.selectedSort.key, ^.onChange ==> updateSort,
+          for (s <- state.sorts)
+            yield <.option(^.value := s.key, s.description)))
       val dateSelection = <.div(^.`class` := "menu-group",
         <.i(^.`class` := "fa fa-calendar fa-lg", ^.color.white),
-        <.select(^.id := "date", ^.`class` := "menu", ^.value := state.selectedDate.key, ^.onChange := "TODO",
-          for (d <- state.dates) yield <.option(^.value := d.key, d.text)
-        ))
+        <.select(^.id := "date", ^.`class` := "menu", ^.value := state.selectedDate.key, ^.onChange ==> updateDate,
+          for (d <- state.dates)
+            yield <.option(^.value := d.key, d.text)))
       val menu = <.header(<.div(^.`class` := "menu", dateSelection, sortSelection))
       val attribution = <.div(^.id := "attribution",
         "Powered by: ",
@@ -110,7 +129,7 @@ package object views {
 
   val FilmPage = {
     ReactComponentB[Unit]("FilmPage")
-      .initialState(FilmsState(isLoading = true, "", Map.empty, NextShowing, Today::Tomorrow::Nil, Today))
+      .initialState(FilmsState(isLoading = true, "", Map.empty))
       .renderBackend[FilmsBackend]
       .componentDidMount(_.backend.start())
       .build

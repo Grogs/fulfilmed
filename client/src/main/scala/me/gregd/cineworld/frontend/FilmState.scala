@@ -2,13 +2,15 @@ package me.gregd.cineworld.frontend
 
 import me.gregd.cineworld.domain.{Movie, Performance}
 
-sealed abstract class Sort(val key: String, val ordering: Ordering[Entry])
-case object NextShowing extends Sort("showtime", Ordering.by{
+import scala.collection.immutable.List
+
+sealed abstract class Sort(val key: String, val description: String, val ordering: Ordering[Entry])
+case object NextShowing extends Sort("showtime", "Next Showing", Ordering.by{
   case (_, performances) => if (performances.isEmpty) "99:99" else performances.map(_.time).min
 })
-case object ImdbRating extends Sort("imdb", Ordering.by{ e: Entry => e._1.rating.getOrElse(0.0)}.reverse)
-case object RTCriticRating extends Sort("critic", Ordering.by{ e: Entry => e._1.criticRating.getOrElse(0)}.reverse)
-case object RTAudienceRating extends Sort("audience", Ordering.by{ e: Entry => e._1.audienceRating.getOrElse(0)}.reverse)
+case object ImdbRating extends Sort("imdb", "IMDb Rating (Descending)", Ordering.by{ e: Entry => e._1.rating.getOrElse(0.0)}.reverse)
+case object RTCriticRating extends Sort("critic", "RT Critic Rating (Descending)", Ordering.by{ e: Entry => e._1.criticRating.getOrElse(0)}.reverse)
+case object RTAudienceRating extends Sort("audience", "RT Audience Rating (Descending)", Ordering.by{ e: Entry => e._1.audienceRating.getOrElse(0)}.reverse)
 
 case class Controller(render: FilmsState => Unit) {
 
@@ -33,7 +35,8 @@ case class FilmsState(
   isLoading: Boolean,
   cinema: String,
   films: Map[Movie, List[Performance]],
-  sort: Sort,
-  dates: List[Date],
-  selectedDate: Date
+  sorts: List[Sort] = List(NextShowing, ImdbRating, RTCriticRating, RTAudienceRating),
+  selectedSort: Sort = NextShowing,
+  dates: List[Date] = List(Today, Tomorrow),
+  selectedDate: Date = Today
 )

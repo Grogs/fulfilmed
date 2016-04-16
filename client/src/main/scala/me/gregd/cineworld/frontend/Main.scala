@@ -20,17 +20,17 @@ object Main extends JSApp {
   @JSExport
   def films(): Unit = {
 
-    def render(state: FilmsState = FilmsState(true, Map.empty)) =
+    def render(state: FilmsState) =
       ReactDOM.render(
         views.FilmPage(state),
         document.getElementById("content")
       )
 
-    render()
+//    render(FilmsState(true, Map.empty, NextShowing, Controller(render)))
 
     for {
       res <- Client[CinemaApi].getMoviesAndPerformances("66", "tomorrow").call()
-    } render(FilmsState(isLoading = false, res))
+    } render(FilmsState(isLoading = false, res, NextShowing, Today::Tomorrow::Nil, Today, Controller(render)))
 
 //    setInterval(() => render(FilmsState(false, Map.empty)), 3000)
 

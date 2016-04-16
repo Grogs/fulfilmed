@@ -1,6 +1,6 @@
 package me.gregd.cineworld.frontend
 
-import japgolly.scalajs.react.ReactComponentB
+import japgolly.scalajs.react.{CallbackTo, Callback, ReactComponentB}
 import me.gregd.cineworld.domain.{Movie,Performance}
 import japgolly.scalajs.react.vdom.prefix_<^._
 
@@ -42,10 +42,12 @@ package object views {
     def frown = icon("fa-frown-o", "No movies found!")
     ReactComponentB[FilmsState]("FilmsList")
     .render_P{
-      case FilmsState(loading, movies) =>
+      case FilmsState(loading, unorderedMovie, sort, dates, selectedDate, controller) =>
+        type Entry = (Movie, List[Performance])
+        val movies = unorderedMovie.toSeq.sorted(sort.ordering)
         if (loading)
           spinner
-        else if (movies.isEmpty)
+        else if (unorderedMovie.isEmpty)
           frown
         else
           <.div( ^.className := "films-list-container",
@@ -57,20 +59,22 @@ package object views {
 
   val FilmPage = {
     ReactComponentB[FilmsState]("FilmPage")
-      .render_P{ s =>
+      .render_P{ state =>
+        def sortBy(sort: Sort) =
+          ^.onClick --> (Callback.log(s"Sorting by $sort") >> Callback(state.controller.render(state.copy(sort = sort))))
         val sortSelection = <.div(^.`class` := "menu-group",
           <.i(^.`class` := "fa fa-sort-alpha-asc fa-lg", ^.color.white),
-          <.select(^.id := "ordering", ^.`class` := "menu", ^.onChange := "TODO",
-            <.option(^.value := "?", ^.selected := "selected", ^.disabled := "disabled", "Order by..."),
-            <.option(^.value := "imdb", "IMDb Rating (Descending)"),
-            <.option(^.value := "critic", "RT Critic Rating (Descending)"),
-            <.option(^.value := "audience", "RT Audience Rating (Descending)"),
-            <.option(^.value := "showtime", "Next Showing")))
+          <.select(^.id := "ordering", ^.`class` := "menu", ^.value := state.sort.key//, ^.onChange := "TODO"
+            ,
+            <.option(^.value := "showtime", "Next Showing", sortBy(NextShowing)),
+            <.option(^.value := "imdb", "IMDb Rating (Descending)", sortBy(ImdbRating)),
+            <.option(^.value := "critic", "RT Critic Rating (Descending)", sortBy(RTCriticRating)),
+            <.option(^.value := "audience", "RT Audience Rating (Descending)", sortBy(RTAudienceRating))))
         val dateSelection = <.div(^.`class` := "menu-group",
           <.i(^.`class` := "fa fa-calendar fa-lg", ^.color.white),
-          <.select(^.id := "date", ^.`class` := "menu", ^.onChange := "TODO",
-            <.option(^.value := "today", ^.selected := "selected", "Today"),
-            <.option(^.value := "tomorrow", "Tomorrow")))
+          <.select(^.id := "date", ^.`class` := "menu", ^.value := state.selectedDate.key, ^.onChange := "TODO",
+            for (d <- state.dates) yield <.option(^.value := d.key, d.text)
+          ))
         val menu = <.header(<.div(^.`class` := "menu", dateSelection, sortSelection))
         val attribution = <.div(^.id := "attribution",
           "Powered by: ",
@@ -81,7 +85,7 @@ package object views {
 
         <.div( ^.id:="films",
           menu,
-          FilmsList(s),
+          FilmsList(state),
           attribution
         )
       }

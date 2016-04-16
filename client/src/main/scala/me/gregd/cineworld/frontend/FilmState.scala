@@ -31,9 +31,9 @@ object Tomorrow extends Date("tomorrow", "Tomorrow")
 
 case class FilmsState(
   isLoading: Boolean,
+  cinema: String,
   films: Map[Movie, List[Performance]],
   sort: Sort,
   dates: List[Date],
-  selectedDate: Date,
-  controller: Controller
+  selectedDate: Date
 )

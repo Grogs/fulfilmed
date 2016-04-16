@@ -1,8 +1,11 @@
 package me.gregd.cineworld.frontend
 
-import japgolly.scalajs.react.{CallbackTo, Callback, ReactComponentB}
-import me.gregd.cineworld.domain.{Movie,Performance}
+import autowire._
 import japgolly.scalajs.react.vdom.prefix_<^._
+import japgolly.scalajs.react.{BackendScope, Callback, ReactComponentB}
+import me.gregd.cineworld.domain.{CinemaApi, Movie, Performance}
+
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
 
 package object views {
@@ -42,53 +45,74 @@ package object views {
     def frown = icon("fa-frown-o", "No movies found!")
     ReactComponentB[FilmsState]("FilmsList")
     .render_P{
-      case FilmsState(loading, unorderedMovie, sort, dates, selectedDate, controller) =>
-        type Entry = (Movie, List[Performance])
+      case FilmsState(loading, cienma, unorderedMovie, sort, dates, selectedDate) =>
         val movies = unorderedMovie.toSeq.sorted(sort.ordering)
-        if (loading)
-          spinner
-        else if (unorderedMovie.isEmpty)
-          frown
+        if (unorderedMovie.isEmpty)
+          if (loading)
+            spinner
+          else
+            frown
         else
           <.div( ^.className := "films-list-container",
-            for (m <- movies) yield FilmCard(m)
+            for (m <- movies)
+              yield FilmCard(m)
           )
     }
     .build
   }
 
-  val FilmPage = {
-    ReactComponentB[FilmsState]("FilmPage")
-      .render_P{ state =>
-        def sortBy(sort: Sort) =
-          ^.onClick --> (Callback.log(s"Sorting by $sort") >> Callback(state.controller.render(state.copy(sort = sort))))
-        val sortSelection = <.div(^.`class` := "menu-group",
-          <.i(^.`class` := "fa fa-sort-alpha-asc fa-lg", ^.color.white),
-          <.select(^.id := "ordering", ^.`class` := "menu", ^.value := state.sort.key//, ^.onChange := "TODO"
-            ,
-            <.option(^.value := "showtime", "Next Showing", sortBy(NextShowing)),
-            <.option(^.value := "imdb", "IMDb Rating (Descending)", sortBy(ImdbRating)),
-            <.option(^.value := "critic", "RT Critic Rating (Descending)", sortBy(RTCriticRating)),
-            <.option(^.value := "audience", "RT Audience Rating (Descending)", sortBy(RTAudienceRating))))
-        val dateSelection = <.div(^.`class` := "menu-group",
-          <.i(^.`class` := "fa fa-calendar fa-lg", ^.color.white),
-          <.select(^.id := "date", ^.`class` := "menu", ^.value := state.selectedDate.key, ^.onChange := "TODO",
-            for (d <- state.dates) yield <.option(^.value := d.key, d.text)
-          ))
-        val menu = <.header(<.div(^.`class` := "menu", dateSelection, sortSelection))
-        val attribution = <.div(^.id := "attribution",
-          "Powered by: ",
-          <.a(^.href := "http://www.cineworld.co.uk/", "Cineworld's API"), ", ",
-          <.a(^.href := "http://www.omdbapi.com/", "The OMDb API"), ", ",
-          <.a(^.href := "http://www.themoviedb.org/", "TheMovieDB"), " and ",
-          <.a(^.href := "http://www.rottentomatoes.com/", "Rotten Tomatoes"))
+  class FilmsBackend($: BackendScope[Unit, FilmsState]) {
 
-        <.div( ^.id:="films",
-          menu,
-          FilmsList(state),
-          attribution
-        )
-      }
+    def sortBy(sort: Sort) = $.modState(_.copy(sort = sort))
+
+    def loadDate(date: Date) = $.state.map(_.cinema) >>= (cinema => load(date, cinema))
+    def loadCinema(cinema: String) = $.state.map(_.selectedDate) >>= (date => load(date, cinema))
+
+    def load(date: Date, cinema: String) = {
+      val clear = $.modState(_.copy(isLoading = true, films = Map.empty))
+      val updateDate = $.modState(_.copy(selectedDate = date))
+      val res = Client[CinemaApi].getMoviesAndPerformances("66", "tomorrow").call()
+      val updateMovies = for (movies <- res) yield $.modState(_.copy(isLoading = false, films = movies))
+      clear >> updateDate >> Callback.future(updateMovies)
+    }
+
+    def start() = load(Tomorrow, "66")
+
+    def render(state: FilmsState) = {
+      val sortSelection = <.div(^.`class` := "menu-group",
+        <.i(^.`class` := "fa fa-sort-alpha-asc fa-lg", ^.color.white),
+        <.select(^.id := "ordering", ^.`class` := "menu", ^.value := state.sort.key//, ^.onChange := "TODO"
+          ,
+          <.option(^.value := "showtime", "Next Showing", ^.onClick --> sortBy(NextShowing)),
+          <.option(^.value := "imdb", "IMDb Rating (Descending)", ^.onClick --> sortBy(ImdbRating)),
+          <.option(^.value := "critic", "RT Critic Rating (Descending)", ^.onClick --> sortBy(RTCriticRating)),
+          <.option(^.value := "audience", "RT Audience Rating (Descending)", ^.onClick --> sortBy(RTAudienceRating))))
+      val dateSelection = <.div(^.`class` := "menu-group",
+        <.i(^.`class` := "fa fa-calendar fa-lg", ^.color.white),
+        <.select(^.id := "date", ^.`class` := "menu", ^.value := state.selectedDate.key, ^.onChange := "TODO",
+          for (d <- state.dates) yield <.option(^.value := d.key, d.text)
+        ))
+      val menu = <.header(<.div(^.`class` := "menu", dateSelection, sortSelection))
+      val attribution = <.div(^.id := "attribution",
+        "Powered by: ",
+        <.a(^.href := "http://www.cineworld.co.uk/", "Cineworld's API"), ", ",
+        <.a(^.href := "http://www.omdbapi.com/", "The OMDb API"), ", ",
+        <.a(^.href := "http://www.themoviedb.org/", "TheMovieDB"), " and ",
+        <.a(^.href := "http://www.rottentomatoes.com/", "Rotten Tomatoes"))
+
+      <.div( ^.id:="films",
+        menu,
+        FilmsList(state),
+        attribution
+      )
+    }
+  }
+
+  val FilmPage = {
+    ReactComponentB[Unit]("FilmPage")
+      .initialState(FilmsState(isLoading = true, "", Map.empty, NextShowing, Today::Tomorrow::Nil, Today))
+      .renderBackend[FilmsBackend]
+      .componentDidMount(_.backend.start())
       .build
   }
 

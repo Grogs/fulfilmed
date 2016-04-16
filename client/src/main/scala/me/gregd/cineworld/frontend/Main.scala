@@ -1,13 +1,10 @@
 package me.gregd.cineworld.frontend
 
 import japgolly.scalajs.react.ReactDOM
-import me.gregd.cineworld.domain.CinemaApi
 import org.scalajs.dom._
 
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
-import autowire._
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
 
 @JSExport
@@ -20,19 +17,10 @@ object Main extends JSApp {
   @JSExport
   def films(): Unit = {
 
-    def render(state: FilmsState) =
-      ReactDOM.render(
-        views.FilmPage(state),
-        document.getElementById("content")
-      )
-
-//    render(FilmsState(true, Map.empty, NextShowing, Controller(render)))
-
-    for {
-      res <- Client[CinemaApi].getMoviesAndPerformances("66", "tomorrow").call()
-    } render(FilmsState(isLoading = false, res, NextShowing, Today::Tomorrow::Nil, Today, Controller(render)))
-
-//    setInterval(() => render(FilmsState(false, Map.empty)), 3000)
+    ReactDOM.render(
+      views.FilmPage(()),
+      document.getElementById("content")
+    )
 
   }
 

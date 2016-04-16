@@ -1,7 +1,5 @@
 package me.gregd.cineworld.pages
 
-import controllers.Assets
-
 import scalatags.Text.all._
 import scalatags.Text.tags2.{title => titleElem}
 

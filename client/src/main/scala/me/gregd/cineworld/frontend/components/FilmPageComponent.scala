@@ -11,6 +11,7 @@ import scala.collection.immutable.List
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
 object FilmPageComponent {
+  type Entry = (Movie, List[Performance])
 
   def apply() = components.FilmPage()
 

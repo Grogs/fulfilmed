@@ -1,7 +1,7 @@
 package me.gregd.cineworld.pages
 
 import scalatags.Text.all._
-import scalatags.Text.tags2.{title => titleElem}
+import scalatags.Text.tags2.{title=>titleElem}
 
 class Films {
   def apply(scriptPaths: List[String]) =

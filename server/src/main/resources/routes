@@ -1,4 +1,4 @@
-GET     /index                          me.gregd.cineworld.CinemaController.index()
+GET     /                          me.gregd.cineworld.CinemaController.index()
 GET     /films                          me.gregd.cineworld.CinemaController.films()
 
 GET     /cinemas                        me.gregd.cineworld.CinemaController.cinemas()

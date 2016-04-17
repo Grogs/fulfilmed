@@ -19,6 +19,7 @@ lazy val client: Project = project
     skip in packageJSDependencies := false,
     libraryDependencies ++= Seq(
       "com.github.japgolly.scalajs-react" %%% "core" % "0.10.4",
+      "com.github.japgolly.scalajs-react" %%% "extra" % "0.11.0",
       "org.scala-js" %%% "scalajs-java-time" % "0.1.0"
     ),
     jsDependencies ++= Seq(

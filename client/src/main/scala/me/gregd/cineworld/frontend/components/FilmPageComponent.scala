@@ -12,7 +12,7 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
 object FilmPageComponent {
 
-  def apply() = components.FilmPage(())
+  def apply() = components.FilmPage()
 
   object model {
     case class State(

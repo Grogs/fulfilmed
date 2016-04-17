@@ -246,7 +246,7 @@ class Cineworld @Inject() (@Named("cineworld.api-key") apiKey:String, implicit v
 //object Cineworld extends Cineworld(Config.apiKey, Movies) {}
 
 case class Film(edi:String, title:String, poster_url: String) extends Logging {
-  val textToStrip = List(" - Unlimited Screening", " (English subtitles)", " - Movies for Juniors", "Take 2 - ", "3D - ", "2D - ", "Autism Friendly Screening: ", " for Juniors", " (English dubbed version)", " (Japanese with English subtitles)")
+  val textToStrip = List(" - Unlimited Screening", " (English subtitles)", ": Movies For Juniors", " - Movies For Juniors", "Take 2 - ", "3D - ", "2D - ", "Autism Friendly Screening: ", " for Juniors", " (English dubbed version)", " (Japanese with English subtitles)", " (Hindi)")
   def cleanTitle = {
     var cleaned = title
     textToStrip foreach  { s =>

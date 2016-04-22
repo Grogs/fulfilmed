@@ -2,10 +2,9 @@ package me.gregd.cineworld.frontend
 
 import japgolly.scalajs.react.ReactDOM
 import japgolly.scalajs.react.extra.router.{BaseUrl, Redirect, Router, RouterConfigDsl}
-import org.scalajs.dom._
 import japgolly.scalajs.react.vdom.prefix_<^._
 import me.gregd.cineworld.frontend.components.IndexPage
-import org.scalajs.dom
+import org.scalajs.dom._
 
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport

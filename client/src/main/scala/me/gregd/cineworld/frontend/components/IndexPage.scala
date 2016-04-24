@@ -4,126 +4,25 @@ import japgolly.scalajs.react.vdom.prefix_<^._
 
 import scalacss.Defaults._
 import scalacss.ValueT.Color
-import scalacss.{Attrs, Length, ValueT}
+import scalacss.{Attrs, Length, StyleA, ValueT}
 import scalacss.ScalaCssReact._
 
 object IndexPage {
-
-  object IndexStyle extends StyleSheet.Inline {
-    import dsl._
-    def textShadow[X,Y,Blur](offsetX: Length[X], offsetY: Length[Y], blurRadius: Length[Blur], color: ValueT[Color]) =
-      Attrs.textShadow := List[{def value: scalacss.Value}](offsetX, offsetY, blurRadius, color).map(_.value).mkString(" ")
-    val title = style(
-      fontFamily :=! "HelveticaNeue, Helvetica Neue, Helvetica, Arial, Lucida Grande, sans-serif",
-      letterSpacing(3.px),
-      fontSize(82.px),
-      color.white,
-      lineHeight(95.px),
-      textShadow(0.px, 2.px, 4.px, Color("#225968")),
-      paddingTop(100.px)
-    )
-    val blurb = style(
-      fontFamily :=! "HelveticaNeue, Helvetica Neue, Helvetica, Arial, Lucida Grande, sans-serif",
-      fontSize(24.px),
-      color(Color("#f5f5f5")),
-      lineHeight(29.px),
-      paddingTop(40.px),
-      paddingBottom(50.px)
-    )
-//    val top = style(
-//      backgroundColor(Color("#690B0B")),
-//      backgroundImage := "url('movie_reel.svg')",
-//      backgroundRepeat := "no-repeat",
-//      backgroundPosition := "45% 170%",
-//      backgroundSize := "350px 400px",
-//      textAlign.center,
-//      paddingBottom(150.px)
-//    )
-  }
-
   val label = "label".reactAttr
 
   def apply() = {
-    IndexStyle.addToDocument()
+    implicit def styleaToTagMod(s: StyleA): TagMod = ^.className := s.htmlClass //TODO I get linking errors if I don't copy this across
     <.div(^.id:="indexPage",
-//      <.styleTag(^.`type`:="text/css",
-//        """
-//          |		select {
-//          |		    font-size: 24px;
-//          |		    border: 2px solid white;
-//          |		    border-radius: 10px;
-//          |		    color: white;
-//          |		    padding: 12px;
-//          |		    width: 490px;
-//          |		    -webkit-appearance: none;
-//          |
-//          |		    background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='50px' height='50px'><polyline points='46.139,15.518 25.166,46.49 4.193,15.519' fill='white' /></svg>") right no-repeat;
-//          |
-//          |		    background-color: #690B0B;
-//          |		    background-position: right 15px top 16px;
-//          |		    background-size: 18px 18px;
-//          |		}
-//          |		select:active {
-//          |		    border: 1px solid #fff;
-//          |		}
-//          |
-//          |		#description {
-//          |			font-family: HelveticaNeue;
-//          |			font-size: 24px;
-//          |			color: #323232;
-//          |			line-height: 29px;
-//          |			/* What?: */
-//          |			max-width: 600px;
-//          |			margin-right: auto;
-//          |			margin-left: auto;
-//          |		}
-//          |		#description > h3 {
-//          |			margin-bottom: 0px;
-//          |		}
-//          |		#description > p {
-//          |			margin-top: 0px;
-//          |		}
-//          |
-//          |		body {
-//          |			margin: 0;
-//          |		}
-//          |
-//        """.stripMargin),
-//      <.styleTag(^.`type`:="text/css",
-//        """
-//          |    #films, #top {
-//          |        text-align: center;
-//          |        -webkit-transition:all 1.0s ease-in-out;
-//          |        -moz-transition:all 1.0s ease-in-out;
-//          |        -o-transition:all 1.0s ease-in-out;
-//          |        transition:all 1.0s ease-in-out;
-//          |    }
-//          |    .disabled { display: none; }
-//          |    #films.hidden{
-//          |    	opacity: 0;
-//          |		-webkit-transform: scale(0.001, 0.001);
-//          |    }
-//          |    #top.hidden{
-//          |    	opacity: 0;
-//          |    	margin-top: -9999px;
-//          |    	position: absolute;
-//          |    	visibility: hidden;
-//          |    }
-//          |    select#odeon-cinemas, select#cinema-city-cinemas-hungary {
-//          |    	margin-top: 20px;
-//          |    }
-//          |
-//        """.stripMargin),
-      <.div(^.id:="top",
-        <.div(//IndexStyle.title,
+      <.div(IndexStyle.top,
+        <.div(IndexStyle.title,
           "Fulfilmed"),
-        <.div(//IndexStyle.blurb,
+        <.div(IndexStyle.blurb,
           "A better way to find the best films at your local cinema"),
         <.script(^.`type`:="text/javascript", """
           function selectCinema(e) {location.href = "films.html#/cinema/"+e.value}
         """),
         <.div(
-          <.select(^.id:="cinemas", ^.`class`:=".flat", ^.onChange:="selectCinema(this)",
+          <.select(IndexStyle.select, ^.id:="cinemas", ^.`class`:=".flat", ^.onChange:="selectCinema(this)",
             <.option( ^.value:="?", ^.selected:="selected", ^.disabled:="disabled", "Cineworld cinemas..."),
             <.optgroup( label:="London cinemas",
               <.option( ^.value:="45", "London - Bexleyheath"),
@@ -214,7 +113,7 @@ object IndexPage {
         ),
 
         <.div(
-          <.select(^.id:="odeon-cinemas", ^.`class`:=".flat", ^.onChange:="selectCinema(this)",
+          <.select(IndexStyle.selectWithOffset, ^.`class`:=".flat", ^.onChange:="selectCinema(this)",
             <.option( ^.value:="?", ^.selected:="selected", ^.disabled:="disabled", "Odeon cinemas..."),
             <.optgroup( label:="London cinemas",
               <.option( ^.value:="6883", "Odeon BFI IMAX"),
@@ -352,7 +251,7 @@ object IndexPage {
         ),
 
         <.div(
-          <.select(^.id:="cinema-city-cinemas-hungary", ^.`class`:=".flat", ^.onChange:="selectCinema(this)",
+          <.select(IndexStyle.selectWithOffset, ^.`class`:=".flat", ^.onChange:="selectCinema(this)",
             <.option( ^.value:="?", ^.selected:="selected", ^.disabled:="disabled", "Cinema City (Hungary) cinemas..."),
             <.optgroup( label:="Budapest",
               <.option( ^.value:="1010202", "Cinema City Allee"),
@@ -379,10 +278,9 @@ object IndexPage {
               <.option( ^.value:="1010216", "Cinema City Zalaegerszeg")
             )
           )
-        ),
-
-
-      <.div(^.id:="description",
+        )
+      ),
+      <.div(IndexStyle.description, ^.id:="description",
         <.h3("What?"),
         <.p("Fulfilmed lets you view the movies airing at your local cinema. It adds some features over your Cinema's standard website; inline movie ratings, sorting/filtering by rating, mark films as watched."),
 
@@ -393,7 +291,7 @@ object IndexPage {
         <.p("Currently only Cineworld and Odeon cinemas are supported; I may add more. Beyond that, I want to receive notifications about upcoming high rated films.")
 
       )
-    )
+
     )
   }
 

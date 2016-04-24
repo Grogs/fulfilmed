@@ -9,9 +9,13 @@ import autowire._
 
 import scala.collection.immutable.List
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+import scalacss.StyleA
+
+import org.scalajs.dom.document
 
 object FilmPageComponent {
   type Entry = (Movie, List[Performance])
+  private implicit def styleaToTagMod(s: StyleA): TagMod = ^.className := s.htmlClass //TODO I get linking errors if I don't copy this across
 
   def apply() = components.FilmPage()
 
@@ -40,22 +44,24 @@ object FilmPageComponent {
   object components {
     val FilmCard = ReactComponentB[(Movie, List[Performance])]("FilmCard").render_P{
       case (m, pl) =>
-        <.div( ^.className := "film-container",
-          <.div( ^.classSet1("film", "threedee" -> m.format.contains("3D")),
-            <.div(^.`class` := "title", m.title),
-            <.div(^.`class` := "ratings",
-              <.div(^.`class` := "rating imdb", <.a(^.href:=m.imdbId.map("http://www.imdb.com/title/tt" + _), m.rating)),
-              <.div(^.`class` := "rating rt", m.criticRating),
-              <.div(^.`class` := "rating rtAudience", m.audienceRating)
-            ),
-            <.div(^.`class` := "times",
-              for (p <- pl) yield
-                <.a(^.href := p.booking_url,
-                  <.div(^.`class` := "time", p.time)
-                )
+        <.div( FilmsStyle.filmCard,
+          <.div( FilmsStyle.filmInfo,
+            <.div( ^.classSet("threedee" -> m.format.contains("3D")),
+              <.div(FilmsStyle.filmTitle, m.title),
+              <.div(FilmsStyle.ratings,
+                <.div(FilmsStyle.imdb, <.a(^.href:=m.imdbId.map("http://www.imdb.com/title/tt" + _), m.rating)),
+                <.div(FilmsStyle.rt, m.criticRating),
+                <.div(FilmsStyle.rtAudience, m.audienceRating)
+              ),
+              <.div(FilmsStyle.times,
+                for (p <- pl) yield
+                  <.a(^.href := p.booking_url,
+                    <.div(FilmsStyle.time, p.time)
+                  )
+              )
             )
           ),
-          <.img( ^.`class`:="film-background", ^.src := m.posterUrl)
+          <.img( FilmsStyle.filmBackground, ^.src := m.posterUrl)
         )
     }.build
 
@@ -65,7 +71,7 @@ object FilmPageComponent {
           def icon(faClasses: String, message: String) = {
             <.div(^.margin := "50px 0 50px 0", ^.color.white, ^.textAlign.center,
               <.i(^.`class` := s"fa $faClasses fa-5x"),
-              <.div(^.`class`:="label", message)
+              <.div(FilmsStyle.label, message)
             )
           }
           def spinner = icon("fa-refresh fa-spin", "Loading movies")
@@ -74,7 +80,7 @@ object FilmPageComponent {
           if (movies.isEmpty)
             if (loading) spinner else frown
           else
-            <.div( ^.className := "films-list-container",
+            <.div( FilmsStyle.filmListContainer,
               for (m <- movies) yield FilmCard(m))
       }.build
 
@@ -82,6 +88,8 @@ object FilmPageComponent {
       ReactComponentB[Unit]("FilmPage")
         .initialState(model.State(isLoading = true, "", Map.empty))
         .renderBackend[Backend]
+        .componentWillMountCB(Callback(document.body.style.background = "#111"))
+        .componentWillUnmountCB(Callback(document.body.style.background = null))
         .componentDidMount(_.backend.start())
         .build
     }
@@ -128,25 +136,25 @@ object FilmPageComponent {
     def start() = load(model.Today, "66")
 
     def render(state: model.State) = {
-      val sortSelection = <.div(^.`class` := "menu-group",
+      val sortSelection = <.div(FilmsStyle.menuGroup,
         <.i(^.`class` := "fa fa-sort-alpha-asc fa-lg", ^.color.white),
-        <.select(^.id := "ordering", ^.`class` := "menu", ^.value := state.selectedSort.key, ^.onChange ==> updateSort,
+        <.select(^.id := "ordering", FilmsStyle.select, ^.value := state.selectedSort.key, ^.onChange ==> updateSort,
           for (s <- state.sorts)
             yield <.option(^.value := s.key, s.description)))
-      val dateSelection = <.div(^.`class` := "menu-group",
+      val dateSelection = <.div(FilmsStyle.menuGroup,
         <.i(^.`class` := "fa fa-calendar fa-lg", ^.color.white),
-        <.select(^.id := "date", ^.`class` := "menu", ^.value := state.selectedDate.key, ^.onChange ==> updateDate,
+        <.select(^.id := "date", FilmsStyle.select, ^.value := state.selectedDate.key, ^.onChange ==> updateDate,
           for (d <- state.dates)
             yield <.option(^.value := d.key, d.text)))
-      val menu = <.header(<.div(^.`class` := "menu", dateSelection, sortSelection))
-      val attribution = <.div(^.id := "attribution",
+      val menu = <.header(<.div(FilmsStyle.header, dateSelection, sortSelection))
+      val attribution = <.div(FilmsStyle.attribution,
         "Powered by: ",
         <.a(^.href := "http://www.cineworld.co.uk/", "Cineworld's API"), ", ",
         <.a(^.href := "http://www.omdbapi.com/", "The OMDb API"), ", ",
         <.a(^.href := "http://www.themoviedb.org/", "TheMovieDB"), " and ",
         <.a(^.href := "http://www.rottentomatoes.com/", "Rotten Tomatoes"))
 
-      <.div( ^.id:="films",
+      <.div( ^.id:="films", FilmsStyle.container,
         menu,
         components.FilmsList((state.isLoading, state.selectedSort, state.films)),
         attribution

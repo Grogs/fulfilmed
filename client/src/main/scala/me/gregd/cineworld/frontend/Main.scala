@@ -1,9 +1,11 @@
 package me.gregd.cineworld.frontend
 
+import scalacss.ScalaCssReact._
+import scalacss.Defaults._
 import japgolly.scalajs.react.ReactDOM
 import japgolly.scalajs.react.extra.router.{BaseUrl, Redirect, Router, RouterConfigDsl}
 import japgolly.scalajs.react.vdom.prefix_<^._
-import me.gregd.cineworld.frontend.components.IndexPage
+import me.gregd.cineworld.frontend.components.{FilmsStyle, IndexPage, IndexStyle}
 import org.scalajs.dom._
 
 import scala.scalajs.js.JSApp
@@ -15,6 +17,8 @@ object Main extends JSApp {
   @JSExport
   def main(): Unit = {
     val baseUrl = BaseUrl.fromWindowOrigin + "/"
+    IndexStyle.addToDocument()
+    FilmsStyle.addToDocument()
     val routerConfig = RouterConfigDsl[Page].buildConfig{ dsl =>
       import dsl._
       (emptyRule

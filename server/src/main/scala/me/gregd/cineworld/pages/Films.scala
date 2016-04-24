@@ -8,8 +8,8 @@ class Films {
     html(
       head(
         titleElem("Fulfilmed"),
-        link(rel:="stylesheet", href:="webjars/font-awesome/4.5.0/css/font-awesome.min.css"),
-        link(rel:="stylesheet", href:="assets/films.css")
+        link(rel:="stylesheet", href:="webjars/font-awesome/4.5.0/css/font-awesome.min.css")
+//        link(rel:="stylesheet", href:="assets/films.css")
       ),
       body(
         div( id:="content"),

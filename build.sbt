@@ -1,3 +1,5 @@
+import sbt.Project.projectToRef
+
 lazy val commonSettings = Seq(
   organization := "me.gregd",
   version := "1.1",
@@ -11,15 +13,10 @@ scalacOptions ++= Seq("-Xfatal-warnings","-feature")
 
 lazy val client: Project = project
   .settings(
-    Seq(fastOptJS, fullOptJS, packageJSDependencies) map {
-      packageJSKey =>
-        crossTarget in packageJSKey := (resourceDirectory in server in Assets).value
-    }:_*
-  ).settings(
     skip in packageJSDependencies := false,
     libraryDependencies ++= Seq(
-      "com.github.japgolly.scalajs-react" %%% "core" % "0.11.0",
-      "com.github.japgolly.scalajs-react" %%% "extra" % "0.11.0",
+      "com.github.japgolly.scalajs-react" %%% "core" % "0.11.1",
+      "com.github.japgolly.scalajs-react" %%% "extra" % "0.11.1",
       "com.github.japgolly.scalacss" %%% "core" % "0.4.0",
       "com.github.japgolly.scalacss" %%% "ext-react" % "0.4.0",
       "org.scala-js" %%% "scalajs-java-time" % "0.1.0"
@@ -39,10 +36,14 @@ lazy val client: Project = project
   .enablePlugins(ScalaJSPlugin, ScalaJSPlay)
   .dependsOn(sharedJs)
 
+lazy val jsProjects = Seq(client)
+
 lazy val server: Project = project
   .settings(commonSettings: _*)
   .settings(
     //compile in Compile <<= (compile in Compile) dependsOn (fastOptJS in (`scala-frontend`, Compile)),
+    scalaJSProjects := jsProjects,
+    pipelineStages := Seq(scalaJSProd),
     name := "fulfilmed-backend",
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-library" % "2.11.7",
@@ -72,8 +73,9 @@ lazy val server: Project = project
       "org.webjars" % "font-awesome" % "4.5.0"
     )
   )
-  .enablePlugins(PlayScala)
+  .enablePlugins(PlayScala, PlayScalaJS)
   .disablePlugins(PlayLayoutPlugin)
+  .aggregate(jsProjects.map(projectToRef): _*)
   .dependsOn(sharedJvm)
 
 lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared"))

@@ -1,9 +1,13 @@
 package me.gregd.cineworld.frontend.components
 
-import japgolly.scalajs.react.{BackendScope, Callback, ReactComponentB}
+import japgolly.scalajs.react._
+import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.prefix_<^._
+import me.gregd.cineworld.frontend.{Films, Page}
 import org.scalajs.dom._
+import org.scalajs.dom.html.Select
 
+import scala.scalajs.js.debugger
 import scalacss.Defaults._
 import scalacss.ValueT.Color
 import scalacss.{Attrs, Length, StyleA, ValueT}
@@ -16,7 +20,12 @@ object IndexPage {
 
   //    val element = //  }
 
-  def apply() = ReactComponentB.static("IndexPage", {
+
+  def apply(router: RouterCtl[Page]) = ReactComponentB.static("IndexPage", {
+    def selectCinema(e: SyntheticEvent[Select]): Callback = {
+      val cinemaId = e.target.value
+      router.set(Films(cinemaId))
+    }
     implicit def styleaToTagMod(s: StyleA): TagMod = ^.className := s.htmlClass //TODO I get linking errors if I don't copy this across
     <.div(^.id := "indexPage",
       <.div(IndexStyle.top,
@@ -32,7 +41,7 @@ object IndexPage {
           (typ, cinemas) <- cinemas
         } yield
           <.div(
-            <.select(IndexStyle.selectWithOffset, ^.id := "cinemas", ^.`class` := ".flat", ^.onChange := "selectCinema(this)",
+            <.select(IndexStyle.selectWithOffset, ^.id := "cinemas", ^.`class` := ".flat", ^.onChange ==> selectCinema,
               <.option(^.value := "?", ^.selected := "selected", ^.disabled := "disabled", typ),
               for {
                 (groupName, cinemas) <- cinemas

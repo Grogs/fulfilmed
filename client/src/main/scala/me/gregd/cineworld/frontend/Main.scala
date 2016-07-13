@@ -23,7 +23,7 @@ object Main extends JSApp {
     val routerConfig = RouterConfigDsl[Page].buildConfig{ dsl =>
       import dsl._
       (removeTrailingSlashes
-      |staticRoute(root, Home) ~> render( IndexPage()() )
+      |staticRoute(root, Home) ~> renderR( IndexPage(_)() )
       |dynamicRouteCT("#!/films" / string("[0-9]+").caseClass[Films]) ~> render( components.FilmPageComponent() )
       ).notFound(redirectToPage(Home)(Redirect.Replace))
     }

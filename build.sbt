@@ -9,7 +9,7 @@ lazy val commonSettings = Seq(
 scalacOptions += "-target:jvm-1.7" //my vps is stuck on java 7 for the moment
 javacOptions ++= Seq("-source", "1.7", "-target", "1.7")
 
-scalacOptions ++= Seq("-Xfatal-warnings","-feature")
+scalacOptions ++= Seq("-Xfatal-warnings", "-feature")
 
 lazy val client: Project = project
   .settings(
@@ -23,16 +23,16 @@ lazy val client: Project = project
     ),
     jsDependencies ++= Seq(
       "org.webjars.bower" % "react" % "15.0.1"
-        /        "react-with-addons.js"
+        / "react-with-addons.js"
         minified "react-with-addons.min.js"
         commonJSName "React",
       "org.webjars.bower" % "react" % "15.0.1"
-        /         "react-dom.js"
-        minified  "react-dom.min.js"
+        / "react-dom.js"
+        minified "react-dom.min.js"
         dependsOn "react-with-addons.js"
         commonJSName "ReactDOM"
     )
-)
+  )
   .enablePlugins(ScalaJSPlugin, ScalaJSPlay)
   .dependsOn(sharedJs)
 
@@ -62,10 +62,11 @@ lazy val server: Project = project
       "com.typesafe.scala-logging" % "scala-logging-slf4j_2.11" % "2.1.2",
       "ch.qos.logback" % "logback-classic" % "1.0.13",
       "org.jsoup" % "jsoup" % "1.7.3",
-      "org.feijoas" % "mango_2.11" % "0.11",// exclude("jsr305"),
+      "org.feijoas" % "mango_2.11" % "0.11", // exclude("jsr305"),
+      "com.lihaoyi" %% "scalatags" % "0.5.4",
+      ws,
       "org.scalatra" % "scalatra-scalatest_2.11" % "2.3.1" % "test",
-      "org.scalatest" % "scalatest_2.11" % "1.9.1" % "test",
-      "com.lihaoyi" %% "scalatags" % "0.5.4"
+      "org.scalatest" % "scalatest_2.11" % "1.9.1" % "test"
     ),
     //Webjars
     libraryDependencies ++= Seq(
@@ -96,17 +97,17 @@ test in assembly := {}
 
 //mainClass in (Compile,run) := Some("me.gregd.cineworld.util.JettyBootstrap")
 
-resolvers += "Sonatype OSS Releases" at  "http://oss.sonatype.org/content/groups/public"
+resolvers += "Sonatype OSS Releases" at "http://oss.sonatype.org/content/groups/public"
 
-resolvers += "mandubian-snapshots" at  "http://github.com/mandubian/mandubian-mvn/raw/master/snapshots/"
+resolvers += "mandubian-snapshots" at "http://github.com/mandubian/mandubian-mvn/raw/master/snapshots/"
 
-resolvers += "mandubian-releases" at  "http://github.com/mandubian/mandubian-mvn/raw/master/releases/"
+resolvers += "mandubian-releases" at "http://github.com/mandubian/mandubian-mvn/raw/master/releases/"
 
-resolvers += "typesafe-releases" at  "http://repo.typesafe.com/typesafe/releases/"
+resolvers += "typesafe-releases" at "http://repo.typesafe.com/typesafe/releases/"
 
-resolvers += "sonatype-snapshots" at  "http://oss.sonatype.org/content/repositories/snapshots/"
+resolvers += "sonatype-snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
 
-resolvers += "sonatype-releases" at  "http://oss.sonatype.org/content/repositories/releases"
+resolvers += "sonatype-releases" at "http://oss.sonatype.org/content/repositories/releases"
 
-resolvers += "eclipse" at  "http://download.eclipse.org/rt/eclipselink/maven.repo"
+resolvers += "eclipse" at "http://download.eclipse.org/rt/eclipselink/maven.repo"
 

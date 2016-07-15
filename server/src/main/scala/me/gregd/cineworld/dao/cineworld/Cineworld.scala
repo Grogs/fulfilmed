@@ -22,7 +22,7 @@ import scalaj.http.{Http, HttpOptions}
 
 
 @Singleton
-class Cineworld @Inject() (@Named("cineworld.api-key") apiKey:String, implicit val imdb: MovieDao, implicit val tmdb: TheMovieDB) extends CineworldDao with Logging {
+class Cineworld @Inject() (@Named("cineworld.api-key") apiKey:String, implicit val imdb: MovieDao, implicit val tmdb: TheMovieDB) extends CinemaDao with Logging {
   val decode = java.net.URLDecoder.decode(_:String, "UTF-8")
 
   val movieCache : LoadingCache[(String,LocalDate), List[Movie]] = {

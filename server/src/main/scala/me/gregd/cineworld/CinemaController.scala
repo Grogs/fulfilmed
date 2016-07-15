@@ -31,9 +31,8 @@ class CinemaController @Inject() (env: Environment, dao: Cineworld, cinemaServic
   val scriptPaths  = List(
     "assets/fulfilmed-scala-frontend-jsdeps.js",
     "assets/fulfilmed-scala-frontend-" + (env.mode match {
-      case Dev => "fastopt.js"
+      case Dev | Test => "fastopt.js"
       case Prod => "fullopt.js"
-      case Test => throw new IllegalArgumentException("Shouldn't be used in Test mode")
     })
   )
 

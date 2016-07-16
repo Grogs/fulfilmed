@@ -2,6 +2,7 @@ package me.gregd.cineworld.dao.cineworld
 
 import javax.inject.Inject
 
+import me.gregd.cineworld.domain.{Cinema, Movie}
 import org.json4s._
 import org.json4s.native.JsonMethods._
 import play.api.libs.ws._
@@ -26,6 +27,17 @@ class CineworldDao @Inject() (ws: WSClient) {
       .get()
       .map( r => parse(r.body).children.map(_.extract[MovieResp]))
 
+}
+
+object CineworldDao {
+  def toCinema(cinemaResp: CinemaResp): Cinema =
+    Cinema(cinemaResp.id.toString, cinemaResp.n)
+
+  def toMovie(movieResp: MovieResp): Seq[Movie] =
+    movieResp.TYPD map { typ =>
+      val img = s"https://www.cineworld.co.uk/xmedia-cw/repo/feats/posters/${movieResp.code}.jpg"
+      Movie(movieResp.n, Option(movieResp.code), Option(typ), None, None, None, None, None, Option(img))
+    }
 }
 
 case class CinemaResp(excode: Int, id: Long, addr: String, idx: Int, n: String, pn: String,

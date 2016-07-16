@@ -5,7 +5,7 @@ import javax.inject.Inject
 import autowire.Core.Request
 import grizzled.slf4j.Logging
 import me.gregd.cineworld.dao.TheMovieDB
-import me.gregd.cineworld.dao.cineworld.{Cineworld, Film}
+import me.gregd.cineworld.dao.cineworld.Cineworld
 import me.gregd.cineworld.dao.movies.MovieDao
 import me.gregd.cineworld.domain.{Cinema, CinemaApi, Movie, Performance}
 import me.gregd.cineworld.pages.{Films, Index}
@@ -88,15 +88,5 @@ class CinemaController @Inject() (env: Environment, dao: Cineworld, cinemaServic
   def getPerformances(id: String, date: String) = returnJson {
     dao.retrievePerformances(id, getDate(date))
   }
-
-  def getRating(title: String) = returnJson {
-//    logger.info(s"Retrieving rating for ${params("title")}") //TODO
-    Film(
-      edi = "Fake ID",
-      title = title,
-      ""
-    ).toMovie
-  }
-
 
 }

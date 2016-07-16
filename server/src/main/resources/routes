@@ -5,7 +5,6 @@ GET     /cinemas                        me.gregd.cineworld.CinemaController.cine
 GET     /cinemas/cinemacity             me.gregd.cineworld.CinemaController.cinemas_cinemacity()
 GET     /cinema/:id/films/:date         me.gregd.cineworld.CinemaController.getFilms(id: String, date: String)
 GET     /cinema/:id/performances/:date  me.gregd.cineworld.CinemaController.getPerformances(id: String, date: String)
-GET     /rating/:title                  me.gregd.cineworld.CinemaController.getRating(title: String)
 
 GET     /api/*path                      me.gregd.cineworld.CinemaController.api(path)
 POST    /api/*path                      me.gregd.cineworld.CinemaController.api(path)

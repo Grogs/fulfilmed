@@ -32,7 +32,7 @@ class CinemaController @Inject() (env: Environment, dao: Cineworld, cinemaServic
     "assets/fulfilmed-scala-frontend-jsdeps.js",
     "assets/fulfilmed-scala-frontend-" + (env.mode match {
       case Dev | Test => "fastopt.js"
-      case Prod => "fullopt.js"
+      case Prod => "opt.js"
     })
   )
 
@@ -53,12 +53,6 @@ class CinemaController @Inject() (env: Environment, dao: Cineworld, cinemaServic
     )
   }
 
-  def films() = Action(
-    Ok(
-      Films(scriptPaths).render
-    ).as("text/html")
-  )
-
   def index() = Action(
     Ok(
       Index(scriptPaths).render
@@ -66,13 +60,6 @@ class CinemaController @Inject() (env: Environment, dao: Cineworld, cinemaServic
   )
 
   def returnJson[T:Writes](t: => T) = Action(Ok(Json.toJson(t)))
-
-  def cinemas() = returnJson {
-    dao.retrieveCinemas()
-  }
-//  def cinemas_cinemacity() = returnJson {
-//    dao.retrieveCinemaCityCinemas()
-//  }
 
   def getDate(s: String): LocalDate = s match {
     case "today" => new LocalDate

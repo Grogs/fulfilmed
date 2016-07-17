@@ -6,7 +6,7 @@ import javax.inject.Inject
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.cineworld.CineworldDao
 import me.gregd.cineworld.dao.movies.MovieDao
-import me.gregd.cineworld.domain.{CinemaApi, Movie, Performance}
+import me.gregd.cineworld.domain.{Cinema, CinemaApi, Movie, Performance}
 import play.api.Environment
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -32,5 +32,9 @@ class CinemaService @Inject()(env: Environment, movieDao: MovieDao, cineworldDao
       ).toMap
     )
 
-
+  override def getCinemas(): Future[Seq[(Chain, Map[Grouping, Seq[Cinema]])]] =
+    cineworldDao.retrieveCinemas().map(
+      _.map(CineworldDao.toCinema)
+        .groupBy(s => if (s.id startsWith "London - ") "London cinemas" else "All other cinemas")
+    ).map(r => Seq("Cineworld" -> r))
 }

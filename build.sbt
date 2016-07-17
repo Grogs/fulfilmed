@@ -33,7 +33,7 @@ lazy val client: Project = project
         commonJSName "ReactDOM"
     )
   )
-  .enablePlugins(ScalaJSPlugin, ScalaJSPlay)
+  .enablePlugins(ScalaJSPlugin, ScalaJSPlay, DockerPlugin)
   .dependsOn(sharedJs)
 
 lazy val jsProjects = Seq(client)
@@ -44,7 +44,7 @@ lazy val server: Project = project
     //compile in Compile <<= (compile in Compile) dependsOn (fastOptJS in (`scala-frontend`, Compile)),
     scalaJSProjects := jsProjects,
     pipelineStages := Seq(scalaJSProd),
-    name := "fulfilmed-backend",
+    name := "fulfilmed",
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-library" % "2.11.7",
       "org.scala-lang" % "scala-compiler" % "2.11.7",
@@ -85,7 +85,8 @@ lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared"))
     libraryDependencies ++= Seq(
       "com.lihaoyi" %%% "upickle" % "0.3.6",
       "com.lihaoyi" %%% "autowire" % "0.2.4",
-      "com.lihaoyi" %%% "scalatags" % "0.5.2"
+      "com.lihaoyi" %%% "scalatags" % "0.5.2",
+      "fr.hmil" %%% "roshttp" % "1.0.0"
     )
   )
 lazy val sharedJvm = shared.jvm
@@ -94,8 +95,6 @@ lazy val sharedJs = shared.js
 routesGenerator := InjectedRoutesGenerator
 
 test in assembly := {}
-
-//mainClass in (Compile,run) := Some("me.gregd.cineworld.util.JettyBootstrap")
 
 resolvers += "Sonatype OSS Releases" at "http://oss.sonatype.org/content/groups/public"
 

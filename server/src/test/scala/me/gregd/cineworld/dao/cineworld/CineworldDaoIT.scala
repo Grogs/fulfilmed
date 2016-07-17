@@ -1,5 +1,6 @@
 package me.gregd.cineworld.dao.cineworld
 
+import me.gregd.cineworld.domain.Cinema
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.Futures
 import play.api.libs.ws.ahc.AhcWSClient
@@ -18,7 +19,13 @@ class CineworldDaoIT extends FunSuite with Futures {
   val cineworldDao = fakeApp.injector.instanceOf[CineworldDao]
 
   test("testRetrieveCinemas") {
-    println(Await.result(cineworldDao.retrieveCinemas(), 10.seconds))
+    val cinemas = Await.result(cineworldDao.retrieveCinemas(), 10.seconds)
+    val (london, rest) = cinemas.map(CineworldDao.toCinema).partition(_.name.startsWith("London - "))
+    println("London")
+    def print(c: Cinema) = println(s"""Cinema("${c.id}", "${c.name}")""")
+    london.foreach(print)
+    println("Rest")
+    rest.foreach(print)
   }
 
   test("testRetrieve7DayListings") {

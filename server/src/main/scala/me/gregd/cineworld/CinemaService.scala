@@ -1,30 +1,36 @@
 package me.gregd.cineworld
 
+import java.time.LocalDate
 import javax.inject.Inject
 
 import me.gregd.cineworld.dao.TheMovieDB
-import me.gregd.cineworld.dao.cineworld.Cineworld
+import me.gregd.cineworld.dao.cineworld.CineworldDao
 import me.gregd.cineworld.dao.movies.MovieDao
 import me.gregd.cineworld.domain.{CinemaApi, Movie, Performance}
-import org.joda.time.LocalDate
 import play.api.Environment
 
-class CinemaService @Inject() (env: Environment, dao: Cineworld, implicit val movies: MovieDao, implicit val  tmdb: TheMovieDB) extends CinemaApi{
+import scala.concurrent.{ExecutionContext, Future}
+
+class CinemaService @Inject()(env: Environment, movieDao: MovieDao, cineworldDao: CineworldDao, implicit val movies: MovieDao, implicit val tmdb: TheMovieDB) extends CinemaApi {
+
+  implicit val ec = ExecutionContext.global
 
   def getDate(s: String): LocalDate = s match {
-    case "today" => new LocalDate
-    case "tomorrow" => new LocalDate() plusDays 1
-    case other => new LocalDate(other)
+    case "today" => LocalDate.now()
+    case "tomorrow" => LocalDate.now() plusDays 1
+    case other => LocalDate.parse(s)
   }
 
-  def getMoviesAndPerformances(cinemaId: String, dateRaw: String): Map[Movie, List[Performance]] = {
-    val date = getDate(dateRaw)
-    val allPerformances = dao.retrievePerformances(cinemaId, date)
-    (for {
-      movie <- dao.retrieveMovies(cinemaId, date)
-      id = movie.cineworldId orElse movie.imdbId getOrElse movie.title
-      performances = allPerformances.getOrElse(id, None).getOrElse(Nil)
-    } yield movie -> performances.toList).toMap
-  }
+  def getMoviesAndPerformances(cinemaId: String, dateRaw: String): Future[Map[Movie, List[Performance]]] =
+    cineworldDao.retrieve7DayListings(cinemaId).map(
+      _.flatMap(
+        CineworldDao.toMovie(cinemaId, _)
+          .map { case (k, v) =>
+            movieDao.toMovie(k) -> v.getOrElse(getDate(dateRaw), Nil).toList
+          }
+          .filter(_._2.nonEmpty)
+      ).toMap
+    )
+
 
 }

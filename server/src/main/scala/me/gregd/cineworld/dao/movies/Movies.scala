@@ -1,18 +1,20 @@
 package me.gregd.cineworld.dao.movies
 
-import javax.inject.{Named=>named, Inject, Singleton}
+import javax.inject.{Inject, Singleton, Named => named}
 
 import scala.util.Try
-import scalaj.http.{HttpOptions, Http}
+import scalaj.http.{Http, HttpOptions}
 import org.json4s._
 import org.json4s.native.JsonMethods._
 import me.gregd.cineworld.Config
 import org.feijoas.mango.common.cache.CacheBuilder
 import java.util.concurrent.TimeUnit._
+
 import grizzled.slf4j.Logging
 import java.text.NumberFormat
+
 import com.rockymadden.stringmetric.similarity.DiceSorensenMetric
-import me.gregd.cineworld.domain.Movie
+import me.gregd.cineworld.domain.{Film, Format, Movie}
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.util.Implicits._
 
@@ -27,6 +29,34 @@ class Movies @Inject() (@named("rotten-tomatoes.api-key") rottenTomatoesApiKey:S
   def getId(title:String) = find(title).flatMap(_.imdbId)
   def getIMDbRating(id:String) = imdbCache(id ).map(_._1)
   def getVotes(id:String) = imdbCache(id).map(_._2)
+
+  def toMovie(film: Film): Movie = {
+    logger.debug(s"Creating movie from $film")
+    val format = Format.split(film.title)._1
+    val movie: Movie = find(film.cleanTitle)
+      .getOrElse(
+        Movie(film.cleanTitle, None, None, None, None, None, None, None, None)
+      )
+      .copy(
+        title = film.title,
+        cineworldId = Option(film.id),
+        format = Option(format),
+        posterUrl = Option(film.poster_url)
+      )
+    val imdbId = movie.imdbId map ("tt" + _)
+    val rating = imdbId flatMap getIMDbRating
+    val votes = imdbId flatMap getVotes
+    val posterUrl = Try(tmdb.posterUrl(movie)).toOption.flatten
+    posterUrl match {
+      case Some(newUrl) => logger.debug(s"Found highres poster in TMDD for '${movie.title}': $newUrl")
+      case None => logger.debug(s"Didn't find poster in TMDB postUrl for ${movie.title}")
+    }
+    movie
+      .copy(rating = rating, votes = votes)
+      //Use higher res poster for TMDB when available
+      .copy(posterUrl = posterUrl orElse movie.posterUrl)
+  }
+
 
   private var cachedMovies: Option[(Seq[Movie], Long)] = None
   def allMoviesCached() = {
@@ -194,5 +224,3 @@ class Movies @Inject() (@named("rotten-tomatoes.api-key") rottenTomatoesApiKey:S
     .asString.body
 
 }
-
-//object Movies extends Movies(Config.rottenTomatoesApiKey, Config.tmdb) {}

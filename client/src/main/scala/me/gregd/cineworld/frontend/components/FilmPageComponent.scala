@@ -6,18 +6,18 @@ import me.gregd.cineworld.domain.{CinemaApi, Movie, Performance}
 import me.gregd.cineworld.frontend._
 import org.scalajs.dom.html.Select
 import autowire._
+import japgolly.scalajs.react.CompScope.DuringCallbackM
 
 import scala.collection.immutable.List
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scalacss.StyleA
-
 import org.scalajs.dom.document
 
 object FilmPageComponent {
   type Entry = (Movie, List[Performance])
   private implicit def styleaToTagMod(s: StyleA): TagMod = ^.className := s.htmlClass //TODO I get linking errors if I don't copy this across
 
-  def apply() = components.FilmPage()
+  def apply(page: Films) = components.FilmPage(page)
 
   object model {
     case class State(
@@ -85,19 +85,19 @@ object FilmPageComponent {
       }.build
 
     val FilmPage = {
-      ReactComponentB[Unit]("FilmPage")
+      ReactComponentB[Films]("FilmPage")
         .initialState(model.State(isLoading = true, "", Map.empty))
         .renderBackend[Backend]
         .componentWillMountCB(Callback(document.body.style.background = "#111"))
         .componentWillUnmountCB(Callback(document.body.style.background = null))
-        .componentDidMount(_.backend.start())
+        .componentDidMount( c => c.backend.load(model.Today, c.props.cinemaId))
         .build
     }
 
   }
 
 
-  class Backend($: BackendScope[Unit, model.State]) {
+  class Backend($: BackendScope[Films, model.State]) {
 
     def updateSort(event: SyntheticEvent[Select]) = {
       val sortKey = event.target.value
@@ -132,8 +132,6 @@ object FilmPageComponent {
         yield $.modState(_.copy(isLoading = false, films = movies))
       clearAndUpdate >> Callback.future(updateMovies)
     }
-
-    def start() = load(model.Today, "66")
 
     def render(state: model.State) = {
       val sortSelection = <.div(FilmsStyle.menuGroup,

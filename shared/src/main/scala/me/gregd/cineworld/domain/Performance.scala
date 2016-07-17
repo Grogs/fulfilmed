@@ -12,5 +12,5 @@ case class Performance(
   booking_url: String,
   date: Option[String] = None
 ) {
-  date.foreach( d => assert(d.matches("""\d{4}-\d{2}-\d{2}"""), "Invalid date"))
+//  date.foreach( d => assert(d.matches("""\d{4}[-/]\d{2}[-/]\d{2}"""), "Invalid date"))
 }

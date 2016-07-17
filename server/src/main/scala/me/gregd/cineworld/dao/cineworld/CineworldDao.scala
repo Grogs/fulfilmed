@@ -1,18 +1,30 @@
 package me.gregd.cineworld.dao.cineworld
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
-import me.gregd.cineworld.domain.{Cinema, Movie}
+import me.gregd.cineworld.domain.{Cinema, Film, Movie, Performance}
 import org.json4s._
 import org.json4s.native.JsonMethods._
 import play.api.libs.ws._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class CineworldDao @Inject() (ws: WSClient) {
+class CineworldDao @Inject()(ws: WSClient) {
 
-  object StringToLong extends CustomSerializer[Long](format => ({ case JString(x) => x.toLong }, { case x: Long => JInt(x) }))
-  object StringToInt extends CustomSerializer[Int](format => ({ case JString(x) => x.toInt }, { case x: Long => JInt(x) }))
+  object StringToLong extends CustomSerializer[Long](format => ( {
+    case JString(x) => x.toLong
+  }, {
+    case x: Long => JInt(x)
+  }))
+
+  object StringToInt extends CustomSerializer[Int](format => ( {
+    case JString(x) => x.toInt
+  }, {
+    case x: Long => JInt(x)
+  }))
+
   implicit val formats = DefaultFormats + StringToLong + StringToInt
   implicit val ec = ExecutionContext.global
 
@@ -25,7 +37,7 @@ class CineworldDao @Inject() (ws: WSClient) {
   def retrieve7DayListings(cinema: String): Future[Seq[MovieResp]] =
     ws.url(s"https://www.cineworld.co.uk/pgm-site?si=$cinema&max=365")
       .get()
-      .map( r => parse(r.body).children.map(_.extract[MovieResp]))
+      .map(r => parse(r.body).children.map(_.extract[MovieResp]))
 
 }
 
@@ -33,11 +45,23 @@ object CineworldDao {
   def toCinema(cinemaResp: CinemaResp): Cinema =
     Cinema(cinemaResp.id.toString, cinemaResp.n)
 
-  def toMovie(movieResp: MovieResp): Seq[Movie] =
-    movieResp.TYPD map { typ =>
+  def toMovie(cinemaId: String, movieResp: MovieResp): Map[Film, Map[LocalDate, Seq[Performance]]] =
+    movieResp.TYPD.map { typ =>
       val img = s"https://www.cineworld.co.uk/xmedia-cw/repo/feats/posters/${movieResp.code}.jpg"
-      Movie(movieResp.n, Option(movieResp.code), Option(typ), None, None, None, None, None, Option(img))
+      val showings = movieResp.BD.map(toPerformances(cinemaId)).toMap
+      val film = Film(movieResp.code, movieResp.n, img)
+      film -> showings
+    }.toMap
+
+  def toPerformances(cinemaId: String)(day: Day): (LocalDate, Seq[Performance]) = {
+    val date = LocalDate.parse(day.date, DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+    val showings = day.P.map { s =>
+      val typ = if (s.is3d) "3D" else "2D"
+      val bookingUrl = s"https://www.cineworld.co.uk/ecom-tickets?siteId=$cinemaId&prsntId=${s.code}"
+      Performance(s.time, !s.sold, typ, bookingUrl, Option(day.date))
     }
+    date -> showings
+  }
 }
 
 case class CinemaResp(excode: Int, id: Long, addr: String, idx: Int, n: String, pn: String,

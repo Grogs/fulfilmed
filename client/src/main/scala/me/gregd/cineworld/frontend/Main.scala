@@ -24,7 +24,7 @@ object Main extends JSApp {
       import dsl._
       (removeTrailingSlashes
       |staticRoute(root, Home) ~> renderR( IndexPage(_)() )
-      |dynamicRouteCT("#!/films" / string("[0-9]+").caseClass[Films]) ~> render( components.FilmPageComponent() )
+      |dynamicRouteCT("#!/films" / string("[0-9]+").caseClass[Films]) ~> dynRender( components.FilmPageComponent(_) )
       ).notFound(redirectToPage(Home)(Redirect.Replace))
     }
     val router = Router(baseUrl, routerConfig.logToConsole)
@@ -34,10 +34,10 @@ object Main extends JSApp {
   @JSExport
   def films(): Unit = {
 
-    ReactDOM.render(
-      components.FilmPageComponent(),
-      document.getElementById("content")
-    )
+//    ReactDOM.render(
+//      components.FilmPageComponent(),
+//      document.getElementById("content")
+//    )
 
   }
 

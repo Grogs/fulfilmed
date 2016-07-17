@@ -70,9 +70,9 @@ class CinemaController @Inject() (env: Environment, dao: Cineworld, cinemaServic
   def cinemas() = returnJson {
     dao.retrieveCinemas()
   }
-  def cinemas_cinemacity() = returnJson {
-    dao.retrieveCinemaCityCinemas()
-  }
+//  def cinemas_cinemacity() = returnJson {
+//    dao.retrieveCinemaCityCinemas()
+//  }
 
   def getDate(s: String): LocalDate = s match {
     case "today" => new LocalDate

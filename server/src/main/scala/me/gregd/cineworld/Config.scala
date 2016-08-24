@@ -1,26 +1,20 @@
 package me.gregd.cineworld
 
-import javax.inject.{Named=>named}
+import javax.inject.{Named => named}
 
-import com.google.inject.{Provides=>provides, AbstractModule}
-import me.gregd.cineworld.dao.cineworld.Cineworld
-import me.gregd.cineworld.dao.movies.Movies
-import me.gregd.cineworld.util.TaskSupport
-import me.gregd.cineworld.util.TaskSupport.TimeDSL
-import grizzled.slf4j.Logging
+import com.google.inject.{AbstractModule, Provides => provides}
 import com.typesafe.config.ConfigFactory
-import me.gregd.cineworld.dao.TheMovieDB
-import scala.slick.driver.H2Driver.simple.Database
+import grizzled.slf4j.Logging
+import me.gregd.cineworld.util.TaskSupport
 import me.gregd.cineworld.util.caching.DatabaseCache
-import me.gregd.cineworld.domain.Movie
+
+import scala.slick.driver.H2Driver.simple.Database
 import scala.util.Try
-import org.joda.time.LocalDate
 
 
 class Config extends AbstractModule with TaskSupport with Logging {
   val prop = ConfigFactory.load.getString _
   
-  @provides@named("cineworld.api-key") def apiKey = prop("cineworld.api-key")
   @provides@named("rotten-tomatoes.api-key") def rottenTomatoesApiKey = prop("rotten-tomatoes.api-key")
   @provides@named("themoviedb.api-key") def tmdbApiKey = prop("themoviedb.api-key")
   val dbUrl = Try(prop("database.caching")) getOrElse "jdbc:h2:mem:caching;DB_CLOSE_DELAY=-1"

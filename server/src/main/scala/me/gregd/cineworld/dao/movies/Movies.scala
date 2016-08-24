@@ -19,7 +19,11 @@ import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.util.Implicits._
 
 @Singleton
-class Movies @Inject() (@named("rotten-tomatoes.api-key") rottenTomatoesApiKey:String, tmdb: TheMovieDB) extends MovieDao with Logging {
+class Movies @Inject() (
+                         @named("rotten-tomatoes.api-key") rottenTomatoesApiKey:String,
+                         tmdb: TheMovieDB
+                       ) extends MovieDao with Logging {
+  
   implicit val formats = DefaultFormats
 
   val imdbCache = CacheBuilder.newBuilder()

@@ -2,7 +2,7 @@ package me.gregd.cineworld.dao.movies
 
 import com.google.inject.Guice
 import me.gregd.cineworld.Config
-import me.gregd.cineworld.dao.cineworld.Cineworld
+import me.gregd.cineworld.dao.cineworld.CinemaDao
 import org.scalatest.{Matchers, FeatureSpec}
 
 /**

@@ -10,7 +10,7 @@ import org.joda.time.LocalDate
  * Created by Greg Dorrell on 01/07/2014.
  */
 class CineworldOdeonCinemasTest extends FunSuite with Matchers {
-  val cineworld = Guice.createInjector(Config).getInstance(classOf[Cineworld])
+//  val cineworld = Guice.createInjector(Config).getInstance(classOf[Cineworld])
 
 //  test("getOdeonCinemas should be non-empty") {
 //    cineworld.retrieveOdeonCinemas() should not be ('empty)

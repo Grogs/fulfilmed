@@ -5,7 +5,7 @@ import javax.inject.Inject
 import autowire.Core.Request
 import grizzled.slf4j.Logging
 import me.gregd.cineworld.dao.TheMovieDB
-import me.gregd.cineworld.dao.cineworld.Cineworld
+import me.gregd.cineworld.dao.cineworld.CinemaDao
 import me.gregd.cineworld.dao.movies.MovieDao
 import me.gregd.cineworld.domain.{Cinema, CinemaApi, Movie, Performance}
 import me.gregd.cineworld.pages.{Films, Index}
@@ -21,8 +21,9 @@ import upickle.Js.Obj
 import upickle.default.{Reader, Writer}
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-class CinemaController @Inject() (env: Environment, dao: Cineworld, cinemaService: CinemaService, implicit val movies: MovieDao, implicit val  tmdb: TheMovieDB) extends Controller with Logging {
+class CinemaController @Inject() (env: Environment, dao: CinemaDao, cinemaService: CinemaService, implicit val movies: MovieDao, implicit val  tmdb: TheMovieDB) extends Controller with Logging {
 
   implicit val cinemaWrites = Json.writes[Cinema]
   implicit val performanceWrites = Json.writes[Performance]
@@ -59,7 +60,7 @@ class CinemaController @Inject() (env: Environment, dao: Cineworld, cinemaServic
     ).as("text/html")
   )
 
-  def returnJson[T:Writes](t: => T) = Action(Ok(Json.toJson(t)))
+  def returnJson[T:Writes](t: => Future[T]) = Action.async(t.map( r=>Ok(Json.toJson(r))))
 
   def getDate(s: String): LocalDate = s match {
     case "today" => new LocalDate

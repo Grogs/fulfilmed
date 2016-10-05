@@ -1,53 +1,76 @@
 package me.gregd.cineworld.dao.cineworld
 
-import javax.inject.{Inject, Named, Singleton}
+import java.time.LocalDate
+import javax.inject.{Inject, Singleton}
 
+import cats.instances.future._
+import cats.instances.tuple._
+import cats.syntax.bitraverse._
 import grizzled.slf4j.Logging
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.movies.MovieDao
-import me.gregd.cineworld.domain._
-import org.joda.time.LocalDate
+import me.gregd.cineworld.domain.{Movie, Performance}
 import org.json4s._
 
-import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext}
+import scala.concurrent.{ExecutionContext, Future}
 
 
 @Singleton
 class RemoteCinemaDao @Inject()(
-                            imdb: MovieDao,
-                            tmdb: TheMovieDB,
-                            dao: CineworldDao
-                          ) extends CinemaDao with Logging {
+                                 imdb: MovieDao,
+                                 tmdb: TheMovieDB,
+                                 dao: CineworldRepository
+                               ) extends CinemaDao with Logging {
   val decode = java.net.URLDecoder.decode(_: String, "UTF-8")
   implicit val formats = DefaultFormats
   implicit val ec = ExecutionContext.global
 
+  private def getDate(s: String): LocalDate = s match {
+    case "today" => LocalDate.now()
+    case "tomorrow" => LocalDate.now() plusDays 1
+    case other => LocalDate.parse(s)
+  }
+
+
   override def retrieveCinemas() =
-      dao.retrieveCinemas()
-        .map(_.map(CineworldDao.toCinema).toList)
+    dao.retrieveCinemas().map(
+      _.map(CineworldRepository.toCinema)
+    )
 
-  override def retrieveMovies(cinema: String, date: LocalDate = new LocalDate) =
-      dao
-        .retrieve7DayListings(cinema)
-        .map(_.flatMap(
-          CineworldDao.toMovie(cinema, _)
-            //todo filter on date
-            .keys
-            .map(imdb.toMovie)
-        ).toList)
+  override def retrieveMoviesAndPerformances(cinemaId: String, dateRaw: String) = {
+
+    dao.retrieve7DayListings(cinemaId).flatMap { rawMovies =>
+      val futures: Seq[Future[(Movie, List[Performance])]] = for {
+        movieResp <- rawMovies
+        (film, allPerformances) <- CineworldRepository.toMovie(cinemaId, movieResp)
+        movie = imdb.toMovie(film)
+        performances = allPerformances.getOrElse(getDate(dateRaw), Nil).toList
+        if performances.nonEmpty
+        performancesF = Future.successful(performances)
+        res: Future[(Movie, List[Performance])] = sequence(movie -> performancesF)
+        _ = logger.debug(s"Retrieved listings for $cinemaId:$dateRaw:${film.id}")
+      } yield res
+      logger.debug(futures)
+      for (f <- futures) {
+        logger.debug(s"processing $f")
+        f.onComplete( t =>
+          logger.debug(s"processed $f, res: $t")
+        )
+      }
+      Future.sequence(
+        futures
+      ).map(_.toMap)
+    }
+  }
 
 
-
-  override def retrievePerformances(cinema: String, date: LocalDate = new LocalDate) =
-      dao
-        .retrieve7DayListings(cinema)
-        .map(_.flatMap(
-          CineworldDao.toMovie(cinema, _)
-            .mapValues(_(java.time.LocalDate.of(date.getYear, date.getMonthOfYear, date.getDayOfMonth)))
-            .map{case (f, s) => f.id -> Option(s)}
-        ).toMap)
-
+  def sequence[A, B](t: (Future[A], Future[B])): Future[(A, B)] = t match {
+    case (a, b) =>
+      for {
+        a <- a
+        b <- b
+      } yield (a, b)
+  }
 
 
   //  def retrieveMovies(cinema: String, date: LocalDate = new LocalDate)(implicit imdb: MovieDao = this.imdb): List[Movie] = movieCache.get(cinema, date).get
@@ -194,7 +217,6 @@ class RemoteCinemaDao @Inject()(
   //  }
 
 
-
   //  def retrieveOdeonPerformances(cinema: String, date: LocalDate): Map[String, Option[Seq[Performance]]] = {
   //    retrieveOdeonFilms(cinema, date).map { case (f, perfs) =>
   //      f.id -> Option(perfs)
@@ -210,7 +232,6 @@ class RemoteCinemaDao @Inject()(
   //      case id => retrieveOdeonPerformances(cinema, date)
   //    }
   //  }
-
 
 
 }

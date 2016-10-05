@@ -1,6 +1,6 @@
 package me.gregd.cineworld
 
-import me.gregd.cineworld.dao.cineworld.CineworldDao
+import me.gregd.cineworld.dao.cineworld.CineworldRepository$
 import org.scalatest.FunSuite
 import play.api.test.FakeApplication
 

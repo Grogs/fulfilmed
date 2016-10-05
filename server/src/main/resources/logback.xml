@@ -27,8 +27,11 @@
     <logger name="application" level="INFO" />
 
     <logger name="com.gargoylesoftware.htmlunit.javascript" level="OFF" />
+    <!--<logger name="io.netty.handler.logging.LoggingHandler" level="info" />-->
 
-    <root level="DEBUG">
+    <logger name="me.gregd" level="debug" />
+
+    <root level="INFO">
         <appender-ref ref="ASYNCFILE" />
         <appender-ref ref="ASYNCSTDOUT" />
     </root>

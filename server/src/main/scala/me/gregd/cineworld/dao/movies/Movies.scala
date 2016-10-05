@@ -6,7 +6,6 @@ import scala.util.Try
 import scalaj.http.{Http, HttpOptions}
 import org.json4s._
 import org.json4s.native.JsonMethods._
-import me.gregd.cineworld.Config
 import org.feijoas.mango.common.cache.CacheBuilder
 import java.util.concurrent.TimeUnit._
 
@@ -17,6 +16,10 @@ import com.rockymadden.stringmetric.similarity.DiceSorensenMetric
 import me.gregd.cineworld.domain.{Film, Format, Movie}
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.util.Implicits._
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scalaj.http.HttpOptions.{connTimeout, readTimeout}
 
 @Singleton
 class Movies @Inject() (
@@ -30,14 +33,13 @@ class Movies @Inject() (
     .refreshAfterWrite(24, HOURS)
     .build( (id:String) => imdbRatingAndVotes(id) orElse imdbRatingAndVotes_new(id) )
 
-  def getId(title:String) = find(title).flatMap(_.imdbId)
   def getIMDbRating(id:String) = imdbCache(id ).map(_._1)
   def getVotes(id:String) = imdbCache(id).map(_._2)
 
-  def toMovie(film: Film): Movie = {
+  def toMovie(film: Film): Future[Movie] = for (movieOpt <- find(film.cleanTitle)) yield {
     logger.debug(s"Creating movie from $film")
     val format = Format.split(film.title)._1
-    val movie: Movie = find(film.cleanTitle)
+    val movie = movieOpt
       .getOrElse(
         Movie(film.cleanTitle, None, None, None, None, None, None, None, None)
       )
@@ -47,10 +49,10 @@ class Movies @Inject() (
         format = Option(format),
         posterUrl = Option(film.poster_url)
       )
-    val imdbId = movie.imdbId map ("tt" + _)
+    val imdbId: Option[String] = movie.imdbId map ("tt" + _)
     val rating = imdbId flatMap getIMDbRating
     val votes = imdbId flatMap getVotes
-    val posterUrl = Try(tmdb.posterUrl(movie)).toOption.flatten
+    val posterUrl: Option[String] = Try(tmdb.posterUrl(movie)).toOption.flatten
     posterUrl match {
       case Some(newUrl) => logger.debug(s"Found highres poster in TMDD for '${movie.title}': $newUrl")
       case None => logger.debug(s"Didn't find poster in TMDB postUrl for ${movie.title}")
@@ -62,23 +64,15 @@ class Movies @Inject() (
   }
 
 
-  private var cachedMovies: Option[(Seq[Movie], Long)] = None
+  private var cachedMovies: Future[Seq[Movie]] = Future(allMovies())
   def allMoviesCached() = {
-    def refresh = {
-      logger.info(s"refreshing movies cache, old value:\n$cachedMovies")
-      cachedMovies = Try(allMovies()).toOption.map(_ -> System.currentTimeMillis())
-      cachedMovies.get._1
-    }
-    cachedMovies match {
-      case None => {
-        refresh
-      }
-      case Some((res, time)) => {
-        val age = System.currentTimeMillis() - time
-        import me.gregd.cineworld.util.TaskSupport.TimeDSL
-        if (age > 10.hours) refresh else res
-      }
-    }
+//    def refresh = {
+//      logger.info(s"refreshing movies cache")
+//      val newValues = allMovies()
+//      cachedMovies.completeWith(newValues)
+//      newValues
+//    }
+    cachedMovies
   }
 
   def allMovies(): Seq[Movie] = {
@@ -105,12 +99,12 @@ class Movies @Inject() (
     (movies ++ alternateTitles) distinctBy (_.title)
   }
 
-  val compareFunc = DiceSorensenMetric(1).compare(_:String,_:String).get
+  val diceSorensen = DiceSorensenMetric(1).compare(_:String,_:String).get
   val minWeight = 0.8
 
-  def find(title: String): Option[Movie] = {
-    val matc = allMoviesCached.maxBy( m => compareFunc(title,m.title))
-    val weight = compareFunc(title, matc.title)
+  def find(title: String): Future[Option[Movie]] = for (moviesCache <- allMoviesCached()) yield{
+    val matc = moviesCache.maxBy( m => diceSorensen(title, m.title) )
+    val weight = diceSorensen(title, matc.title)
     logger.info(s"Best match for $title was  ${matc.title} ($weight) - ${if (weight>minWeight) "ACCEPTED" else "REJECTED"}")
     if (weight > minWeight) Option(matc) else None
   }
@@ -120,14 +114,13 @@ class Movies @Inject() (
    * Retrieves their IMDb ID, and audience/critic rating, as well as posters etc.
    *
    * Rotten tomatoes limits the call to 50 movies per page. So there isa  recursive call to retrieve all pages.
-   * @return
    */
   def nowShowing(): Seq[RTMovie] = {
     def acc(pageNum:Int = 1): Seq[RTMovie] = {
       logger.debug(s"Retreiving list of movies in threatres according to RT (page $pageNum)")
       val resp = Http("http://api.rottentomatoes.com/api/public/v1.0/lists/movies/in_theaters.json")
-        .option(HttpOptions.connTimeout(30000))
-        .option(HttpOptions.readTimeout(30000))
+        .option(connTimeout(30000))
+        .option(readTimeout(30000))
         .params(
           "apikey" -> rottenTomatoesApiKey,
           "country"-> "uk",
@@ -147,8 +140,8 @@ class Movies @Inject() (
     def acc(pageNum:Int = 1): Seq[RTMovie] = {
       logger.debug(s"Retreiving list of upcoming movies according to RT (page $pageNum)")
       val resp = Http("http://api.rottentomatoes.com/api/public/v1.0/lists/movies/upcoming.json")
-        .option(HttpOptions.connTimeout(30000))
-        .option(HttpOptions.readTimeout(30000))
+        .option(connTimeout(30000))
+        .option(readTimeout(30000))
         .params(
           "apikey" -> rottenTomatoesApiKey,
           "country"-> "uk",
@@ -167,8 +160,8 @@ class Movies @Inject() (
   def openingSoon(): Seq[RTMovie] = {
       logger.debug(s"Retreiving list of movies opening this coming week according to RT")
       val resp = Http("http://api.rottentomatoes.com/api/public/v1.0/lists/movies/opening.json")
-        .option(HttpOptions.connTimeout(30000))
-        .option(HttpOptions.readTimeout(30000))
+        .option(connTimeout(30000))
+        .option(readTimeout(30000))
         .params(
           "apikey" -> rottenTomatoesApiKey,
           "country"-> "uk",
@@ -201,8 +194,8 @@ class Movies @Inject() (
   protected[movies] def imdbRatingAndVotes_new(id:String): (Option[(Double,Int)]) = {
     logger.debug(s"Retreiving IMDb rating (v2) and votes for $id")
     val resp = Http("http://deanclatworthy.com/imdb/")
-      .option(HttpOptions.connTimeout(10000))
-      .option(HttpOptions.readTimeout(10000))
+      .option(connTimeout(10000))
+      .option(readTimeout(10000))
       .params(
         "id" -> id
       )
@@ -223,8 +216,8 @@ class Movies @Inject() (
 
 
   private def curl(url: String) = Http(url)
-    .option(HttpOptions.connTimeout(30000))
-    .option(HttpOptions.readTimeout(30000))
+    .option(connTimeout(30000))
+    .option(readTimeout(30000))
     .asString.body
 
 }

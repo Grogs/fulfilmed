@@ -11,7 +11,7 @@ import play.api.libs.ws._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class CineworldDao @Inject()(ws: WSClient) {
+class CineworldRepository @Inject()(ws: WSClient) {
 
   object StringToLong extends CustomSerializer[Long](format => ( {
     case JString(x) => x.toLong
@@ -41,7 +41,7 @@ class CineworldDao @Inject()(ws: WSClient) {
 
 }
 
-object CineworldDao {
+object CineworldRepository {
   def toCinema(cinemaResp: CinemaResp): Cinema =
     Cinema(cinemaResp.id.toString, cinemaResp.n)
 

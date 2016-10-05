@@ -9,7 +9,6 @@ import scala.concurrent.Future
 
 @ImplementedBy(classOf[CachingCinemaDao])
 trait CinemaDao {
-  def retrieveCinemas(): Future[List[Cinema]]
-  def retrieveMovies(cinema:String, date: LocalDate = new LocalDate()): Future[List[Movie]]
-  def retrievePerformances(cinema: String, date: LocalDate = new LocalDate()): Future[Map[String, Option[Seq[Performance]]]]
+  def retrieveCinemas(): Future[Seq[Cinema]]
+  def retrieveMoviesAndPerformances(cinemaId: String, dateRaw: String): Future[Map[Movie, List[Performance]]]
 }

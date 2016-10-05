@@ -31,10 +31,11 @@ object FilmPageComponent {
     )
 
     case class Sort(key: String, description: String, ordering: Ordering[Entry])
-    object NextShowing extends Sort("showtime", "Next Showing", Ordering.by{case (_, performances) => if (performances.isEmpty) "99:99" else performances.map(_.time).min})
-    object ImdbRating extends Sort("imdb", "IMDb Rating (Descending)", Ordering.by{ e: Entry => e._1.rating.getOrElse(0.0)}.reverse)
-    object RTCriticRating extends Sort("critic", "RT Critic Rating (Descending)", Ordering.by{ e: Entry => e._1.criticRating.getOrElse(0)}.reverse)
-    object RTAudienceRating extends Sort("audience", "RT Audience Rating (Descending)", Ordering.by{ e: Entry => e._1.audienceRating.getOrElse(0)}.reverse)
+    def ordering[T:Ordering](fun: Entry => T) = Ordering.by(fun)
+    object NextShowing extends Sort("showtime", "Next Showing", ordering{ case (_, performances) => if (performances.isEmpty) "99:99" else performances.map(_.time).min})
+    object ImdbRating extends Sort("imdb", "IMDb Rating (Descending)", ordering{ case (m, _) => m.rating.getOrElse(0.0)}.reverse)
+    object RTCriticRating extends Sort("critic", "RT Critic Rating (Descending)", ordering{ case (m, _) => m.criticRating.getOrElse(0)}.reverse)
+    object RTAudienceRating extends Sort("audience", "RT Audience Rating (Descending)", ordering{ case (m, _) => m.audienceRating.getOrElse(0)}.reverse)
 
     case class Date(key: String, text: String)
     object Today extends Date("today", "Today")

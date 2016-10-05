@@ -16,11 +16,11 @@ class CineworldDaoIT extends FunSuite with Futures {
 
   val fakeApp = FakeApplication()
 
-  val cineworldDao = fakeApp.injector.instanceOf[CineworldDao]
+  val cineworldDao = fakeApp.injector.instanceOf[CineworldRepository]
 
   test("testRetrieveCinemas") {
     val cinemas = Await.result(cineworldDao.retrieveCinemas(), 10.seconds)
-    val (london, rest) = cinemas.map(CineworldDao.toCinema).partition(_.name.startsWith("London - "))
+    val (london, rest) = cinemas.map(CineworldRepository.toCinema).partition(_.name.startsWith("London - "))
     println("London")
     def print(c: Cinema) = println(s"""Cinema("${c.id}", "${c.name}")""")
     london.foreach(print)

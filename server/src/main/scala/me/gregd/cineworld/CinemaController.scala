@@ -5,14 +5,12 @@ import javax.inject.Inject
 import autowire.Core.Request
 import grizzled.slf4j.Logging
 import me.gregd.cineworld.dao.TheMovieDB
-import me.gregd.cineworld.dao.cineworld.CinemaDao
 import me.gregd.cineworld.dao.movies.MovieDao
 import me.gregd.cineworld.domain.{Cinema, CinemaApi, Movie, Performance}
-import me.gregd.cineworld.pages.{Films, Index}
-import org.joda.time.LocalDate
+import me.gregd.cineworld.pages.Index
 import play.api.Environment
 import play.api.Mode._
-import play.api.libs.json.{Json, Writes}
+import play.api.libs.json.Json
 import play.api.mvc.Action
 import play.api.mvc.Results.Ok
 import play.mvc.Controller
@@ -21,9 +19,8 @@ import upickle.Js.Obj
 import upickle.default.{Reader, Writer}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
-class CinemaController @Inject() (env: Environment, dao: CinemaDao, cinemaService: CinemaService, implicit val movies: MovieDao, implicit val  tmdb: TheMovieDB) extends Controller with Logging {
+class CinemaController @Inject() (env: Environment, cinemaService: CinemaService, implicit val movies: MovieDao, implicit val  tmdb: TheMovieDB) extends Controller with Logging {
 
   implicit val cinemaWrites = Json.writes[Cinema]
   implicit val performanceWrites = Json.writes[Performance]
@@ -59,22 +56,5 @@ class CinemaController @Inject() (env: Environment, dao: CinemaDao, cinemaServic
       Index(scriptPaths).render
     ).as("text/html")
   )
-
-  def returnJson[T:Writes](t: => Future[T]) = Action.async(t.map( r=>Ok(Json.toJson(r))))
-
-  def getDate(s: String): LocalDate = s match {
-    case "today" => new LocalDate
-    case "tomorrow" => new LocalDate() plusDays 1
-    case other => new LocalDate(other)
-  }
-
-  def getFilms(id: String, date: String) = returnJson {
-    dao.retrieveMovies(id, getDate(date))
-  }
-
-
-  def getPerformances(id: String, date: String) = returnJson {
-    dao.retrievePerformances(id, getDate(date))
-  }
 
 }

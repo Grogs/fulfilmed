@@ -22,7 +22,7 @@ class CachingCinemaDao @Inject()(remoteCineworld: RemoteCinemaDao, actorSystem: 
 
   def run(): Unit = {
     refresh()
-    val someMinutes = (8.hours.toMinutes + Random.nextInt(2.hours.toMinutes.toInt)).seconds
+    val someMinutes = (1.hour.toMinutes + Random.nextInt(1.hour.toMinutes.toInt)).seconds
     actorSystem.scheduler.scheduleOnce(someMinutes)(
       run()
     )

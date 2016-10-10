@@ -6,6 +6,9 @@ lazy val commonSettings = Seq(
   scalaVersion := "2.11.7"
 )
 
+// loads the server project at sbt startup
+onLoad in Global := (Command.process("project server", _: State)) compose (onLoad in Global).value
+
 scalacOptions += "-target:jvm-1.7" //my vps is stuck on java 7 for the moment
 javacOptions ++= Seq("-source", "1.7", "-target", "1.7")
 

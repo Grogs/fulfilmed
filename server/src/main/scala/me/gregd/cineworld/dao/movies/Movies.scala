@@ -131,7 +131,7 @@ class Movies @Inject() (
       logger.debug(s"RT in_theaters page $pageNum:\n$resp")
       val json = parse(resp)
       val movies = (json \ "movies").extract[Seq[RTMovie]]
-      if (movies.size < 50) movies else movies ++ acc(pageNum+1)
+      if (movies.size < 50 || pageNum > 15) movies else movies ++ acc(pageNum+1)
     }
     acc()
   }
@@ -152,7 +152,7 @@ class Movies @Inject() (
       logger.debug(s"RT upcoming page $pageNum:\n$resp")
       val json = parse(resp)
       val movies = (json \ "movies").extract[Seq[RTMovie]]
-      if (movies.size < 50) movies else movies ++ acc(pageNum+1)
+      if (movies.size < 50 || pageNum > 15) movies else movies ++ acc(pageNum+1)
     }
     acc()
   }

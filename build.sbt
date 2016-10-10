@@ -3,14 +3,11 @@ import sbt.Project.projectToRef
 lazy val commonSettings = Seq(
   organization := "me.gregd",
   version := "1.1",
-  scalaVersion := "2.11.7"
+  scalaVersion := "2.11.8"
 )
 
 // loads the server project at sbt startup
 onLoad in Global := (Command.process("project server", _: State)) compose (onLoad in Global).value
-
-scalacOptions += "-target:jvm-1.7" //my vps is stuck on java 7 for the moment
-javacOptions ++= Seq("-source", "1.7", "-target", "1.7")
 
 scalacOptions ++= Seq("-Xfatal-warnings", "-feature")
 
@@ -25,15 +22,8 @@ lazy val client: Project = project
       "org.scala-js" %%% "scalajs-java-time" % "0.1.0"
     ),
     jsDependencies ++= Seq(
-      "org.webjars.bower" % "react" % "15.0.1"
-        / "react-with-addons.js"
-        minified "react-with-addons.min.js"
-        commonJSName "React",
-      "org.webjars.bower" % "react" % "15.0.1"
-        / "react-dom.js"
-        minified "react-dom.min.js"
-        dependsOn "react-with-addons.js"
-        commonJSName "ReactDOM"
+      "org.webjars.bower" % "react" % "15.0.1" / "react-with-addons.js" minified "react-with-addons.min.js" commonJSName "React",
+      "org.webjars.bower" % "react" % "15.0.1" / "react-dom.js" minified "react-dom.min.js" dependsOn "react-with-addons.js" commonJSName "ReactDOM"
     )
   )
   .enablePlugins(ScalaJSPlugin, ScalaJSPlay, DockerPlugin)
@@ -96,21 +86,6 @@ lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared"))
 lazy val sharedJvm = shared.jvm
 lazy val sharedJs = shared.js
 
-routesGenerator := InjectedRoutesGenerator
+//routesGenerator := InjectedRoutesGenerator
 
 test in assembly := {}
-
-resolvers += "Sonatype OSS Releases" at "http://oss.sonatype.org/content/groups/public"
-
-resolvers += "mandubian-snapshots" at "http://github.com/mandubian/mandubian-mvn/raw/master/snapshots/"
-
-resolvers += "mandubian-releases" at "http://github.com/mandubian/mandubian-mvn/raw/master/releases/"
-
-resolvers += "typesafe-releases" at "http://repo.typesafe.com/typesafe/releases/"
-
-resolvers += "sonatype-snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
-
-resolvers += "sonatype-releases" at "http://oss.sonatype.org/content/repositories/releases"
-
-resolvers += "eclipse" at "http://download.eclipse.org/rt/eclipselink/maven.repo"
-

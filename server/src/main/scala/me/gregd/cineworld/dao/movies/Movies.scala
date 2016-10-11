@@ -1,24 +1,22 @@
 package me.gregd.cineworld.dao.movies
 
+import java.text.NumberFormat
+import java.util.concurrent.TimeUnit._
 import javax.inject.{Inject, Singleton, Named => named}
 
-import scala.util.Try
-import scalaj.http.{Http, HttpOptions}
+import com.rockymadden.stringmetric.similarity.DiceSorensenMetric
+import grizzled.slf4j.Logging
+import me.gregd.cineworld.dao.TheMovieDB
+import me.gregd.cineworld.domain.{Film, Format, Movie}
+import me.gregd.cineworld.util.Implicits._
+import org.feijoas.mango.common.cache.CacheBuilder
 import org.json4s._
 import org.json4s.native.JsonMethods._
-import org.feijoas.mango.common.cache.CacheBuilder
-import java.util.concurrent.TimeUnit._
-
-import grizzled.slf4j.Logging
-import java.text.NumberFormat
-
-import com.rockymadden.stringmetric.similarity.DiceSorensenMetric
-import me.gregd.cineworld.domain.{Film, Format, Movie}
-import me.gregd.cineworld.dao.TheMovieDB
-import me.gregd.cineworld.util.Implicits._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.Try
+import scalaj.http.Http
 import scalaj.http.HttpOptions.{connTimeout, readTimeout}
 
 @Singleton

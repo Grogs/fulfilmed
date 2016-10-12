@@ -29,7 +29,7 @@
     <logger name="com.gargoylesoftware.htmlunit.javascript" level="OFF" />
     <!--<logger name="io.netty.handler.logging.LoggingHandler" level="info" />-->
 
-    <logger name="me.gregd" level="debug" />
+    <logger name="me.gregd" level="info" />
 
     <root level="INFO">
         <appender-ref ref="ASYNCFILE" />

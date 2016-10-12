@@ -28,11 +28,11 @@ class CachingCinemaDao @Inject()(remoteCineworld: RemoteCinemaDao, actorSystem: 
     )
   }
 
-  logger.debug("Scheduling refresh")
+  logger.info("Scheduling refresh")
     actorSystem.scheduler.scheduleOnce(5.seconds)(run())
 
   def refresh() = {
-    logger.debug("Refreshing")
+    logger.info("Refreshing")
     val eventualCinemas = remoteCineworld.retrieveCinemas()
 
     val todayTomorrow = (for {
@@ -50,7 +50,7 @@ class CachingCinemaDao @Inject()(remoteCineworld: RemoteCinemaDao, actorSystem: 
 
     todayTomorrow.onComplete {
       case Success(allTheData) =>
-        logger.info("Successful")
+        logger.info("Successfully refreshed")
         this.cinemas.completeWith(eventualCinemas)
         this.listings.success(allTheData)
       case Failure(ex) =>

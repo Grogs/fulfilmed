@@ -11,31 +11,11 @@ onLoad in Global := (Command.process("project server", _: State)) compose (onLoa
 
 scalacOptions ++= Seq("-Xfatal-warnings", "-feature")
 
-lazy val client: Project = project
-  .settings(
-    skip in packageJSDependencies := false,
-    libraryDependencies ++= Seq(
-      "com.github.japgolly.scalajs-react" %%% "core" % "0.11.1",
-      "com.github.japgolly.scalajs-react" %%% "extra" % "0.11.1",
-      "com.github.japgolly.scalacss" %%% "core" % "0.4.0",
-      "com.github.japgolly.scalacss" %%% "ext-react" % "0.4.0",
-      "org.scala-js" %%% "scalajs-java-time" % "0.1.0"
-    ),
-    jsDependencies ++= Seq(
-      "org.webjars.bower" % "react" % "15.0.1" / "react-with-addons.js" minified "react-with-addons.min.js" commonJSName "React",
-      "org.webjars.bower" % "react" % "15.0.1" / "react-dom.js" minified "react-dom.min.js" dependsOn "react-with-addons.js" commonJSName "ReactDOM"
-    )
-  )
-  .enablePlugins(ScalaJSPlugin, ScalaJSPlay, DockerPlugin)
-  .dependsOn(sharedJs)
-
-lazy val jsProjects = Seq(client)
-
-lazy val server: Project = project
+lazy val server: Project = project.enablePlugins(PlayScala)
   .settings(commonSettings: _*)
   .settings(
-    scalaJSProjects := jsProjects,
-    pipelineStages := Seq(scalaJSProd),
+    scalaJSProjects := Seq(client),
+    pipelineStages in Assets := Seq(scalaJSPipeline),
     name := "fulfilmed",
     libraryDependencies ++= Seq(
       "com.rockymadden.stringmetric" % "stringmetric-core_2.11" % "0.27.4",
@@ -54,6 +34,7 @@ lazy val server: Project = project
       "com.lihaoyi" %% "scalatags" % "0.5.4",
       "org.typelevel" %% "cats" % "0.7.0",
       ws,
+      filters,
       "org.scalatra" % "scalatra-scalatest_2.11" % "2.3.1" % "test",
       "org.scalatest" % "scalatest_2.11" % "1.9.1" % "test"
     ),
@@ -63,9 +44,7 @@ lazy val server: Project = project
       "org.webjars" % "font-awesome" % "4.5.0"
     )
   )
-  .enablePlugins(PlayScala, PlayScalaJS)
   .disablePlugins(PlayLayoutPlugin)
-  .aggregate(jsProjects.map(projectToRef): _*)
   .dependsOn(sharedJvm)
 
 lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared"))
@@ -80,6 +59,25 @@ lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared"))
   )
 lazy val sharedJvm = shared.jvm
 lazy val sharedJs = shared.js
+
+lazy val client: Project = project
+  .settings(
+    skip in packageJSDependencies := false,
+    libraryDependencies ++= Seq(
+      "com.github.japgolly.scalajs-react" %%% "core" % "0.11.1",
+      "com.github.japgolly.scalajs-react" %%% "extra" % "0.11.1",
+      "com.github.japgolly.scalacss" %%% "core" % "0.4.0",
+      "com.github.japgolly.scalacss" %%% "ext-react" % "0.4.0",
+      "org.scala-js" %%% "scalajs-java-time" % "0.1.0"
+    ),
+    jsDependencies ++= Seq(
+      "org.webjars.bower" % "react" % "15.0.1" / "react-with-addons.js" minified "react-with-addons.min.js" commonJSName "React",
+      "org.webjars.bower" % "react" % "15.0.1" / "react-dom.js" minified "react-dom.min.js" dependsOn "react-with-addons.js" commonJSName "ReactDOM"
+    ),
+    (emitSourceMaps in fullOptJS) := true
+  )
+  .enablePlugins(ScalaJSPlugin, ScalaJSWeb, DockerPlugin)
+  .dependsOn(sharedJs)
 
 test in assembly := {}
 

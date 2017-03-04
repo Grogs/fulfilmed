@@ -1,16 +1,13 @@
 package me.gregd.cineworld.dao.cineworld
 
-import com.google.inject.Guice
-import me.gregd.cineworld.Config
-import org.scalatest.FunSuite
-import org.scalatest.Matchers
-import org.joda.time.LocalDate
+import org.scalatest.{FunSuite, Matchers}
+import org.scalatestplus.play.OneAppPerSuite
 
 /**
  * Created by Greg Dorrell on 01/07/2014.
  */
-class CineworldOdeonCinemasTest extends FunSuite with Matchers {
-  val cineworld = Guice.createInjector(Config).getInstance(classOf[Cineworld])
+class CineworldOdeonCinemasTest extends FunSuite with Matchers with OneAppPerSuite {
+  val cineworld = app.injector.instanceOf[Cineworld]
 
 //  test("getOdeonCinemas should be non-empty") {
 //    cineworld.retrieveOdeonCinemas() should not be ('empty)

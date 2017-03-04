@@ -4,11 +4,9 @@ import javax.inject.Inject
 
 import autowire.Core.Request
 import grizzled.slf4j.Logging
-import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.cineworld.Cineworld
-import me.gregd.cineworld.dao.movies.MovieDao
 import me.gregd.cineworld.domain.{Cinema, CinemaApi, Movie, Performance}
-import me.gregd.cineworld.pages.{Films, Index}
+import me.gregd.cineworld.pages.Index
 import org.joda.time.LocalDate
 import play.api.Environment
 import play.api.Mode._
@@ -22,11 +20,11 @@ import upickle.default.{Reader, Writer}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class CinemaController @Inject() (env: Environment, dao: Cineworld, cinemaService: CinemaService, implicit val movies: MovieDao, implicit val  tmdb: TheMovieDB) extends Controller with Logging {
+class CinemaController @Inject() (env: Environment, dao: Cineworld, cinemaService: CinemaService) extends Controller with Logging {
 
-  implicit val cinemaWrites = Json.writes[Cinema]
-  implicit val performanceWrites = Json.writes[Performance]
-  implicit val movieWrites = Json.writes[Movie]
+  implicit val cinemaFormat = Json.format[Cinema]
+  implicit val performanceFormat = Json.format[Performance]
+  implicit val movieFormat = Json.format[Movie]
 
   val scriptPaths  = List(
     "assets/fulfilmed-scala-frontend-jsdeps.js",

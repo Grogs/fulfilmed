@@ -5,16 +5,18 @@ import javax.inject.{Named => named}
 import com.google.inject.{AbstractModule, Provides => provides}
 import com.typesafe.config.ConfigFactory
 import grizzled.slf4j.Logging
-import me.gregd.cineworld.util.TaskSupport
 import me.gregd.cineworld.util.caching.DatabaseCache
 
 import scala.slick.driver.H2Driver.simple.Database
 import scala.util.Try
 
 
-class Config extends AbstractModule with TaskSupport with Logging {
-  val prop = ConfigFactory.load.getString _
-  
+class Config extends AbstractModule with Logging {
+  val prop = {
+    val config = ConfigFactory.load
+    config.getString _
+  }
+
   @provides@named("rotten-tomatoes.api-key") def rottenTomatoesApiKey = prop("rotten-tomatoes.api-key")
   @provides@named("themoviedb.api-key") def tmdbApiKey = prop("themoviedb.api-key")
   val dbUrl = Try(prop("database.caching")) getOrElse "jdbc:h2:mem:caching;DB_CLOSE_DELAY=-1"

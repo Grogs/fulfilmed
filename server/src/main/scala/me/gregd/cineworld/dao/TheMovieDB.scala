@@ -1,35 +1,37 @@
 package me.gregd.cineworld.dao
 
-import javax.inject.{Named=>named, Inject, Singleton}
+import javax.inject.{Inject, Singleton, Named => named}
 
-import scalaj.http.{HttpOptions, Http, HttpRequest}
+import grizzled.slf4j.Logging
+import me.gregd.cineworld.domain.Movie
+import me.gregd.cineworld.util.Implicits._
 import org.json4s._
 import org.json4s.native.JsonMethods._
-import me.gregd.cineworld.domain.Movie
-import scala.util.Try
-import me.gregd.cineworld.util.Implicits._
-import grizzled.slf4j.Logging
-import me.gregd.cineworld.Config
+import play.api.libs.json.{Json, Reads}
+import play.api.libs.ws.WSClient
 
-/**
- * Created by Greg Dorrell on 22/05/2014.
- */
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.util.Try
+import scalaj.http.HttpOptions.{connTimeout, readTimeout}
+import scalaj.http.{Http, HttpRequest}
+
 @Singleton
-class TheMovieDB @Inject() (@named("themoviedb.api-key")apiKey: String) extends Logging {
+class TheMovieDB @Inject()(@named("themoviedb.api-key") apiKey: String, ws: WSClient) extends Logging {
 
   protected implicit val formats = DefaultFormats
 
-  val baseUrl="http://api.themoviedb.org/3"
+  val baseUrl = "http://api.themoviedb.org/3"
   val baseImageUrl = {
-    val json =  get("configuration")
+    val json = get("configuration")
     (json \ "images" \ "base_url").extract[String] + "w300"
   }
 
-  protected def get(path:String, transform: HttpRequest => HttpRequest = m => m): JValue = {
+  protected def get(path: String, transform: HttpRequest => HttpRequest = m => m): JValue = {
     val req = transform(
       Http(s"$baseUrl/$path")
-        .option(HttpOptions.connTimeout(30000))
-        .option(HttpOptions.readTimeout(30000))
+        .option(connTimeout(30000))
+        .option(readTimeout(30000))
         .header("Accept", "application/json")
         .param("api_key", apiKey)
     )
@@ -38,31 +40,70 @@ class TheMovieDB @Inject() (@named("themoviedb.api-key")apiKey: String) extends 
     parse(StringInput(resp.body))
   }
 
+  def fetchNowPlaying() = {
+    def acc(page: Int): Future[List[model.TmdbMovie]] = {
+      ws.url(s"$baseUrl/movie/now_playing?api_key=$apiKey&language=en-US&page=$page&region=GB")
+        .get()
+        .map(_.json.as[model.NowShowingResponse])
+        .flatMap(resp =>
+          if (resp.page < resp.total_pages) {
+            val rest = acc(page + 1)
+            rest.map(resp.results ++ _)
+          } else {
+            Future.successful(resp.results)
+          }
+        )
+    }
+    acc(1)
+  }
+
   def alternateTitles(imdbId: String): Seq[String] = Try {
     val json = get(s"movie/tt$imdbId/alternative_titles")
     val titles = json \ "titles" \ "title"
     titles
       .extractOrElse[Seq[String]](
-        Seq(titles.extract[String])
-      )
+      Seq(titles.extract[String])
+    )
   }
-    .onFailure(logger.error(s"Unable to retrieve alternate titles for $imdbId from TMDB",_:Throwable))
+    .onFailure(logger.error(s"Unable to retrieve alternate titles for $imdbId from TMDB", _: Throwable))
     .getOrElse(Nil)
 
   def posterUrl(m: Movie): Option[String] = m.imdbId flatMap posterUrl
+
   def alternateTitles(m: Movie): Seq[String] = (m.imdbId map alternateTitles) getOrElse Nil
 
 
-
   def posterUrl(imdbId: String): Option[String] = Try {
-    val json = get(s"find/tt$imdbId", _.param("external_source","imdb_id"))
+    val json = get(s"find/tt$imdbId", _.param("external_source", "imdb_id"))
     logger.debug(json \ "movie_results" \ "poster_path")
     val JString(imageName) = json \ "movie_results" \ "poster_path"
     s"$baseImageUrl$imageName"
   }
-    .onFailure(logger.error(s"Unable to retrieve poster for $imdbId from TMDB",_:Throwable))
+    .onFailure(logger.error(s"Unable to retrieve poster for $imdbId from TMDB", _: Throwable))
     .toOption
+
 
 }
 
-//object TheMovieDB extends TheMovieDB(Config.tmdbApiKey) {}
+package model {
+
+  case class TmdbMovie(poster_path: Option[String], adult: Boolean, overview: String, release_date: String, genre_ids: List[Double], id: Double, original_title: String, original_language: String, title: String, backdrop_path: Option[String], popularity: Double, vote_count: Double, video: Boolean, vote_average: Double)
+
+  case class DateRange(maximum: String, minimum: String)
+
+  case class NowShowingResponse(page: Double, results: List[TmdbMovie], dates: DateRange, total_pages: Double, total_results: Double)
+
+  object TmdbMovie {
+    implicit val movieFormat = Json.format[model.TmdbMovie]
+  }
+
+  object DateRange {
+    implicit val dateRangeFormat = Json.format[model.DateRange]
+  }
+
+  object NowShowingResponse {
+    implicit val nowShowingRespFormat: Reads[model.NowShowingResponse] = Json.reads[model.NowShowingResponse]
+  }
+
+
+}

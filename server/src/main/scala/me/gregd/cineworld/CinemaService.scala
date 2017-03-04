@@ -3,17 +3,14 @@ package me.gregd.cineworld
 import java.time.LocalDate
 import javax.inject.Inject
 
-import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.cineworld.CineworldDao
 import me.gregd.cineworld.dao.movies.MovieDao
 import me.gregd.cineworld.domain.{Cinema, CinemaApi, Movie, Performance}
-import play.api.Environment
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class CinemaService @Inject()(env: Environment, movieDao: MovieDao, cineworldDao: CineworldDao, implicit val movies: MovieDao, implicit val tmdb: TheMovieDB) extends CinemaApi {
-
-  implicit val ec = ExecutionContext.global
+class CinemaService @Inject()(movieDao: MovieDao, cineworldDao: CineworldDao) extends CinemaApi {
 
   def getDate(s: String): LocalDate = s match {
     case "today" => LocalDate.now()

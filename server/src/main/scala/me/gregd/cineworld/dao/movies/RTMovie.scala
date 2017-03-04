@@ -1,8 +1,5 @@
 package me.gregd.cineworld.dao.movies
 
-/**
- * Created by Greg Dorrell on 03/05/2014.
- */
 case class RTMovie(
   title: String,
   year: Option[Int],

@@ -1,16 +1,14 @@
 package me.gregd.cineworld.dao.movies
 
-import com.google.inject.Guice
-import me.gregd.cineworld.Config
-import me.gregd.cineworld.dao.cineworld.Cineworld
-import org.scalatest.{Matchers, FeatureSpec}
+import org.scalatest.{FeatureSpec, Matchers}
+import org.scalatestplus.play.OneAppPerSuite
 
 /**
  * Author: Greg Dorrell
  * Date: 11/09/2013
  */
-class IMDbFeatureSpec extends FeatureSpec with Matchers {
-  val movies = Guice.createInjector(Config).getInstance(classOf[Movies])
+class IMDbFeatureSpec extends FeatureSpec with Matchers with OneAppPerSuite {
+  val movies = app.injector.instanceOf[Movies]
 
   info("I should be able to to get ratings for films")
 

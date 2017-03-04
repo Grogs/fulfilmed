@@ -1,18 +1,13 @@
 package me.gregd.cineworld.dao.cineworld
 
-import com.google.inject.Guice
-import me.gregd.cineworld.Config
-import org.scalatest.{Matchers, FeatureSpec}
+import org.scalatest.{FeatureSpec, Matchers}
+import org.scalatestplus.play.OneAppPerSuite
 
-/**
- * Author: Greg Dorrell
- * Date: 03/09/2013
- */
-class CineworldFeatureSpec extends FeatureSpec with Matchers {
+class CineworldFeatureSpec extends FeatureSpec with Matchers with OneAppPerSuite {
 
   info("I should be able to get a list of films showing at my local cinema")
 
-  val cineworld = Guice.createInjector(Config).getInstance(classOf[Cineworld])
+  val cineworld = app.injector.instanceOf[Cineworld]
 
   feature("Cineworld DAO") {
     scenario("Get list of cinemas:") {

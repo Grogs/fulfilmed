@@ -9,13 +9,6 @@ import scala.util.matching.Regex
  * Created by Greg Dorrell on 26/05/2014.
  */
 object Implicits {
-  implicit class WithThreads[T](s:Seq[T]) {
-    def threads(numThreads:Int): ParSeq[T] = {
-      val parSeq = s.par
-      parSeq.tasksupport = new ForkJoinTaskSupport(new ForkJoinPool( numThreads ))
-      parSeq
-    }
-  }
 
   implicit class DistinctBy[T](s:Seq[T]) {
     def distinctBy[K](func: T => K) = {
@@ -31,10 +24,6 @@ object Implicits {
       }
       t
     }
-  }
-
-  implicit class RegexContext(sc: StringContext) {
-    def r = new Regex(sc.parts.mkString(""), sc.parts.tail.map(_ => "x"): _*)
   }
 
 }

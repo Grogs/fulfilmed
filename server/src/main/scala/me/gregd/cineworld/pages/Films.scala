@@ -1,15 +1,14 @@
 package me.gregd.cineworld.pages
 
 import scalatags.Text.all._
-import scalatags.Text.tags2.{title=>titleElem}
+import scalatags.Text.tags2.title
 
 class Films {
   def apply(scriptPaths: List[String]) =
     html(
       head(
-        titleElem("Fulfilmed"),
+        title("Fulfilmed"),
         link(rel:="stylesheet", href:="webjars/font-awesome/4.5.0/css/font-awesome.min.css")
-//        link(rel:="stylesheet", href:="assets/films.css")
       ),
       body(
         div( id:="content"),

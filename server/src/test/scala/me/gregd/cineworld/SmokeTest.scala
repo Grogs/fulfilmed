@@ -1,25 +1,20 @@
 package me.gregd.cineworld
 
-import org.json4s.native.Serialization._
-import me.gregd.cineworld.domain.{Movie, Cinema}
-import org.scalatest.MustMatchers
-import org.scalatra.test.scalatest.{ScalatraFunSuite, ScalatraFeatureSpec}
-import org.json4s.DefaultFormats
+import akka.stream.Materializer
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.{FunSuite, Matchers}
+import org.scalatestplus.play.OneAppPerTest
+import play.api.test.{FakeRequest}
+import play.api.test.Helpers.{GET, OK, route, _}
 
-/**
- * Author: Greg Dorrell
- * Date: 03/05/2014
- */
-class SmokeTest extends ScalatraFunSuite {
-  protected implicit val jsonFormats = DefaultFormats.withBigDecimal
-//  addServlet(Config.webservice, "/*")
+
+class SmokeTest extends FunSuite with Matchers with OneAppPerTest with ScalaFutures {
+
+  implicit val mat = NoMaterial
 
   test("Get list of cinemas") {
-    get("/cinema/66") {
-      status should be (200)
-      val movies = read[Option[List[Movie]]](body)
-      movies should be ('defined)
-      movies.get.size should be > 0
-    }
+    val resp = route(app, FakeRequest(GET, "/")).get.futureValue
+    val body = resp.body.consumeData.futureValue.utf8String
+    resp.header.status shouldBe OK
   }
 }

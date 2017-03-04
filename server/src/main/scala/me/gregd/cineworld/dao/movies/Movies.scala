@@ -1,22 +1,22 @@
 package me.gregd.cineworld.dao.movies
 
+import java.text.NumberFormat
+import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton, Named => named}
 
-import scala.util.Try
-import scalaj.http.{Http, HttpOptions}
+import com.rockymadden.stringmetric.similarity.DiceSorensenMetric
+import grizzled.slf4j.Logging
+import me.gregd.cineworld.dao.TheMovieDB
+import me.gregd.cineworld.domain.{Film, Format, Movie}
+import me.gregd.cineworld.util.Implicits._
+import org.feijoas.mango.common.cache.CacheBuilder
 import org.json4s._
 import org.json4s.native.JsonMethods._
-import me.gregd.cineworld.Config
-import org.feijoas.mango.common.cache.CacheBuilder
-import java.util.concurrent.TimeUnit._
 
-import grizzled.slf4j.Logging
-import java.text.NumberFormat
-
-import com.rockymadden.stringmetric.similarity.DiceSorensenMetric
-import me.gregd.cineworld.domain.{Film, Format, Movie}
-import me.gregd.cineworld.dao.TheMovieDB
-import me.gregd.cineworld.util.Implicits._
+import scala.concurrent.duration._
+import scala.util.{Failure, Success, Try}
+import scalaj.http.Http
+import scalaj.http.HttpOptions.{connTimeout, readTimeout}
 
 @Singleton
 class Movies @Inject() (
@@ -27,7 +27,7 @@ class Movies @Inject() (
   implicit val formats = DefaultFormats
 
   val imdbCache = CacheBuilder.newBuilder()
-    .refreshAfterWrite(24, HOURS)
+    .refreshAfterWrite(24, TimeUnit.HOURS)
     .build( (id:String) => imdbRatingAndVotes(id) orElse imdbRatingAndVotes_new(id) )
 
   def getId(title:String) = find(title).flatMap(_.imdbId)
@@ -62,22 +62,19 @@ class Movies @Inject() (
   }
 
 
-  private var cachedMovies: Option[(Seq[Movie], Long)] = None
+  private var cachedMovies: Try[(Seq[Movie], Long)] = Failure(new UninitializedError)
   def allMoviesCached() = {
     def refresh = {
       logger.info(s"refreshing movies cache, old value:\n$cachedMovies")
-      cachedMovies = Try(allMovies()).toOption.map(_ -> System.currentTimeMillis())
+      cachedMovies = Try(allMovies()).map(_ -> System.currentTimeMillis())
       cachedMovies.get._1
     }
     cachedMovies match {
-      case None => {
+      case Failure(_) =>
         refresh
-      }
-      case Some((res, time)) => {
+      case Success((res, time)) =>
         val age = System.currentTimeMillis() - time
-        import me.gregd.cineworld.util.TaskSupport.TimeDSL
-        if (age > 10.hours) refresh else res
-      }
+        if (age.millis > 10.hours) refresh else res
     }
   }
 
@@ -105,11 +102,13 @@ class Movies @Inject() (
     (movies ++ alternateTitles) distinctBy (_.title)
   }
 
-  val compareFunc = DiceSorensenMetric(1).compare(_:String,_:String).get
+  val compareFunc: (String, String) => Double =
+    DiceSorensenMetric(1).compare(_:String,_:String).get
+
   val minWeight = 0.8
 
   def find(title: String): Option[Movie] = {
-    val matc = allMoviesCached.maxBy( m => compareFunc(title,m.title))
+    val matc = allMoviesCached().maxBy(m => compareFunc(title,m.title))
     val weight = compareFunc(title, matc.title)
     logger.info(s"Best match for $title was  ${matc.title} ($weight) - ${if (weight>minWeight) "ACCEPTED" else "REJECTED"}")
     if (weight > minWeight) Option(matc) else None
@@ -126,8 +125,7 @@ class Movies @Inject() (
     def acc(pageNum:Int = 1): Seq[RTMovie] = {
       logger.debug(s"Retreiving list of movies in threatres according to RT (page $pageNum)")
       val resp = Http("http://api.rottentomatoes.com/api/public/v1.0/lists/movies/in_theaters.json")
-        .option(HttpOptions.connTimeout(30000))
-        .option(HttpOptions.readTimeout(30000))
+        .options(connTimeout(30000), readTimeout(30000))
         .params(
           "apikey" -> rottenTomatoesApiKey,
           "country"-> "uk",
@@ -142,13 +140,12 @@ class Movies @Inject() (
     }
     acc()
   }
-  
+
   def upcoming(): Seq[RTMovie] = {
     def acc(pageNum:Int = 1): Seq[RTMovie] = {
       logger.debug(s"Retreiving list of upcoming movies according to RT (page $pageNum)")
       val resp = Http("http://api.rottentomatoes.com/api/public/v1.0/lists/movies/upcoming.json")
-        .option(HttpOptions.connTimeout(30000))
-        .option(HttpOptions.readTimeout(30000))
+        .options(connTimeout(30000), readTimeout(30000))
         .params(
           "apikey" -> rottenTomatoesApiKey,
           "country"-> "uk",
@@ -167,8 +164,7 @@ class Movies @Inject() (
   def openingSoon(): Seq[RTMovie] = {
       logger.debug(s"Retreiving list of movies opening this coming week according to RT")
       val resp = Http("http://api.rottentomatoes.com/api/public/v1.0/lists/movies/opening.json")
-        .option(HttpOptions.connTimeout(30000))
-        .option(HttpOptions.readTimeout(30000))
+        .options(connTimeout(30000), readTimeout(30000))
         .params(
           "apikey" -> rottenTomatoesApiKey,
           "country"-> "uk",
@@ -201,8 +197,7 @@ class Movies @Inject() (
   protected[movies] def imdbRatingAndVotes_new(id:String): (Option[(Double,Int)]) = {
     logger.debug(s"Retreiving IMDb rating (v2) and votes for $id")
     val resp = Http("http://deanclatworthy.com/imdb/")
-      .option(HttpOptions.connTimeout(10000))
-      .option(HttpOptions.readTimeout(10000))
+      .options(connTimeout(10000), readTimeout(10000))
       .params(
         "id" -> id
       )
@@ -215,16 +210,19 @@ class Movies @Inject() (
       (parse(resp) \ "votes").extract[String].toInt
     ).toOption
     logger.debug(s"$id: $rating with $votes votes")
-    (rating,votes) match {
+    val res: Option[(Double, Int)] = (rating,votes) match {
       case (Some(r), Some(v)) => Option(r,v)
       case _ => None
     }
+//    import cats.
+//    val res2 = (rating, votes).sequence
+    res
   }
 
 
   private def curl(url: String) = Http(url)
-    .option(HttpOptions.connTimeout(30000))
-    .option(HttpOptions.readTimeout(30000))
+    .option(connTimeout(30000))
+    .option(readTimeout(30000))
     .asString.body
 
 }

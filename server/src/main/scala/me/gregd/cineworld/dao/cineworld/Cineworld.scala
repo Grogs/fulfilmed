@@ -15,7 +15,6 @@ import scala.concurrent.{Await, ExecutionContext}
 
 @Singleton
 class Cineworld @Inject() (
-                            @Named("cineworld.api-key") apiKey:String,
                             imdb: MovieDao,
                             tmdb: TheMovieDB,
                             dao: CineworldDao

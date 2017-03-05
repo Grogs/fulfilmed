@@ -10,7 +10,7 @@ import me.gregd.cineworld.pages.Index
 import org.joda.time.LocalDate
 import play.api.Environment
 import play.api.Mode._
-import play.api.libs.json.{Json, Writes}
+import play.api.libs.json.Json
 import play.api.mvc.Action
 import play.api.mvc.Results.Ok
 import play.mvc.Controller
@@ -56,22 +56,5 @@ class CinemaController @Inject() (env: Environment, dao: Cineworld, cinemaServic
       Index(scriptPaths).render
     ).as("text/html")
   )
-
-  def returnJson[T:Writes](t: => T) = Action(Ok(Json.toJson(t)))
-
-  def getDate(s: String): LocalDate = s match {
-    case "today" => new LocalDate
-    case "tomorrow" => new LocalDate() plusDays 1
-    case other => new LocalDate(other)
-  }
-
-  def getFilms(id: String, date: String) = returnJson {
-    dao.retrieveMovies(id, getDate(date))
-  }
-
-
-  def getPerformances(id: String, date: String) = returnJson {
-    dao.retrievePerformances(id, getDate(date))
-  }
 
 }

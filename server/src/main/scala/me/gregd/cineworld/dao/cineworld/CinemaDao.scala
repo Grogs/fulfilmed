@@ -1,11 +1,14 @@
 package me.gregd.cineworld.dao.cineworld
 
-import me.gregd.cineworld.domain.{Performance, Cinema, Movie}
+import com.google.inject.ImplementedBy
+import me.gregd.cineworld.domain.{Cinema, Movie, Performance}
 import me.gregd.cineworld.dao.movies.MovieDao
 import org.joda.time.LocalDate
 
+import scala.concurrent.Future
+
+@ImplementedBy(classOf[CachingCinemaDao])
 trait CinemaDao {
-  def retrieveCinemas(): List[Cinema]
-  def retrieveMovies(cinema:String, date: LocalDate)(implicit imdb: MovieDao): List[Movie]
-  def retrievePerformances(cinema: String, date: LocalDate): Map[String, Option[Seq[Performance]]]
+  def retrieveCinemas(): Future[Seq[Cinema]]
+  def retrieveMoviesAndPerformances(cinemaId: String, dateRaw: String): Future[Map[Movie, List[Performance]]]
 }

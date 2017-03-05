@@ -1,6 +1,6 @@
 package me.gregd.cineworld.util
 
-import me.gregd.cineworld.dao.cineworld.Cineworld
+import me.gregd.cineworld.dao.cineworld.CinemaDao
 
 object FilmsToWatch extends App {
 

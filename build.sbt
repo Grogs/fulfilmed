@@ -33,6 +33,7 @@ lazy val client = project.enablePlugins(ScalaJSPlugin, ScalaJSWeb).settings(
 lazy val server = project.settings(
   commonSettings,
   name := "fulfilmed",
+  dockerRepository := Some("grogs"),
   scalaJSProjects := Seq(client),
   pipelineStages in Assets := Seq(scalaJSPipeline),
   libraryDependencies ++= Seq(

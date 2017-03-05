@@ -71,8 +71,6 @@ class TheMovieDB @Inject()(@named("themoviedb.api-key") apiKey: String, ws: WSCl
     .onFailure(logger.error(s"Unable to retrieve alternate titles for $imdbId from TMDB", _: Throwable))
     .getOrElse(Nil)
 
-  def posterUrl(m: Movie): Option[String] = m.imdbId flatMap posterUrl
-
   def alternateTitles(m: Movie): Seq[String] = (m.imdbId map alternateTitles) getOrElse Nil
 
 }

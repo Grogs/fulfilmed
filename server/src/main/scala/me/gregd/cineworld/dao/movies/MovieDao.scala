@@ -10,8 +10,8 @@ trait MovieDao {
   def getIMDbRating(id:String) : Option[Double]
   def getVotes(id:String) : Option[Int]
 
-  def toMovie(film: Film): Future[Movie]
+  def toMovie(film: Film): Movie
 
-  def find(title: String): Future[Option[Movie]]
+  def find(title: String): Option[Movie]
 
 }

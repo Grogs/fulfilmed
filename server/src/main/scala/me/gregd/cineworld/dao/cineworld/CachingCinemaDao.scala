@@ -66,7 +66,7 @@ class CachingCinemaDao @Inject()(remoteCineworld: RemoteCinemaDao, actorSystem: 
 
     logger.info(s"querying for $cinema:$date")
 
-    Try(Await.result(listings.future, 2.seconds)) match {
+    Try(Await.result(listings.future, 1.seconds)) match {
       case Success(allListings) => allListings.get((cinema, date)) match {
         case Some(listings) =>
           logger.debug(s"Cache hit for $cinema:$date")

@@ -51,6 +51,7 @@ lazy val server = project.settings(
     "com.lihaoyi" %% "scalatags" % "0.5.4",
     "org.typelevel" %% "cats" % "0.9.0",
     ws,
+    filters,
     "org.scalatra" % "scalatra-scalatest_2.11" % "2.3.1" % "test",
     "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test,
     "org.scalatest" % "scalatest_2.11" % "1.9.1" % "test",

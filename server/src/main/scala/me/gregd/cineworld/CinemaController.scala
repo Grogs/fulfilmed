@@ -4,10 +4,8 @@ import javax.inject.Inject
 
 import autowire.Core.Request
 import grizzled.slf4j.Logging
-import me.gregd.cineworld.dao.cineworld.Cineworld
 import me.gregd.cineworld.domain.{Cinema, CinemaApi, Movie, Performance}
 import me.gregd.cineworld.pages.Index
-import org.joda.time.LocalDate
 import play.api.Environment
 import play.api.Mode._
 import play.api.libs.json.Json
@@ -20,7 +18,7 @@ import upickle.default.{Reader, Writer}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class CinemaController @Inject() (env: Environment, dao: Cineworld, cinemaService: CinemaService) extends Controller with Logging {
+class CinemaController @Inject() (env: Environment, cinemaService: CinemaService) extends Controller with Logging {
 
   implicit val cinemaFormat = Json.format[Cinema]
   implicit val performanceFormat = Json.format[Performance]

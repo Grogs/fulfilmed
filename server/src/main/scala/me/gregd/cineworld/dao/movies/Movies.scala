@@ -67,7 +67,7 @@ class Movies @Inject() (
     }
     val age = System.currentTimeMillis() - lastCached
     if (age.millis > 10.hours) refresh
-    Await.result(cachedMovies, 5.seconds)
+    Await.result(cachedMovies, 30.seconds)
   }
 
   def allMovies(): Future[Seq[Movie]] = {
@@ -108,7 +108,7 @@ class Movies @Inject() (
   def find(title: String): Option[Movie] = {
     val matc = allMoviesCached().maxBy(m => compareFunc(title,m.title))
     val weight = compareFunc(title, matc.title)
-    logger.info(s"Best match for $title was  ${matc.title} ($weight) - ${if (weight>minWeight) "ACCEPTED" else "REJECTED"}")
+    logger.debug(s"Best match for $title was  ${matc.title} ($weight) - ${if (weight>minWeight) "ACCEPTED" else "REJECTED"}")
     if (weight > minWeight) Option(matc) else None
   }
 

@@ -5,10 +5,11 @@ case class Movie (
   cineworldId: Option[String],
   format: Option[String],
   imdbId: Option[String],
+  tmdbId: Option[Double],
   rating: Option[Double],
   votes: Option[Int],
-  audienceRating: Option[Int],
-  criticRating: Option[Int],
+  tmdbRating: Option[Double],
+  tmdbVotes: Option[Int],
   posterUrl: Option[String]
 )
 

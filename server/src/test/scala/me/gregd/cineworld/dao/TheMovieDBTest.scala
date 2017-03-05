@@ -15,10 +15,6 @@ class TheMovieDBTest extends FunSuite with Matchers with OneAppPerSuite with Sca
     tmdb
   }
 
-  test("Get poster for tt2381991 (The Huntsmen sequel)") {
-    tmdb.posterUrl("2381991")
-  }
-
   test("Fetch now playing") {
     val actual = tmdb.fetchNowPlaying().futureValue
     actual should not be 'empty

@@ -1,6 +1,6 @@
 package me.gregd.cineworld
 
-import akka.stream.{ActorMaterializer, Materializer}
+import akka.stream.ActorMaterializer
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{FunSuite, Matchers}
 import org.scalatestplus.play.OneAppPerTest
@@ -9,7 +9,6 @@ import play.api.test.Helpers.{GET, OK, route, _}
 
 
 class SmokeTest extends FunSuite with Matchers with OneAppPerTest with ScalaFutures {
-
 
   test("Get list of cinemas") {
     implicit val materializer = ActorMaterializer()(app.actorSystem)

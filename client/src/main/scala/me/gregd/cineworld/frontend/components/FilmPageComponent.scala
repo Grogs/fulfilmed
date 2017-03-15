@@ -24,7 +24,7 @@ object FilmPageComponent {
       isLoading: Boolean,
       cinema: String,
       films: Map[Movie, List[Performance]],
-      sorts: List[Sort] = List(NextShowing, ImdbRating, RTCriticRating, RTAudienceRating),
+      sorts: List[Sort] = List(NextShowing, ImdbRating, TmdbRating, TmdbVotes),
       selectedSort: Sort = NextShowing,
       dates: List[Date] = List(Today, Tomorrow),
       selectedDate: Date = Today
@@ -33,8 +33,8 @@ object FilmPageComponent {
     case class Sort(key: String, description: String, ordering: Ordering[Entry])
     object NextShowing extends Sort("showtime", "Next Showing", Ordering.by{case (_, performances) => if (performances.isEmpty) "99:99" else performances.map(_.time).min})
     object ImdbRating extends Sort("imdb", "IMDb Rating (Descending)", Ordering.by{ e: Entry => e._1.rating.getOrElse(0.0)}.reverse)
-    object RTCriticRating extends Sort("critic", "RT Critic Rating (Descending)", Ordering.by{ e: Entry => e._1.criticRating.getOrElse(0)}.reverse)
-    object RTAudienceRating extends Sort("audience", "RT Audience Rating (Descending)", Ordering.by{ e: Entry => e._1.audienceRating.getOrElse(0)}.reverse)
+    object TmdbRating extends Sort("tmdb", "TheMovieDatabase Rating (Descending)", Ordering.by{ e: Entry => e._1.tmdbRating.getOrElse(0.0)}.reverse)
+    object TmdbVotes extends Sort("votes", "TheMovieDatabase Votes (Descending)", Ordering.by{ e: Entry => e._1.tmdbVotes.getOrElse(0)}.reverse)
 
     case class Date(key: String, text: String)
     object Today extends Date("today", "Today")
@@ -50,8 +50,8 @@ object FilmPageComponent {
               <.div(FilmsStyle.filmTitle, m.title),
               <.div(FilmsStyle.ratings,
                 <.div(FilmsStyle.imdb, <.a(^.href:=m.imdbId.map("http://www.imdb.com/title/tt" + _), m.rating)),
-                <.div(FilmsStyle.rt, m.criticRating),
-                <.div(FilmsStyle.rtAudience, m.audienceRating)
+                <.div(FilmsStyle.rt, m.tmdbRating),
+                <.div(FilmsStyle.rtAudience, m.tmdbVotes)
               ),
               <.div(FilmsStyle.times,
                 for (p <- pl) yield

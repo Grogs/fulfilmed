@@ -13,8 +13,10 @@ import org.feijoas.mango.common.cache.CacheBuilder
 import org.json4s._
 import org.json4s.native.JsonMethods._
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
-import scala.util.{Failure, Success, Try}
+import scala.concurrent.{Await, Future}
+import scala.util.Try
 import scalaj.http.Http
 import scalaj.http.HttpOptions.{connTimeout, readTimeout}
 
@@ -39,7 +41,7 @@ class Movies @Inject() (
     val format = Format.split(film.title)._1
     val movie: Movie = find(film.cleanTitle)
       .getOrElse(
-        Movie(film.cleanTitle, None, None, None, None, None, None, None, None)
+        Movie(film.cleanTitle, None, None, None, None, None, None, None, None, None)
       )
       .copy(
         title = film.title,
@@ -50,56 +52,52 @@ class Movies @Inject() (
     val imdbId = movie.imdbId map ("tt" + _)
     val rating = imdbId flatMap getIMDbRating
     val votes = imdbId flatMap getVotes
-    val posterUrl = Try(tmdb.posterUrl(movie)).toOption.flatten
-    posterUrl match {
-      case Some(newUrl) => logger.debug(s"Found highres poster in TMDD for '${movie.title}': $newUrl")
-      case None => logger.debug(s"Didn't find poster in TMDB postUrl for ${movie.title}")
-    }
     movie
       .copy(rating = rating, votes = votes)
-      //Use higher res poster for TMDB when available
-      .copy(posterUrl = posterUrl orElse movie.posterUrl)
   }
 
 
-  private var cachedMovies: Try[(Seq[Movie], Long)] = Failure(new UninitializedError)
+  private var cachedMovies: Future[Seq[Movie]] = Future.failed(new UninitializedError)
+  private var lastCached: Long = 0
   def allMoviesCached() = {
     def refresh = {
       logger.info(s"refreshing movies cache, old value:\n$cachedMovies")
-      cachedMovies = Try(allMovies()).map(_ -> System.currentTimeMillis())
-      cachedMovies.get._1
+      cachedMovies = allMovies()
+      lastCached = System.currentTimeMillis()
     }
-    cachedMovies match {
-      case Failure(_) =>
-        refresh
-      case Success((res, time)) =>
-        val age = System.currentTimeMillis() - time
-        if (age.millis > 10.hours) refresh else res
-    }
+    val age = System.currentTimeMillis() - lastCached
+    if (age.millis > 10.hours) refresh
+    Await.result(cachedMovies, 30.seconds)
   }
 
-  def allMovies(): Seq[Movie] = {
-    val movies = ( nowShowing ++ openingSoon ++ upcoming ) map { rt =>
-      Movie(
-        rt.title,
-        None,
-        None,
-        rt.alternate_ids.imdb,
-        None,
-        None,
-        rt.ratings.audience_score,
-        rt.ratings.critics_score,
-        None
-      )
+  def allMovies(): Future[Seq[Movie]] = {
+    for {
+      tmdbNowPlaying <- tmdb.fetchNowPlaying()
+    } yield {
+
+      val movies = tmdbNowPlaying.map{ m =>
+        Movie(
+          m.title,
+          None,
+          None,
+          None,
+          Option(m.id),
+          None,
+          None,
+          Option(m.vote_average),
+          Option(m.vote_count.toInt),
+          m.poster_path.map(tmdb.baseImageUrl + _)
+        )
+      }
+
+      val alternateTitles = for {
+        m <- movies
+        altTitle <- tmdb.alternateTitles(m)
+        _=logger.trace(s"Alternative title for ${m.title}: $altTitle")
+      } yield m.copy(title = altTitle)
+
+      (movies ++ alternateTitles) distinctBy (_.title)
     }
-
-    val alternateTitles = for {
-      m <- movies
-      altTitle <- tmdb.alternateTitles(m)
-      _=logger.trace(s"Alternative title for ${m.title}: $altTitle")
-    } yield m.copy(title = altTitle)
-
-    (movies ++ alternateTitles) distinctBy (_.title)
   }
 
   val compareFunc: (String, String) => Double =
@@ -110,74 +108,15 @@ class Movies @Inject() (
   def find(title: String): Option[Movie] = {
     val matc = allMoviesCached().maxBy(m => compareFunc(title,m.title))
     val weight = compareFunc(title, matc.title)
-    logger.info(s"Best match for $title was  ${matc.title} ($weight) - ${if (weight>minWeight) "ACCEPTED" else "REJECTED"}")
+    logger.debug(s"Best match for $title was  ${matc.title} ($weight) - ${if (weight>minWeight) "ACCEPTED" else "REJECTED"}")
     if (weight > minWeight) Option(matc) else None
-  }
-
-  /**
-   * Uses Rotten Tomatoes In Theaters api call to get a Seq all of movies in UK cinemas.
-   * Retrieves their IMDb ID, and audience/critic rating, as well as posters etc.
-   *
-   * Rotten tomatoes limits the call to 50 movies per page. So there isa  recursive call to retrieve all pages.
-   * @return
-   */
-  def nowShowing(): Seq[RTMovie] = {
-    def acc(pageNum:Int = 1): Seq[RTMovie] = {
-      logger.debug(s"Retreiving list of movies in threatres according to RT (page $pageNum)")
-      val resp = Http("http://api.rottentomatoes.com/api/public/v1.0/lists/movies/in_theaters.json")
-        .options(connTimeout(30000), readTimeout(30000))
-        .params(
-          "apikey" -> rottenTomatoesApiKey,
-          "country"-> "uk",
-          "page_limit" -> "50",
-          "page" -> pageNum.toString
-        )
-        .asString.body
-      logger.debug(s"RT in_theaters page $pageNum:\n$resp")
-      val json = parse(resp)
-      val movies = (json \ "movies").extract[Seq[RTMovie]]
-      if (movies.size < 50) movies else movies ++ acc(pageNum+1)
-    }
-    acc()
-  }
-
-  def upcoming(): Seq[RTMovie] = {
-    def acc(pageNum:Int = 1): Seq[RTMovie] = {
-      logger.debug(s"Retreiving list of upcoming movies according to RT (page $pageNum)")
-      val resp = Http("http://api.rottentomatoes.com/api/public/v1.0/lists/movies/upcoming.json")
-        .options(connTimeout(30000), readTimeout(30000))
-        .params(
-          "apikey" -> rottenTomatoesApiKey,
-          "country"-> "uk",
-          "page_limit" -> "50",
-          "page" -> pageNum.toString
-        )
-        .asString.body
-      logger.debug(s"RT upcoming page $pageNum:\n$resp")
-      val json = parse(resp)
-      val movies = (json \ "movies").extract[Seq[RTMovie]]
-      if (movies.size < 50) movies else movies ++ acc(pageNum+1)
-    }
-    acc()
-  }
-
-  def openingSoon(): Seq[RTMovie] = {
-      logger.debug(s"Retreiving list of movies opening this coming week according to RT")
-      val resp = Http("http://api.rottentomatoes.com/api/public/v1.0/lists/movies/opening.json")
-        .options(connTimeout(30000), readTimeout(30000))
-        .params(
-          "apikey" -> rottenTomatoesApiKey,
-          "country"-> "uk",
-          "limit" -> "50"
-        )
-        .asString.body
-      logger.debug(s"RT opening:\n$resp")
-      (parse(resp) \ "movies").extract[Seq[RTMovie]]
   }
 
   protected[movies] def imdbRatingAndVotes(id:String): (Option[(Double,Int)]) = {
     logger.debug(s"Retreiving IMDb rating and votes for $id")
-    val resp = curl(s"http://www.omdbapi.com/?i=$id")
+    val resp = Http(s"http://www.omdbapi.com/?i=$id")
+      .options(connTimeout(30000), readTimeout(30000))
+      .asString.body
     logger.debug(s"OMDb response for $id:\n$resp")
     val rating = Try(
       (parse(resp) \ "imdbRating").extract[String].toDouble
@@ -203,6 +142,7 @@ class Movies @Inject() (
       )
       .asString.body
     logger.debug(s"IMDB API response for $id:\n$resp")
+
     val rating = Try(
       (parse(resp) \ "rating").extract[String].toDouble
     ).toOption
@@ -214,15 +154,6 @@ class Movies @Inject() (
       case (Some(r), Some(v)) => Option(r,v)
       case _ => None
     }
-//    import cats.
-//    val res2 = (rating, votes).sequence
     res
   }
-
-
-  private def curl(url: String) = Http(url)
-    .option(connTimeout(30000))
-    .option(readTimeout(30000))
-    .asString.body
-
 }

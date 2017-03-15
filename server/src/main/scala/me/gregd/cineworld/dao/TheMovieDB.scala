@@ -3,6 +3,7 @@ package me.gregd.cineworld.dao
 import javax.inject.{Inject, Singleton, Named => named}
 
 import grizzled.slf4j.Logging
+import me.gregd.cineworld.dao.model.TmdbMovie
 import me.gregd.cineworld.domain.Movie
 import me.gregd.cineworld.util.Implicits._
 import org.json4s._
@@ -40,9 +41,11 @@ class TheMovieDB @Inject()(@named("themoviedb.api-key") apiKey: String, ws: WSCl
     parse(StringInput(resp.body))
   }
 
-  def fetchNowPlaying() = {
+  def fetchNowPlaying(): Future[List[TmdbMovie]] = {
     def acc(page: Int): Future[List[model.TmdbMovie]] = {
-      ws.url(s"$baseUrl/movie/now_playing?api_key=$apiKey&language=en-US&page=$page&region=GB")
+      val url = s"$baseUrl/movie/now_playing?api_key=$apiKey&language=en-US&page=$page&region=GB"
+      logger.info(s"Fetching now playing page $page")
+      ws.url(url)
         .get()
         .map(_.json.as[model.NowShowingResponse])
         .flatMap(resp =>
@@ -68,20 +71,7 @@ class TheMovieDB @Inject()(@named("themoviedb.api-key") apiKey: String, ws: WSCl
     .onFailure(logger.error(s"Unable to retrieve alternate titles for $imdbId from TMDB", _: Throwable))
     .getOrElse(Nil)
 
-  def posterUrl(m: Movie): Option[String] = m.imdbId flatMap posterUrl
-
   def alternateTitles(m: Movie): Seq[String] = (m.imdbId map alternateTitles) getOrElse Nil
-
-
-  def posterUrl(imdbId: String): Option[String] = Try {
-    val json = get(s"find/tt$imdbId", _.param("external_source", "imdb_id"))
-    logger.debug(json \ "movie_results" \ "poster_path")
-    val JString(imageName) = json \ "movie_results" \ "poster_path"
-    s"$baseImageUrl$imageName"
-  }
-    .onFailure(logger.error(s"Unable to retrieve poster for $imdbId from TMDB", _: Throwable))
-    .toOption
-
 
 }
 

@@ -1,8 +1,5 @@
 GET     /                          me.gregd.cineworld.CinemaController.index()
 
-GET     /cinema/:id/films/:date         me.gregd.cineworld.CinemaController.getFilms(id: String, date: String)
-GET     /cinema/:id/performances/:date  me.gregd.cineworld.CinemaController.getPerformances(id: String, date: String)
-
 GET     /api/*path                      me.gregd.cineworld.CinemaController.api(path)
 POST    /api/*path                      me.gregd.cineworld.CinemaController.api(path)
 

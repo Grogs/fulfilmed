@@ -2,7 +2,7 @@ import webscalajs.SourceMappings
 
 lazy val commonSettings = Seq(
   organization := "me.gregd",
-  version := "1.1",
+  version := "1.2",
   scalaVersion := "2.11.8"
 )
 
@@ -18,22 +18,17 @@ lazy val client = project.enablePlugins(ScalaJSPlugin, ScalaJSWeb).settings(
     "org.scala-js" %%% "scalajs-java-time" % "0.1.0"
   ),
   jsDependencies ++= Seq(
-    "org.webjars.bower" % "react" % "15.0.1"
-      / "react-with-addons.js"
-      minified "react-with-addons.min.js"
-      commonJSName "React",
-    "org.webjars.bower" % "react" % "15.0.1"
-      / "react-dom.js"
-      minified "react-dom.min.js"
-      dependsOn "react-with-addons.js"
-      commonJSName "ReactDOM"
-  )
+    "org.webjars.bower" % "react" % "15.0.1" / "react-with-addons.js" minified "react-with-addons.min.js" commonJSName "React",
+    "org.webjars.bower" % "react" % "15.0.1" / "react-dom.js" minified "react-dom.min.js" dependsOn "react-with-addons.js" commonJSName "ReactDOM"
+  ),
+  (emitSourceMaps in fullOptJS) := true
 ).dependsOn(sharedJs)
 
 
 lazy val server = project.settings(
   commonSettings,
   name := "fulfilmed",
+  dockerRepository := Some("grogs"),
   scalaJSProjects := Seq(client),
   pipelineStages in Assets := Seq(scalaJSPipeline),
   libraryDependencies ++= Seq(
@@ -57,6 +52,7 @@ lazy val server = project.settings(
     "com.lihaoyi" %% "scalatags" % "0.5.4",
     "org.typelevel" %% "cats" % "0.9.0",
     ws,
+    filters,
     "org.scalatra" % "scalatra-scalatest_2.11" % "2.3.1" % "test",
     "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test,
     "org.scalatest" % "scalatest_2.11" % "1.9.1" % "test",
@@ -88,18 +84,18 @@ lazy val shared = crossProject.crossType(CrossType.Pure).settings(
 lazy val sharedJvm = shared.jvm
 lazy val sharedJs = shared.js
 
-resolvers += "Sonatype OSS Releases" at "http://oss.sonatype.org/content/groups/public"
-
-resolvers += "mandubian-snapshots" at "http://github.com/mandubian/mandubian-mvn/raw/master/snapshots/"
-
-resolvers += "mandubian-releases" at "http://github.com/mandubian/mandubian-mvn/raw/master/releases/"
-
-resolvers += "typesafe-releases" at "http://repo.typesafe.com/typesafe/releases/"
-
-resolvers += "sonatype-snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
-
-resolvers += "sonatype-releases" at "http://oss.sonatype.org/content/repositories/releases"
-
-resolvers += "eclipse" at "http://download.eclipse.org/rt/eclipselink/maven.repo"
+//resolvers += "Sonatype OSS Releases" at "http://oss.sonatype.org/content/groups/public"
+//
+//resolvers += "mandubian-snapshots" at "http://github.com/mandubian/mandubian-mvn/raw/master/snapshots/"
+//
+//resolvers += "mandubian-releases" at "http://github.com/mandubian/mandubian-mvn/raw/master/releases/"
+//
+//resolvers += "typesafe-releases" at "http://repo.typesafe.com/typesafe/releases/"
+//
+//resolvers += "sonatype-snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
+//
+//resolvers += "sonatype-releases" at "http://oss.sonatype.org/content/repositories/releases"
+//
+//resolvers += "eclipse" at "http://download.eclipse.org/rt/eclipselink/maven.repo"
 
 onLoad in Global := (Command.process("project server", _: State)) compose (onLoad in Global).value

@@ -7,6 +7,7 @@ lazy val commonSettings = Seq(
 )
 
 lazy val client = project.enablePlugins(ScalaJSPlugin, ScalaJSWeb).settings(
+  commonSettings,
   persistLauncher := true,
   persistLauncher in Test := false,
   libraryDependencies ++= Seq(

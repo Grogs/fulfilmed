@@ -1,3 +1,4 @@
+import com.decodified.scalassh.{HostConfig, PublicKeyLogin, SSH, SshLogin}
 import webscalajs.SourceMappings
 
 lazy val commonSettings = Seq(
@@ -11,11 +12,12 @@ lazy val client = project.enablePlugins(ScalaJSPlugin, ScalaJSWeb).settings(
   persistLauncher := true,
   persistLauncher in Test := false,
   libraryDependencies ++= Seq(
+    "org.scala-js" %%% "scalajs-dom" % "0.9.1",
     "com.github.japgolly.scalajs-react" %%% "core" % "0.11.1",
     "com.github.japgolly.scalajs-react" %%% "extra" % "0.11.1",
     "com.github.japgolly.scalacss" %%% "core" % "0.4.0",
     "com.github.japgolly.scalacss" %%% "ext-react" % "0.4.0",
-    "org.scala-js" %%% "scalajs-java-time" % "0.1.0"
+    "org.scala-js" %%% "scalajs-java-time" % "0.2.0"
   ),
   jsDependencies ++= Seq(
     "org.webjars.bower" % "react" % "15.0.1" / "react-with-addons.js" minified "react-with-addons.min.js" commonJSName "React",
@@ -31,6 +33,8 @@ lazy val server = project.settings(
   dockerRepository := Some("grogs"),
   scalaJSProjects := Seq(client),
   pipelineStages in Assets := Seq(scalaJSPipeline),
+  WebKeys.packagePrefix in Assets := "public/",
+  managedClasspath in Runtime += (packageBin in Assets).value,
   libraryDependencies ++= Seq(
     "org.scala-lang" % "scala-library" % "2.11.7",
     "org.scala-lang" % "scala-compiler" % "2.11.7",
@@ -84,18 +88,50 @@ lazy val shared = crossProject.crossType(CrossType.Pure).settings(
 lazy val sharedJvm = shared.jvm
 lazy val sharedJs = shared.js
 
-//resolvers += "Sonatype OSS Releases" at "http://oss.sonatype.org/content/groups/public"
-//
-//resolvers += "mandubian-snapshots" at "http://github.com/mandubian/mandubian-mvn/raw/master/snapshots/"
-//
-//resolvers += "mandubian-releases" at "http://github.com/mandubian/mandubian-mvn/raw/master/releases/"
-//
-//resolvers += "typesafe-releases" at "http://repo.typesafe.com/typesafe/releases/"
-//
-//resolvers += "sonatype-snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
-//
-//resolvers += "sonatype-releases" at "http://oss.sonatype.org/content/repositories/releases"
-//
-//resolvers += "eclipse" at "http://download.eclipse.org/rt/eclipselink/maven.repo"
-
 onLoad in Global := (Command.process("project server", _: State)) compose (onLoad in Global).value
+
+
+lazy val dokkuHost = settingKey[String]("Host for Dokku deployment")
+lazy val dokkuUser = settingKey[String]("Remote Dokku user (normally 'dokku')")
+lazy val dokkuApp = settingKey[String]("Your Dokku app name")
+lazy val dokkuVersion = settingKey[String]("Dokku app version - defaults to project version")
+lazy val dokkuLogin = settingKey[SshLogin]("SSH Login for Dokku deployment")
+lazy val dokkuHostConfig = settingKey[HostConfig]("Host config for Dokku deployment")
+lazy val dokkuDeploy = taskKey[Unit]("Deploy docker image with dokku")
+
+
+
+dokkuUser := "root"
+dokkuVersion := version.value
+dokkuLogin := PublicKeyLogin(dokkuUser.value)
+
+dokkuHostConfig := HostConfig(dokkuLogin.value, dokkuHost.value)
+
+dokkuApp := "fulfilmed"
+
+dokkuHost := "fulfilmed.com"
+
+dokkuDeploy <<= (dokkuHost, dokkuHostConfig, dokkuApp, dokkuVersion, target in Docker, streams) map {
+  (host, hostConfig, app, version, dockerTag, streams) =>
+    import streams.log
+
+    val tagCmd = s"echo docker tag $dockerTag dokku/$app:$version"
+    val deployCmd = s"echo dokku tags:deploy $app $version"
+
+    SSH(host, hostConfig) { client =>
+      val res = for {
+        _ <- Right(log.info("Tagging docker image")).right
+        _ <- client.execPTY(tagCmd).right
+        _ <- Right(log.info("Deploying")).right
+        _ <- client.execPTY(deployCmd).right
+      } yield ()
+
+      res
+    }
+    ()
+}
+
+
+
+
+

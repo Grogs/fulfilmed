@@ -25,14 +25,13 @@ class Movies @Inject() (
                          @named("rotten-tomatoes.api-key") rottenTomatoesApiKey:String,
                          tmdb: TheMovieDB
                        ) extends MovieDao with Logging {
-  
+
   implicit val formats = DefaultFormats
 
   val imdbCache = CacheBuilder.newBuilder()
     .refreshAfterWrite(24, TimeUnit.HOURS)
     .build( (id:String) => imdbRatingAndVotes(id) orElse imdbRatingAndVotes_new(id) )
 
-  def getId(title:String) = find(title).flatMap(_.imdbId)
   def getIMDbRating(id:String) = imdbCache(id ).map(_._1)
   def getVotes(id:String) = imdbCache(id).map(_._2)
 

@@ -1,18 +1,17 @@
 package me.gregd.cineworld.dao.cineworld
 
 import java.time.LocalDate
+import java.time.LocalDate.now
 import javax.inject.{Inject, Singleton}
 
-import cats.instances.future._
-import cats.instances.tuple._
-import cats.syntax.bitraverse._
 import grizzled.slf4j.Logging
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.movies.MovieDao
-import me.gregd.cineworld.domain.{Movie, Performance}
 import org.json4s._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.util.{Success, Try}
 
 
 @Singleton
@@ -23,12 +22,17 @@ class RemoteCinemaDao @Inject()(
                                ) extends CinemaDao with Logging {
   val decode = java.net.URLDecoder.decode(_: String, "UTF-8")
   implicit val formats = DefaultFormats
-  implicit val ec = ExecutionContext.global
 
-  private def getDate(s: String): LocalDate = s match {
-    case "today" => LocalDate.now()
-    case "tomorrow" => LocalDate.now() plusDays 1
-    case other => LocalDate.parse(s)
+  private def getDate(s: String): Try[LocalDate] = {
+    val res = s match {
+      case "today" => Success(now())
+      case "tomorrow" => Success(now() plusDays 1)
+      case other => Try(LocalDate.parse(s))
+    }
+    res.filter { date =>
+      val fromToday = date.toEpochDay - now().toEpochDay
+      fromToday >= 0 && fromToday < 7
+    }
   }
 
 
@@ -44,12 +48,12 @@ class RemoteCinemaDao @Inject()(
         movieResp <- rawMovies
         (film, allPerformances) <- CineworldRepository.toMovie(cinemaId, movieResp)
         movie = imdb.toMovie(film)
-        performances = allPerformances.getOrElse(getDate(dateRaw), Nil).toList
+        date = getDate(dateRaw).get
+        performances = allPerformances.getOrElse(date, Nil).toList
         if performances.nonEmpty
-        performancesF = performances
-        res = movie -> performancesF
         _ = logger.debug(s"Retrieved listings for $cinemaId:$dateRaw:${film.id}")
-      } yield res
+      } yield
+        movie -> performances
       res.toMap
     }
   }

@@ -1,7 +1,7 @@
 package me.gregd.cineworld.dao.cineworld
 
 import java.lang.management.ManagementFactory
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Inject, Named, Singleton}
 import javax.management.ObjectName
 
 import akka.actor.ActorSystem
@@ -66,20 +66,13 @@ class CachingCinemaDao @Inject()(remoteCineworld: RemoteCinemaDao, actorSystem: 
 
     logger.info(s"querying for $cinema:$date")
 
-    Try(Await.result(listings.future, 1.seconds)) match {
-      case Success(allListings) => allListings.get((cinema, date)) match {
-        case Some(listings) =>
-          logger.debug(s"Cache hit for $cinema:$date")
-          Future.successful(listings)
-        case None =>
-          logger.debug(s"Cache miss for $cinema:$date")
-          fallback()
+    listings.future
+      .collect{ case all if all contains (cinema, date) =>
+        all((cinema, date))
       }
-      case Failure(ex) =>
-        logger.error(s"exception from cache for $cinema:$date", ex)
+      .recoverWith{case _ =>
         fallback()
-    }
-
+      }
   }
 
 }

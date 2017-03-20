@@ -1,4 +1,5 @@
 import com.decodified.scalassh.{HostConfig, PublicKeyLogin, SSH, SshLogin}
+import com.decodified.scalassh.HostKeyVerifiers.DontVerify
 import webscalajs.SourceMappings
 
 lazy val commonSettings = Seq(
@@ -105,7 +106,7 @@ dokkuUser := "root"
 dokkuVersion := version.value
 dokkuLogin := PublicKeyLogin(dokkuUser.value)
 
-dokkuHostConfig := HostConfig(dokkuLogin.value, dokkuHost.value)
+dokkuHostConfig := HostConfig(dokkuLogin.value)
 
 dokkuApp := "fulfilmed"
 
@@ -119,11 +120,23 @@ dokkuDeploy <<= (dokkuHost, dokkuHostConfig, dokkuApp, dokkuVersion, target in D
     val deployCmd = s"echo dokku tags:deploy $app $version"
 
     SSH(host, hostConfig) { client =>
+
+      def exec(tagCmd: String) = {
+        val res = client.execPTY(tagCmd)
+        res match {
+          case Left(failure) =>
+            log.error(failure)
+          case Right(success) =>
+            println(success.stdOutAsString())
+        }
+        res.right
+      }
+
       val res = for {
         _ <- Right(log.info("Tagging docker image")).right
-        _ <- client.execPTY(tagCmd).right
+        _ <- exec(tagCmd)
         _ <- Right(log.info("Deploying")).right
-        _ <- client.execPTY(deployCmd).right
+        _ <- exec(deployCmd)
       } yield ()
 
       res

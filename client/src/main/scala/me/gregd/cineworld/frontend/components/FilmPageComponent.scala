@@ -1,17 +1,17 @@
 package me.gregd.cineworld.frontend.components
 
-import japgolly.scalajs.react.{BackendScope, Callback, ReactComponentB, SyntheticEvent}
-import japgolly.scalajs.react.vdom.prefix_<^._
-import me.gregd.cineworld.domain.{CinemaApi, Movie, Performance}
-import me.gregd.cineworld.frontend._
-import org.scalajs.dom.html.Select
 import autowire._
-import japgolly.scalajs.react.CompScope.DuringCallbackM
+import japgolly.scalajs.react.vdom.prefix_<^._
+import japgolly.scalajs.react.{BackendScope, Callback, ReactComponentB, SyntheticEvent}
+import me.gregd.cineworld.ServerCinemaApi
+import me.gregd.cineworld.domain.{Movie, Performance}
+import me.gregd.cineworld.frontend._
+import org.scalajs.dom.document
+import org.scalajs.dom.html.Select
 
 import scala.collection.immutable.List
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scalacss.StyleA
-import org.scalajs.dom.document
 
 object FilmPageComponent {
   type Entry = (Movie, List[Performance])
@@ -127,7 +127,7 @@ object FilmPageComponent {
         isLoading = true, films = Map.empty,
         selectedDate = date, cinema = cinema
       ))
-      val res = Client[CinemaApi].getMoviesAndPerformances(cinema, date.key).call()
+      val res = Client[ServerCinemaApi].getMoviesAndPerformances(cinema, date.key).call()
       val updateMovies = for (movies <- res)
         yield $.modState(_.copy(isLoading = false, films = movies))
       clearAndUpdate >> Callback.future(updateMovies)

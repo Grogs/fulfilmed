@@ -1,10 +1,11 @@
 package me.gregd.cineworld.dao.cineworld
 
+import java.time.LocalDate.now
 import javax.inject.{Inject, Singleton}
 
-import akka.actor.ActorSystem
 import grizzled.slf4j.Logging
 import me.gregd.cineworld.domain._
+import monix.execution.Scheduler
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -12,41 +13,42 @@ import scala.concurrent.duration._
 import scala.util.{Failure, Random, Success}
 
 @Singleton
-class CachingCinemaDao @Inject()(remoteCineworld: RemoteCinemaDao, actorSystem: ActorSystem) extends CinemaDao with Logging {
+class CachingCinemaDao @Inject()(remoteCineworld: RemoteCinemaDao, scheduler: Scheduler) extends CinemaDao with Logging {
 
   type Listings = Map[(String, String), Map[Movie, List[Performance]]]
 
   private var cinemas: Future[Seq[Cinema]] = remoteCineworld.retrieveCinemas()
   private var listings: Future[Listings] = fetchListings(cinemas)
 
-
   def run(): Unit = {
     val someMinutes = (1.hour.toMinutes + Random.nextInt(1.hour.toMinutes.toInt)).seconds
-    actorSystem.scheduler.scheduleOnce(someMinutes) {
+    scheduler.scheduleOnce(someMinutes) {
       refresh()
       run()
     }
   }
 
   logger.info("Scheduling refresh")
-  actorSystem.scheduler.scheduleOnce(5.seconds)(run())
+  scheduler.scheduleOnce(5.seconds)(run())
 
-  private def fetchListings(eventualCinemas: Future[Seq[Cinema]]): Future[Listings] = {
+  protected def fetchListings(eventualCinemas: Future[Seq[Cinema]]): Future[Listings] = {
     (
       for {
         cinemas <- eventualCinemas
-      } yield for {
-        cinema <- cinemas
-        day <- List("today", "tomorrow")
-        _ = logger.debug(s"Retrieving listings for ${cinema.id} / $day")
-        listings = remoteCineworld.retrieveMoviesAndPerformances(cinema.id, day)
-      } yield for {
-        ls <- listings
-      } yield ((cinema.id, day), ls)
-      ).map(Future.sequence(_)).flatMap(identity).map(_.toMap)
+      } yield
+        for {
+          cinema <- cinemas
+          day <- (0 to 2).map( now plusDays _ toString )
+          _ = logger.debug(s"Retrieving listings for ${cinema.id} / $day")
+          listings = remoteCineworld.retrieveMoviesAndPerformances(cinema.id, day)
+        } yield
+          for {
+            ls <- listings
+          } yield ((cinema.id, day), ls)
+    ).map(Future.sequence(_)).flatMap(identity).map(_.toMap)
   }
 
-  private def refreshCinemas() = {
+  protected def refreshCinemas() = {
     logger.info("Refreshing cinema")
 
     val next = for {
@@ -65,7 +67,7 @@ class CachingCinemaDao @Inject()(remoteCineworld: RemoteCinemaDao, actorSystem: 
     next
   }
 
-  private def refreshListings(eventualCinemas: Future[Seq[Cinema]]) = {
+  protected def refreshListings(eventualCinemas: Future[Seq[Cinema]]) = {
     logger.info("Refreshing listings")
 
     val next = for {
@@ -86,18 +88,19 @@ class CachingCinemaDao @Inject()(remoteCineworld: RemoteCinemaDao, actorSystem: 
   }
 
   def refresh(): Future[Unit] = {
-    refreshListings(refreshCinemas()).map(_=>())
+    refreshListings(refreshCinemas()).map(_ => ())
   }
 
   def retrieveCinemas() = cinemas orElse refreshCinemas()
 
   def retrieveMoviesAndPerformances(cinema: String, date: String) = {
-    def forRequest(l: Listings) = l((cinema, date))
+    def forRequest(l: Listings) =
+      l((cinema, date))
     listings.map(forRequest) orElse refreshListings(cinemas).map(forRequest)
   }
 
-  implicit class FutureUtil[T](f1: => Future[T]) {
-    def orElse(f2: Future[T]): Future[T] = {
+  implicit class FutureUtil[T](f1: Future[T]) {
+    def orElse(f2: => Future[T]): Future[T] = {
       if (f1.isCompleted && f1.value.get.isFailure) {
         f2
       } else {

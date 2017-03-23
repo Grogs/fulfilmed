@@ -79,9 +79,9 @@ lazy val server = project.settings(
 
 lazy val shared = crossProject.crossType(CrossType.Pure).settings(
   libraryDependencies ++= Seq(
-    "com.lihaoyi" %%% "upickle" % "0.3.6",
-    "com.lihaoyi" %%% "autowire" % "0.2.4",
-    "com.lihaoyi" %%% "scalatags" % "0.5.2",
+    "com.lihaoyi" %%% "upickle" % "0.4.3",
+    "com.lihaoyi" %%% "autowire" % "0.2.6",
+    "com.lihaoyi" %%% "scalatags" % "0.6.3",
     "fr.hmil" %%% "roshttp" % "1.0.0"
   ),
   commonSettings

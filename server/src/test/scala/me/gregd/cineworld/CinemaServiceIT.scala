@@ -1,11 +1,10 @@
 package me.gregd.cineworld
 
-import me.gregd.cineworld.dao.cineworld.CineworldRepository$
 import org.scalatest.FunSuite
 import play.api.test.FakeApplication
 
-import scala.concurrent.{Await, ExecutionContext}
 import scala.concurrent.duration._
+import scala.concurrent.{Await, ExecutionContext}
 
 /**
   * Created by grogs on 17/07/2016.

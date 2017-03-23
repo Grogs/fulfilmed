@@ -51,7 +51,7 @@ class RemoteCinemaDao @Inject()(
         date = getDate(dateRaw).get
         performances = allPerformances.getOrElse(date, Nil).toList
         if performances.nonEmpty
-        _ = logger.debug(s"Retrieved listings for $cinemaId:$dateRaw:${film.id}")
+        _ = logger.info(s"Retrieved listings for $cinemaId:$dateRaw:${film.id}")
       } yield
         movie -> performances
       res.toMap

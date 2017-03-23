@@ -47,11 +47,15 @@ object CineworldRepository {
 
   def toMovie(cinemaId: String, movieResp: MovieResp): Map[Film, Map[LocalDate, Seq[Performance]]] =
     movieResp.TYPD.map { typ =>
-      val img = s"https://www.cineworld.co.uk/xmedia-cw/repo/feats/posters/${movieResp.code}.jpg"
       val showings = movieResp.BD.map(toPerformances(cinemaId)).toMap
-      val film = Film(movieResp.code, movieResp.n, img)
+      val film: Film = toFilm(movieResp)
       film -> showings
     }.toMap
+
+  def toFilm(movieResp: MovieResp): Film = {
+    val img = s"https://www.cineworld.co.uk/xmedia-cw/repo/feats/posters/${movieResp.code}.jpg"
+    Film(movieResp.code, movieResp.n, img)
+  }
 
   def toPerformances(cinemaId: String)(day: Day): (LocalDate, Seq[Performance]) = {
     val date = LocalDate.parse(day.date, DateTimeFormatter.ofPattern("dd/MM/yyyy"))

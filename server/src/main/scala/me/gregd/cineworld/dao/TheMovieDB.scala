@@ -23,7 +23,7 @@ class TheMovieDB @Inject()(@named("themoviedb.api-key") apiKey: String, ws: WSCl
   protected implicit val formats = DefaultFormats
 
   val baseUrl = "http://api.themoviedb.org/3"
-  val baseImageUrl = {
+  lazy val baseImageUrl = {
     val json = get("configuration")
     (json \ "images" \ "base_url").extract[String] + "w300"
   }

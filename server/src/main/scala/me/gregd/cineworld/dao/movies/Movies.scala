@@ -21,10 +21,7 @@ import scalaj.http.Http
 import scalaj.http.HttpOptions.{connTimeout, readTimeout}
 
 @Singleton
-class Movies @Inject() (
-                         @named("rotten-tomatoes.api-key") rottenTomatoesApiKey:String,
-                         tmdb: TheMovieDB
-                       ) extends MovieDao with Logging {
+class Movies @Inject()(tmdb: TheMovieDB) extends MovieDao with Logging {
 
   implicit val formats = DefaultFormats
 
@@ -54,7 +51,6 @@ class Movies @Inject() (
     movie
       .copy(rating = rating, votes = votes)
   }
-
 
   private var cachedMovies: Future[Seq[Movie]] = Future.failed(new UninitializedError)
   private var lastCached: Long = 0

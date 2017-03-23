@@ -34,7 +34,7 @@ lazy val server = project.settings(
   scalaJSProjects := Seq(client),
   pipelineStages in Assets := Seq(scalaJSPipeline),
   WebKeys.packagePrefix in Assets := "public/",
-  managedClasspath in Runtime += (packageBin in Assets).value,
+//  managedClasspath in Runtime += (packageBin in Assets).value,
   libraryDependencies ++= Seq(
     "org.scala-lang" % "scala-library" % "2.11.7",
     "org.scala-lang" % "scala-compiler" % "2.11.7",
@@ -55,12 +55,13 @@ lazy val server = project.settings(
     "org.feijoas" % "mango_2.11" % "0.11", // exclude("jsr305"),
     "com.lihaoyi" %% "scalatags" % "0.5.4",
     "org.typelevel" %% "cats" % "0.9.0",
+    "io.monix" %% "monix" % "2.2.2",
     ws,
     filters,
-    "org.scalatra" % "scalatra-scalatest_2.11" % "2.3.1" % "test",
+    "org.scalatra" % "scalatra-scalatest_2.11" % "2.3.1" % Test,
     "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test,
-    "org.scalatest" % "scalatest_2.11" % "1.9.1" % "test",
-
+    "org.scalatest" % "scalatest_2.11" % "1.9.1" % Test,
+    "com.lihaoyi" %% "pprint" % "0.4.3" % Test,
 
     "com.vmunier" %% "scalajs-scripts" % "1.0.0"
 

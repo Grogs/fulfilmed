@@ -3,7 +3,7 @@ package me.gregd.cineworld.dao
 import javax.inject.{Inject, Singleton, Named => named}
 
 import grizzled.slf4j.Logging
-import me.gregd.cineworld.dao.model.TmdbMovie
+import me.gregd.cineworld.dao.model.{NowShowingResponse, TmdbMovie}
 import me.gregd.cineworld.domain.Movie
 import me.gregd.cineworld.util.Implicits._
 import org.json4s._
@@ -41,35 +41,28 @@ class TheMovieDB @Inject()(@named("themoviedb.api-key") apiKey: String, ws: WSCl
     parse(StringInput(resp.body))
   }
 
-  def fetchNowPlaying(): Future[List[TmdbMovie]] = {
-    def acc(page: Int): Future[List[model.TmdbMovie]] = {
-      val url = s"$baseUrl/movie/now_playing?api_key=$apiKey&language=en-US&page=$page&region=GB"
-      logger.info(s"Fetching now playing page $page")
-      ws.url(url)
-        .get()
-        .map(_.json.as[model.NowShowingResponse])
-        .flatMap(resp =>
-          if (resp.page < resp.total_pages) {
-            val rest = acc(page + 1)
-            rest.map(resp.results ++ _)
-          } else {
-            Future.successful(resp.results)
-          }
-        )
-    }
-    acc(1)
+  def fetchNowPlaying(): Future[Seq[TmdbMovie]] = {
+    Future.traverse(1 to 10)(fetchPage).map(_.flatMap(_.results))
   }
 
-  def alternateTitles(imdbId: String): Seq[String] = Try {
-    val json = get(s"movie/tt$imdbId/alternative_titles")
-    val titles = json \ "titles" \ "title"
-    titles
-      .extractOrElse[Seq[String]](
-      Seq(titles.extract[String])
-    )
+  private def fetchPage(page: Int) = {
+    val url = s"$baseUrl/movie/now_playing?api_key=$apiKey&language=en-US&page=$page&region=GB"
+    logger.info(s"Fetching now playing page $page")
+    ws.url(url)
+      .get()
+      .map(_.json.as[NowShowingResponse])
   }
-    .onFailure(logger.error(s"Unable to retrieve alternate titles for $imdbId from TMDB", _: Throwable))
-    .getOrElse(Nil)
+
+  def alternateTitles(imdbId: String): Seq[String] =
+    Try {
+      val json = get(s"movie/tt$imdbId/alternative_titles")
+      val titles = json \ "titles" \ "title"
+      titles
+        .extractOrElse[Seq[String]](
+          Seq(titles.extract[String])
+        )
+    }.onFailure(logger.error(s"Unable to retrieve alternate titles for $imdbId from TMDB", _: Throwable))
+      .getOrElse(Nil)
 
   def alternateTitles(m: Movie): Seq[String] = (m.imdbId map alternateTitles) getOrElse Nil
 
@@ -77,7 +70,20 @@ class TheMovieDB @Inject()(@named("themoviedb.api-key") apiKey: String, ws: WSCl
 
 package model {
 
-  case class TmdbMovie(poster_path: Option[String], adult: Boolean, overview: String, release_date: String, genre_ids: List[Double], id: Double, original_title: String, original_language: String, title: String, backdrop_path: Option[String], popularity: Double, vote_count: Double, video: Boolean, vote_average: Double)
+  case class TmdbMovie(poster_path: Option[String],
+                       adult: Boolean,
+                       overview: String,
+                       release_date: String,
+                       genre_ids: List[Double],
+                       id: Double,
+                       original_title: String,
+                       original_language: String,
+                       title: String,
+                       backdrop_path: Option[String],
+                       popularity: Double,
+                       vote_count: Double,
+                       video: Boolean,
+                       vote_average: Double)
 
   case class DateRange(maximum: String, minimum: String)
 
@@ -94,6 +100,5 @@ package model {
   object NowShowingResponse {
     implicit val nowShowingRespFormat: Reads[model.NowShowingResponse] = Json.reads[model.NowShowingResponse]
   }
-
 
 }

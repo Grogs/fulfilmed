@@ -1,10 +1,10 @@
 package me.gregd.cineworld.dao.cineworld
 
-import java.time.LocalDate.now
 import javax.inject.{Inject, Singleton}
 
 import grizzled.slf4j.Logging
 import me.gregd.cineworld.domain._
+import me.gregd.cineworld.util.Clock
 import monix.execution.Scheduler
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -13,7 +13,7 @@ import scala.concurrent.duration._
 import scala.util.{Failure, Random, Success}
 
 @Singleton
-class CachingCinemaDao @Inject()(remoteCineworld: RemoteCinemaDao, scheduler: Scheduler) extends CinemaDao with Logging {
+class CachingCinemaDao @Inject()(remoteCineworld: RemoteCinemaDao, scheduler: Scheduler, clock: Clock) extends CinemaDao with Logging {
 
   type Listings = Map[(String, String), Map[Movie, List[Performance]]]
 
@@ -38,7 +38,7 @@ class CachingCinemaDao @Inject()(remoteCineworld: RemoteCinemaDao, scheduler: Sc
       } yield
         for {
           cinema <- cinemas
-          day <- (0 to 2).map( now plusDays _ toString )
+          day <- (0 to 2).map( clock.today() plusDays _ toString )
           _ = logger.debug(s"Retrieving listings for ${cinema.id} / $day")
           listings = remoteCineworld.retrieveMoviesAndPerformances(cinema.id, day)
         } yield

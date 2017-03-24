@@ -1,13 +1,13 @@
 package me.gregd.cineworld.dao.cineworld
 
 import java.time.LocalDate
-import java.time.LocalDate.now
 import javax.inject.{Inject, Singleton}
 
 import grizzled.slf4j.Logging
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.movies.MovieDao
 import me.gregd.cineworld.domain.{Cinema, Movie, Performance}
+import me.gregd.cineworld.util.Clock
 import org.json4s._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -18,7 +18,8 @@ import scala.util.Try
 class RemoteCinemaDao @Inject()(
     imdb: MovieDao,
     tmdb: TheMovieDB,
-    dao: CineworldRepository
+    dao: CineworldRepository,
+    clock: Clock
 ) extends CinemaDao
     with Logging {
 
@@ -28,7 +29,7 @@ class RemoteCinemaDao @Inject()(
   private def getDate(s: String): Try[LocalDate] = {
     Try(LocalDate.parse(s))
       .filter { date =>
-        val fromToday = date.toEpochDay - now().toEpochDay
+        val fromToday = date.toEpochDay - clock.today().toEpochDay
         fromToday >= 0 && fromToday <= 7
       }
   }

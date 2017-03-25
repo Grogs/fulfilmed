@@ -40,7 +40,7 @@ class CachingCinemaDao @Inject()(remoteCineworld: RemoteCinemaDao, scheduler: Sc
       } yield
         for {
           cinema <- cinemas
-          day <- (0 to 2).map( clock.today() plusDays _ toString )
+          day <- (0 to 2).map(clock.today() plusDays _ toString)
           _ = logger.debug(s"Retrieving listings for ${cinema.id} / $day")
           listings = remoteCineworld.retrieveMoviesAndPerformances(cinema.id, day)
         } yield
@@ -96,9 +96,8 @@ class CachingCinemaDao @Inject()(remoteCineworld: RemoteCinemaDao, scheduler: Sc
   def retrieveCinemas() = cinemas orElse refreshCinemas()
 
   def retrieveMoviesAndPerformances(cinema: String, date: String) = {
-    def forRequest(l: Listings) =
-      l((cinema, date))
-    listings.map(forRequest) orElse refreshListings(cinemas).map(forRequest)
+    def forRequest(l: Listings) = l((cinema, date))
+    (listings orElse refreshListings(cinemas)).map(forRequest)
   }
 
 }

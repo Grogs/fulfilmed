@@ -1,16 +1,13 @@
 package me.gregd.cineworld.frontend.components
 
 import scalacss.Defaults._
-import scalacss.ValueT.Color
-import scalacss.ext.CssReset.webkitAppearance
-import scalacss.{Attrs, Length, ValueT}
 
 object FilmsStyle extends StyleSheet.Inline {
 
   import dsl._
 
-  def textShadow[X, Y, Blur](offsetX: Length[X], offsetY: Length[Y], blurRadius: Length[Blur], color: ValueT[Color]) =
-    Attrs.textShadow := List[ {def value: scalacss.Value}](offsetX, offsetY, blurRadius, color).map(_.value).mkString(" ")
+//  def textShadow[X, Y, Blur](offsetX: Length[X], offsetY: Length[Y], blurRadius: Length[Blur], color: Color) =
+//    Attrs.textShadow := List[ {def value: scalacss.Value}](offsetX, offsetY, blurRadius, color).map(_.value).mkString(" ")
 
   val filmListContainer= style(
     textAlign.center,
@@ -47,7 +44,7 @@ object FilmsStyle extends StyleSheet.Inline {
     lineHeight(20.px),
     color.white,
     minWidth(190.px),
-    webkitAppearance := "none",
+//    webkitAppearance := "none",
     background := "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='50.px' height='50.px'><polyline points='46.139,15.518 25.166,36.49 4.193,15.519' fill='white'/></svg>\") right no-repeat",
     backgroundColor(Color("#640F0F")),
     backgroundPosition := "right 10px top 9px",
@@ -107,7 +104,7 @@ object FilmsStyle extends StyleSheet.Inline {
     fontSize(36.px),
     color(Color("#E5E5E5")),
     lineHeight(44.px),
-    textShadow(0.px, 1.px, 9.px, rgba(0,0,0,1)),
+//    textShadow(0.px, 1.px, 9.px, rgba(0,0,0,1)),
     textAlign.center,
     marginTop(20.px)
   )

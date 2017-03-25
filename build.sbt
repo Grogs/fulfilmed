@@ -14,15 +14,16 @@ lazy val client = project.enablePlugins(ScalaJSPlugin, ScalaJSWeb).settings(
   persistLauncher in Test := false,
   libraryDependencies ++= Seq(
     "org.scala-js" %%% "scalajs-dom" % "0.9.1",
-    "com.github.japgolly.scalajs-react" %%% "core" % "0.11.1",
-    "com.github.japgolly.scalajs-react" %%% "extra" % "0.11.1",
-    "com.github.japgolly.scalacss" %%% "core" % "0.4.0",
-    "com.github.japgolly.scalacss" %%% "ext-react" % "0.4.0",
+    "com.github.japgolly.scalajs-react" %%% "core" % "1.0.0-RC1",
+    "com.github.japgolly.scalajs-react" %%% "extra" % "1.0.0-RC1",
+    "com.github.japgolly.scalacss" %%% "core" % "0.5.1",
+    "com.github.japgolly.scalacss" %%% "ext-react" % "0.5.1",
     "org.scala-js" %%% "scalajs-java-time" % "0.2.0"
   ),
   jsDependencies ++= Seq(
-    "org.webjars.bower" % "react" % "15.0.1" / "react-with-addons.js" minified "react-with-addons.min.js" commonJSName "React",
-    "org.webjars.bower" % "react" % "15.0.1" / "react-dom.js" minified "react-dom.min.js" dependsOn "react-with-addons.js" commonJSName "ReactDOM"
+    "org.webjars.bower" % "react" % "15.4.2" / "react-with-addons.js" minified "react-with-addons.min.js" commonJSName "React",
+    "org.webjars.bower" % "react" % "15.4.2" / "react-dom.js" minified "react-dom.min.js" dependsOn "react-with-addons.js" commonJSName "ReactDOM",
+    "org.webjars.bower" % "react" % "15.4.2" / "react-dom-server.js" minified "react-dom-server.min.js" dependsOn "react-with-addons.js" commonJSName "ReactDOMServer"
   ),
   (emitSourceMaps in fullOptJS) := true
 ).dependsOn(sharedJs)

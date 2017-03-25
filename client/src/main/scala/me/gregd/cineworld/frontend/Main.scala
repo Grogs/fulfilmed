@@ -1,16 +1,16 @@
 package me.gregd.cineworld.frontend
 
 import japgolly.scalajs.react.ReactDOM
-import japgolly.scalajs.react.extra.router.{BaseUrl, Redirect, Router, RouterConfigDsl}
-import japgolly.scalajs.react._, vdom.prefix_<^._
-
+import japgolly.scalajs.react.extra._
+import japgolly.scalajs.react.extra.router._
+import japgolly.scalajs.react._
+import japgolly.scalajs.react.vdom.html_<^._
 import me.gregd.cineworld.frontend.components.{FilmsStyle, IndexPage, IndexStyle}
 import org.scalajs.dom._
 
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
 import scalacss.Defaults._
-import scalacss.ScalaCssReact._
 
 
 @JSExport
@@ -32,7 +32,7 @@ object Main extends JSApp {
     }
     val router = Router(baseUrl, routerConfig)
 
-    ReactDOM.render(router(), document.getElementById("content"))
+    router().renderIntoDOM(document.getElementById("content"))
   }
 
 }

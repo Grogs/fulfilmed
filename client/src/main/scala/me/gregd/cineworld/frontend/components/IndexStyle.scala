@@ -1,21 +1,20 @@
 package me.gregd.cineworld.frontend.components
 
-import scalacss.Defaults._
-import scalacss.ValueT.Color
-import scalacss.ext.CssReset.webkitAppearance
-import scalacss.{Attrs, Length, ValueT}
+import scalacss.DevDefaults._
+//import scalacss.ValueT.Color
+//import scalacss.ext.CssReset.webkitAppearance
 
 object IndexStyle extends StyleSheet.Inline {
   import dsl._
-  def textShadow[X,Y,Blur](offsetX: Length[X], offsetY: Length[Y], blurRadius: Length[Blur], color: ValueT[Color]) =
-    Attrs.textShadow := List[{def value: scalacss.Value}](offsetX, offsetY, blurRadius, color).map(_.value).mkString(" ")
+//  def textShadow[X,Y,Blur](offsetX: Length[X], offsetY: Length[Y], blurRadius: Length[Blur], color: Color) =
+//    Attrs.textShadow := List[{def value: scalacss.Value}](offsetX, offsetY, blurRadius, color).map(_.value).mkString(" ")
   val title = style(
     fontFamily :=! "HelveticaNeue, Helvetica Neue, Helvetica, Arial, Lucida Grande, sans-serif",
     letterSpacing(3.px),
     fontSize(82.px),
     color.white,
     lineHeight(95.px),
-    textShadow(0.px, 2.px, 4.px, Color("#225968")),
+//    textShadow(0.px, 2.px, 4.px, Color("#225968")),
     paddingTop(100.px)
   )
   val blurb = style(
@@ -42,7 +41,7 @@ object IndexStyle extends StyleSheet.Inline {
     color.white,
     padding(12.px),
     width(490.px),
-    webkitAppearance := none,
+//    webkitAppearance := none,
     background := "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='50px' height='50px'><polyline points='46.139,15.518 25.166,46.49 4.193,15.519' fill='white' /></svg>\") right no-repeat",
     backgroundColor(Color("#690B0B")),
     backgroundPosition := "right 15px top 16px",

@@ -1,13 +1,8 @@
 package me.gregd.cineworld.util
 
-import scala.collection.parallel.{ForkJoinTaskSupport, ParSeq}
-import scala.concurrent.forkjoin.ForkJoinPool
+import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
-import scala.util.matching.Regex
 
-/**
- * Created by Greg Dorrell on 26/05/2014.
- */
 object Implicits {
 
   implicit class DistinctBy[T](s:Seq[T]) {
@@ -23,6 +18,17 @@ object Implicits {
         case Failure(exception) => func(exception)
       }
       t
+    }
+  }
+
+  implicit class FutureUtil[T](f1: Future[T]) {
+    import scala.concurrent.ExecutionContext.Implicits.global
+    def orElse(f2: => Future[T]): Future[T] = {
+      if (f1.isCompleted && f1.value.get.isFailure) {
+        f2
+      } else {
+        f1 recoverWith { case _ => f2 }
+      }
     }
   }
 

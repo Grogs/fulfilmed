@@ -65,7 +65,7 @@ class Movies @Inject()(tmdb: TheMovieDB) extends MovieDao with Logging {
     Await.result(cachedMovies, 30.seconds)
   }
 
-  def allMovies(): Future[Seq[Movie]] = {
+  private def allMovies(): Future[Seq[Movie]] = {
     for {
       tmdbNowPlaying <- tmdb.fetchNowPlaying()
     } yield {

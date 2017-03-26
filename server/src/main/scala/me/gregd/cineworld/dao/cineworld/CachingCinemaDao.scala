@@ -12,6 +12,8 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.{Failure, Random, Success}
 
+import me.gregd.cineworld.util.Implicits.FutureUtil
+
 @Singleton
 class CachingCinemaDao @Inject()(remoteCineworld: RemoteCinemaDao, scheduler: Scheduler, clock: Clock) extends CinemaDao with Logging {
 
@@ -38,7 +40,7 @@ class CachingCinemaDao @Inject()(remoteCineworld: RemoteCinemaDao, scheduler: Sc
       } yield
         for {
           cinema <- cinemas
-          day <- (0 to 2).map( clock.today() plusDays _ toString )
+          day <- (0 to 2).map(clock.today() plusDays _ toString)
           _ = logger.debug(s"Retrieving listings for ${cinema.id} / $day")
           listings = remoteCineworld.retrieveMoviesAndPerformances(cinema.id, day)
         } yield
@@ -94,19 +96,8 @@ class CachingCinemaDao @Inject()(remoteCineworld: RemoteCinemaDao, scheduler: Sc
   def retrieveCinemas() = cinemas orElse refreshCinemas()
 
   def retrieveMoviesAndPerformances(cinema: String, date: String) = {
-    def forRequest(l: Listings) =
-      l((cinema, date))
-    listings.map(forRequest) orElse refreshListings(cinemas).map(forRequest)
-  }
-
-  implicit class FutureUtil[T](f1: Future[T]) {
-    def orElse(f2: => Future[T]): Future[T] = {
-      if (f1.isCompleted && f1.value.get.isFailure) {
-        f2
-      } else {
-        f1 recoverWith { case _ => f2 }
-      }
-    }
+    def forRequest(l: Listings) = l((cinema, date))
+    (listings orElse refreshListings(cinemas)).map(forRequest)
   }
 
 }

@@ -6,7 +6,7 @@ import javax.inject.{Inject, Singleton}
 import grizzled.slf4j.Logging
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.movies.MovieDao
-import me.gregd.cineworld.domain.{Cinema, Movie, Performance}
+import me.gregd.cineworld.domain.{Cinema, Film, Movie, Performance}
 import me.gregd.cineworld.util.Clock
 import org.json4s._
 
@@ -43,7 +43,12 @@ class RemoteCinemaDao @Inject()(
 
   override def retrieveMoviesAndPerformances(cinemaId: String, dateRaw: String): Future[Map[Movie, List[Performance]]] = {
 
-    dao.retrieve7DayListings(cinemaId).map { rawMovies =>
+    def sequence[K,V](m: Map[Future[K], V]): Future[Map[K,V]] = {
+      import cats._,instances.all._,syntax._
+      Traverse[({type M[A] = Map[V, A]})#M].sequence(m.map(_.swap)).map(_.map(_.swap))
+    }
+
+    dao.retrieve7DayListings(cinemaId).flatMap { rawMovies =>
       val res = for {
         movieResp <- rawMovies
         (film, allPerformances) <- CineworldRepository.toMovie(cinemaId, movieResp)
@@ -53,7 +58,7 @@ class RemoteCinemaDao @Inject()(
         if performances.nonEmpty
         _ = logger.info(s"Retrieved listings for $cinemaId:$dateRaw:${film.id}")
       } yield movie -> performances
-      res.toMap
+      sequence(res.toMap)
     }
   }
 

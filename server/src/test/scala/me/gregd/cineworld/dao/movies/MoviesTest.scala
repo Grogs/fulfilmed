@@ -1,14 +1,17 @@
 package me.gregd.cineworld.dao.movies
 
-import fakes.{FakeCineworldRepository, FakeTheMovieDB}
+import fakes.{FakeCineworldRepository, FakeRatings, FakeTheMovieDB}
 import me.gregd.cineworld.dao.cineworld.CineworldRepository.toFilm
 import me.gregd.cineworld.domain.Movie
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{FunSuite, Matchers}
 
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+
 class MoviesTest extends FunSuite with ScalaFutures with Matchers {
 
-  val movieDao = new Movies(FakeTheMovieDB)
+  val movieDao = new Movies(FakeTheMovieDB, FakeRatings)
 
   test("movies.toMovie") {
     val cinema = FakeCineworldRepository.retrieveCinemas().futureValue.head
@@ -18,9 +21,9 @@ class MoviesTest extends FunSuite with ScalaFutures with Matchers {
       .futureValue
       .map(toFilm)
 
-    val movies = films.map(movieDao.toMovie)
+    val movies = Future.traverse(films)(movieDao.toMovie).futureValue
 
-    movies shouldEqual expectedFilmToMovies
+    movies shouldBe expectedFilmToMovies
   }
 
   test("allMovies") {

@@ -49,6 +49,7 @@ class RemoteCinemaDao @Inject()(
     }
 
     dao.retrieve7DayListings(cinemaId).flatMap { rawMovies =>
+      logger.info(s"Retrieving listings for $cinemaId:$dateRaw")
       val res = for {
         movieResp <- rawMovies
         (film, allPerformances) <- CineworldRepository.toMovie(cinemaId, movieResp)
@@ -56,7 +57,6 @@ class RemoteCinemaDao @Inject()(
         date = getDate(dateRaw).get
         performances = allPerformances.getOrElse(date, Nil).toList
         if performances.nonEmpty
-        _ = logger.info(s"Retrieved listings for $cinemaId:$dateRaw:${film.id}")
       } yield movie -> performances
       sequence(res.toMap)
     }

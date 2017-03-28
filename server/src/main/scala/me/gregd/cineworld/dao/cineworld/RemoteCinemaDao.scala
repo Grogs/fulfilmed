@@ -43,9 +43,9 @@ class RemoteCinemaDao @Inject()(
 
   override def retrieveMoviesAndPerformances(cinemaId: String, dateRaw: String): Future[Map[Movie, List[Performance]]] = {
 
-    def sequence[K,V](m: Map[Future[K], V]): Future[Map[K,V]] = {
-      import cats._,instances.all._,syntax._
-      Traverse[({type M[A] = Map[V, A]})#M].sequence(m.map(_.swap)).map(_.map(_.swap))
+    def sequence[K, V](m: Map[Future[K], V]): Future[Map[K, V]] = {
+      import cats.Traverse, cats.instances.all._
+      Traverse[({type M[A] = Map[V, A] })#M].sequence(m.map(_.swap)).map(_.map(_.swap))
     }
 
     dao.retrieve7DayListings(cinemaId).flatMap { rawMovies =>

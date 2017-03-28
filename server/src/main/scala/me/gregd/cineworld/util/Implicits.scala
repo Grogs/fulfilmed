@@ -5,7 +5,7 @@ import scala.util.{Failure, Success, Try}
 
 object Implicits {
 
-  implicit class DistinctBy[T](s:Seq[T]) {
+  implicit class DistinctBy[T](s: Seq[T]) {
     def distinctBy[K](func: T => K) = {
       s.groupBy(func).map(_._2.head).toSeq
     }

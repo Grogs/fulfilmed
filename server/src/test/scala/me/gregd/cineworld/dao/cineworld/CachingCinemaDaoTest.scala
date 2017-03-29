@@ -2,7 +2,7 @@ package me.gregd.cineworld.dao.cineworld
 
 import java.time.LocalDate
 
-import fakes.{FakeCineworldRepository, FakeTheMovieDB}
+import fakes.{FakeCineworldRepository, FakeRatings, FakeTheMovieDB}
 import me.gregd.cineworld.dao.movies.Movies
 import me.gregd.cineworld.domain.{Cinema, Movie, Performance}
 import me.gregd.cineworld.util.FixedClock
@@ -12,11 +12,11 @@ import org.scalatest.time.{Millis, Span}
 
 import scala.concurrent.Future
 
-class CachingCinemaDaoTest extends FunSuite with ScalaFutures with Matchers {
+class CachingCinemaDaoTest extends FunSuite with ScalaFutures with Matchers  {
 
   implicit val defaultPatienceConfig = PatienceConfig(Span(1500, Millis))
 
-  val fakeRemoteCinemaDao = new RemoteCinemaDao(new Movies(FakeTheMovieDB), FakeTheMovieDB, FakeCineworldRepository, FixedClock(LocalDate.parse("2017-03-23")))
+  val fakeRemoteCinemaDao = new RemoteCinemaDao(new Movies(FakeTheMovieDB, FakeRatings), FakeTheMovieDB, FakeCineworldRepository, FixedClock(LocalDate.parse("2017-03-23")))
 
   val cachingCinemaDao = new CachingCinemaDao(fakeRemoteCinemaDao, monix.execution.Scheduler.global, FixedClock(LocalDate.parse("2017-03-23"))) {
     var refreshCinemaInvocations = 0

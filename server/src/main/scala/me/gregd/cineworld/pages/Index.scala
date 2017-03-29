@@ -1,7 +1,7 @@
 package me.gregd.cineworld.pages
 
 import scalatags.Text.all._
-import scalatags.Text.tags2.{title=>titleElem}
+import scalatags.Text.tags2.{title => titleElem}
 
 class Index {
   def apply(scriptPaths: List[String]) =
@@ -13,8 +13,8 @@ class Index {
       ),
       body(
         style := "margin: 0",
-        div( id:="content"),
-        for (p <- scriptPaths) yield script(`type`:="text/javascript", src:=p),
+        div(id := "content"),
+        for (p <- scriptPaths) yield script(`type` := "text/javascript", src := p),
         script("me.gregd.cineworld.frontend.Main().main()")
       )
     )

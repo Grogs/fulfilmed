@@ -4,9 +4,13 @@ import webscalajs.SourceMappings
 
 lazy val commonSettings = Seq(
   organization := "me.gregd",
-  version := "1.2",
+  version := "1.2.1",
   scalaVersion := "2.11.8"
 )
+
+resolvers += Resolver.sonatypeRepo("releases")
+
+addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3")
 
 lazy val client = project.enablePlugins(ScalaJSPlugin, ScalaJSWeb).settings(
   commonSettings,
@@ -40,29 +44,29 @@ lazy val server = project.settings(
   libraryDependencies ++= Seq(
     "org.scala-lang" % "scala-library" % "2.11.7",
     "org.scala-lang" % "scala-compiler" % "2.11.7",
-    "com.rockymadden.stringmetric" % "stringmetric-core_2.11" % "0.27.4",
-    "com.chuusai" % "shapeless_2.11" % "2.2.4",
-    "com.typesafe.slick" % "slick_2.11" % "2.1.0",
+    "com.rockymadden.stringmetric" %% "stringmetric-core" % "0.27.4",
+    "com.chuusai" %% "shapeless" % "2.2.4",
+    "com.typesafe.slick" %% "slick" % "2.1.0",
     "com.h2database" % "h2" % "1.3.164",
-    "org.scalaj" % "scalaj-http_2.11" % "1.1.5",
-    "org.json4s" % "json4s-native_2.11" % "3.2.11",
-    "org.json4s" % "json4s-jackson_2.11" % "3.2.11",
-    "org.scalatra" % "scalatra_2.11" % "2.3.1",
-    "org.scalatra" % "scalatra-json_2.11" % "2.3.1",
+    "org.scalaj" %% "scalaj-http" % "1.1.5",
+    "org.json4s" %% "json4s-native" % "3.2.11",
+    "org.json4s" %% "json4s-jackson" % "3.2.11",
+    "org.scalatra" %% "scalatra" % "2.3.1",
+    "org.scalatra" %% "scalatra-json" % "2.3.1",
     "com.google.guava" % "guava" % "16.0.1",
     "com.google.code.findbugs" % "jsr305" % "3.0.1",
-    "com.typesafe.scala-logging" % "scala-logging-slf4j_2.11" % "2.1.2",
+    "com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2",
     "ch.qos.logback" % "logback-classic" % "1.0.13",
     "org.jsoup" % "jsoup" % "1.7.3",
-    "org.feijoas" % "mango_2.11" % "0.11", // exclude("jsr305"),
+    "org.feijoas" %% "mango" % "0.11",
     "com.lihaoyi" %% "scalatags" % "0.5.4",
     "org.typelevel" %% "cats" % "0.9.0",
     "io.monix" %% "monix" % "2.2.2",
     ws,
     filters,
-    "org.scalatra" % "scalatra-scalatest_2.11" % "2.3.1" % Test,
+    "org.scalatra" %% "scalatra-scalatest" % "2.3.1" % Test,
     "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test,
-    "org.scalatest" % "scalatest_2.11" % "1.9.1" % Test,
+    "org.scalatest" %% "scalatest" % "1.9.1" % Test,
     "com.lihaoyi" %% "pprint" % "0.4.3" % Test,
 
     "com.vmunier" %% "scalajs-scripts" % "1.0.0"

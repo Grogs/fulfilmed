@@ -40,7 +40,7 @@ class CachingCinemaDao @Inject()(remoteCineworld: RemoteCinemaDao, scheduler: Sc
       } yield
         for {
           cinema <- cinemas
-          day <- (0 to 2).map(clock.today() plusDays _ toString)
+          day <- (0 to 1).map(clock.today() plusDays _ toString)
           _ = logger.debug(s"Retrieving listings for ${cinema.id} / $day")
           listings = remoteCineworld.retrieveMoviesAndPerformances(cinema.id, day)
         } yield

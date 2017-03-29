@@ -42,15 +42,15 @@ class TheMovieDB @Inject()(@named("themoviedb.api-key") apiKey: String, ws: WSCl
   }
 
   def fetchNowPlaying(): Future[Seq[TmdbMovie]] = {
-    Future.traverse(1 to 5)(fetchPage).map(_.flatMap(_.results))
+    Future.traverse(1 to 5)(fetchPage).map(_.flatten)
   }
 
-  private def fetchPage(page: Int) = {
+  private def fetchPage(page: Int): Future[Seq[TmdbMovie]] = {
     val url = s"$baseUrl/movie/now_playing?api_key=$apiKey&language=en-US&page=$page&region=GB"
     logger.info(s"Fetching now playing page $page")
     ws.url(url)
       .get()
-      .map(_.json.as[NowShowingResponse])
+      .map(_.json.as[NowShowingResponse].results)
   }
 
   def alternateTitles(imdbId: String): Seq[String] =

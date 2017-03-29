@@ -42,7 +42,7 @@ class TheMovieDB @Inject()(@named("themoviedb.api-key") apiKey: String, ws: WSCl
   }
 
   def fetchNowPlaying(): Future[Seq[TmdbMovie]] = {
-    Future.traverse(1 to 10)(fetchPage).map(_.flatMap(_.results))
+    Future.traverse(1 to 5)(fetchPage).map(_.flatMap(_.results))
   }
 
   private def fetchPage(page: Int) = {
@@ -69,6 +69,8 @@ class TheMovieDB @Inject()(@named("themoviedb.api-key") apiKey: String, ws: WSCl
 }
 
 package model {
+
+  import play.api.libs.json.OFormat
 
   case class TmdbMovie(poster_path: Option[String],
                        adult: Boolean,
@@ -98,7 +100,7 @@ package model {
   }
 
   object NowShowingResponse {
-    implicit val nowShowingRespFormat: Reads[model.NowShowingResponse] = Json.reads[model.NowShowingResponse]
+    implicit val nowShowingRespFormat: OFormat[NowShowingResponse] = Json.format[model.NowShowingResponse]
   }
 
 }

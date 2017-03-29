@@ -21,7 +21,7 @@ object Implicits {
     }
   }
 
-  implicit class FutureUtil[T](f1: Future[T]) {
+  implicit class FutureOrElse[T](f1: Future[T]) {
     import scala.concurrent.ExecutionContext.Implicits.global
     def orElse(f2: => Future[T]): Future[T] = {
       if (f1.isCompleted && f1.value.get.isFailure) {

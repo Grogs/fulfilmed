@@ -12,7 +12,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.{Failure, Random, Success}
 
-import me.gregd.cineworld.util.Implicits.FutureUtil
+import me.gregd.cineworld.util.Implicits.FutureOrElse
 
 @Singleton
 class CachingCinemaDao @Inject()(remoteCineworld: RemoteCinemaDao, scheduler: Scheduler, clock: Clock) extends CinemaDao with Logging {

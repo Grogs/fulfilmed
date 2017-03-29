@@ -35,41 +35,15 @@ object FilmsStyle extends StyleSheet.Inline {
     paddingLeft(20.px)
   )
   val select = style(
-    padding(8.px, 30.px, 8.px, 10.px),
     margin(7.px, 7.px, 7.px, 1.px),
-    borderRadius(10.px),
     border(1.px, solid, Color("#7F1717")),
     fontFamily :=! "Calibri, Verdana, Arial, sans-serif",
     fontSize(16.px),
-    lineHeight(20.px),
+    height(1.8.em),
     color.white,
     minWidth(190.px),
-//    webkitAppearance := "none",
-    background := "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='50.px' height='50.px'><polyline points='46.139,15.518 25.166,36.49 4.193,15.519' fill='white'/></svg>\") right no-repeat",
-    backgroundColor(Color("#640F0F")),
-    backgroundPosition := "right 10px top 9px",
-    backgroundSize := "18px 18px"
+    backgroundColor(Color("#640F0F"))
   )
-  val `select#filter`= style(
-    background := "none",
-    direction.rtl,
-    paddingRight(10.px),
-    minWidth(30.px)
-  )
-
-  //TODO
-  //@media only screen and (max-device-width(480.px) {)
-  //    div.menu-group {
-  //        paddingLeft(10.px),
-  //    }
-  //    select.menu {
-  //        fontSize(24.px),
-  //        lineHeight(24.px),
-  //        paddingRight(0),
-  //        marginLeft(2.px),
-  //        minWidth(120.px),
-  //    }
-  //)
 
 
   /*-----  FILM CARD CSS ------*/

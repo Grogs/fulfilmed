@@ -24,7 +24,7 @@ class MoviesTest extends FunSuite with ScalaFutures with Matchers {
   }
 
   test("allMovies") {
-    val movies = movieDao.allMovies().futureValue.take(3)
+    val movies = movieDao.allMoviesCached.take(3)
     movies shouldEqual expectedAllMovies
   }
 

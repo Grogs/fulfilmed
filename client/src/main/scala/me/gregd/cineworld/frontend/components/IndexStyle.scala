@@ -1,11 +1,15 @@
 package me.gregd.cineworld.frontend.components
 
 import scalacss.DevDefaults._
+import scalacss.internal.Attr
 //import scalacss.ValueT.Color
 //import scalacss.ext.CssReset.webkitAppearance
 
 object IndexStyle extends StyleSheet.Inline {
   import dsl._
+
+  val webkitAppearance = Attr.real("-webkit-appearance")
+
 //  def textShadow[X,Y,Blur](offsetX: Length[X], offsetY: Length[Y], blurRadius: Length[Blur], color: Color) =
 //    Attrs.textShadow := List[{def value: scalacss.Value}](offsetX, offsetY, blurRadius, color).map(_.value).mkString(" ")
   val title = style(
@@ -36,16 +40,11 @@ object IndexStyle extends StyleSheet.Inline {
   )
   val select = style(
     fontSize(24.px),
+    height(1.8.em),
     border(2.px, solid, white),
-    borderRadius(10.px),
     color.white,
-    padding(12.px),
     width(490.px),
-//    webkitAppearance := none,
-    background := "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='50px' height='50px'><polyline points='46.139,15.518 25.166,46.49 4.193,15.519' fill='white' /></svg>\") right no-repeat",
     backgroundColor(Color("#690B0B")),
-    backgroundPosition := "right 15px top 16px",
-    backgroundSize := "18px 18px",
     &.active(
       border(1.px, solid, white)
     )

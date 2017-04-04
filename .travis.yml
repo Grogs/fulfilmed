@@ -1,6 +1,8 @@
 language: scala
 scala:
   - 2.11.8
+env:
+  - JDK=oraclejdk8
 
 deploy:
   provider: script

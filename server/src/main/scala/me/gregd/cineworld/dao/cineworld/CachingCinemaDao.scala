@@ -23,7 +23,7 @@ class CachingCinemaDao @Inject()(remoteCineworld: RemoteCinemaDao, scheduler: Sc
   private var listings: Future[Listings] = fetchListings(cinemas)
 
   def run(): Unit = {
-    val someMinutes = (1.hour.toMinutes + Random.nextInt(1.hour.toMinutes.toInt)).seconds
+    val someMinutes = (1.5.hours.toSeconds + Random.nextInt(1.5.hours.toSeconds.toInt)).seconds
     scheduler.scheduleOnce(someMinutes) {
       refresh()
       run()
@@ -34,6 +34,7 @@ class CachingCinemaDao @Inject()(remoteCineworld: RemoteCinemaDao, scheduler: Sc
   scheduler.scheduleOnce(5.seconds)(run())
 
   protected def fetchListings(eventualCinemas: Future[Seq[Cinema]]): Future[Listings] = {
+    logger.info("Fetching listings")
     (
       for {
         cinemas <- eventualCinemas
@@ -41,11 +42,12 @@ class CachingCinemaDao @Inject()(remoteCineworld: RemoteCinemaDao, scheduler: Sc
         for {
           cinema <- cinemas
           day <- (0 to 1).map(clock.today() plusDays _ toString)
-          _ = logger.debug(s"Retrieving listings for ${cinema.id} / $day")
           listings = remoteCineworld.retrieveMoviesAndPerformances(cinema.id, day)
+          _ = listings.onFailure{ case ex => logger.error(s"Failed to retrieve listings for ${cinema.id} / $day", ex)}
         } yield
           for {
             ls <- listings
+            _ = logger.info(s"Retrieved listings for ${cinema.id} / $day")
           } yield ((cinema.id, day), ls)
     ).map(Future.sequence(_)).flatMap(identity).map(_.toMap)
   }

@@ -88,7 +88,7 @@ package model {
                        overview: String,
                        release_date: String,
                        genre_ids: List[Double],
-                       id: Double,
+                       id: Long,
                        original_title: String,
                        original_language: String,
                        title: String,

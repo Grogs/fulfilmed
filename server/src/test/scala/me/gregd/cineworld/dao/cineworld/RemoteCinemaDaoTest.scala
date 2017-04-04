@@ -12,7 +12,7 @@ import org.scalatest.time.{Millis, Span}
 
 class RemoteCinemaDaoTest extends FunSuite with ScalaFutures with Matchers {
 
-  implicit val defaultPatienceConfig = PatienceConfig(Span(1500, Millis))
+  implicit val defaultPatienceConfig = PatienceConfig(Span(2000, Millis))
 
   val movieDao = new Movies(FakeTheMovieDB, FakeRatings)
   val remoteCinemaDao = new RemoteCinemaDao(movieDao, FakeTheMovieDB, FakeCineworldRepository, FixedClock(LocalDate.parse("2017-03-23")))
@@ -44,11 +44,11 @@ class RemoteCinemaDaoTest extends FunSuite with ScalaFutures with Matchers {
   private val ticketBase = "https://www.cineworld.co.uk/ecom-tickets?siteId=1010900&prsntId="
   private val postBase = "https://www.cineworld.co.uk/xmedia-cw/repo/feats/posters/"
   val expectedShowings = Map(
-    Movie("Get Out", Some("HO00004242"), Some("default"), None, Some("419430"), None, None, Some(7.0), Some(360), Some(postBase + "HO00004242.jpg")) -> List(
-      Performance("12:50", true, "2D", ticketBase + "83182", Some("27/03/2017")),
-      Performance("15:20", true, "2D", ticketBase + "83183", Some("27/03/2017")),
-      Performance("18:30", true, "2D", ticketBase + "83268", Some("27/03/2017")),
-      Performance("21:00", true, "2D", ticketBase + "83269", Some("27/03/2017"))
+    Movie("Life (2017)", Some("HO00004250"), Some("default"), None, None, None, None, None, None, Some(postBase + "HO00004250.jpg")) -> List(
+      Performance("12:10", true, "2D", ticketBase + "83054", Some("27/03/2017")),
+      Performance("14:40", true, "2D", ticketBase + "83055", Some("27/03/2017")),
+      Performance("17:15", true, "2D", ticketBase + "83056", Some("27/03/2017")),
+      Performance("19:45", true, "2D", ticketBase + "83057", Some("27/03/2017"))
     ),
     Movie("Beauty And The Beast", Some("HO00004168"), Some("default"), None, Some("321612"), None, None, Some(7.2), Some(537), Some(postBase + "HO00004168.jpg")) -> List(
       Performance("11:20", true, "2D", ticketBase + "83116", Some("27/03/2017")),
@@ -61,11 +61,11 @@ class RemoteCinemaDaoTest extends FunSuite with ScalaFutures with Matchers {
       Performance("18:00", true, "2D", ticketBase + "83152", Some("27/03/2017")),
       Performance("20:15", true, "2D", ticketBase + "83119", Some("27/03/2017"))
     ),
-    Movie("Life (2017)", Some("HO00004250"), Some("default"), None, None, None, None, None, None, Some(postBase + "HO00004250.jpg")) -> List(
-      Performance("12:10", true, "2D", ticketBase + "83054", Some("27/03/2017")),
-      Performance("14:40", true, "2D", ticketBase + "83055", Some("27/03/2017")),
-      Performance("17:15", true, "2D", ticketBase + "83056", Some("27/03/2017")),
-      Performance("19:45", true, "2D", ticketBase + "83057", Some("27/03/2017"))
+    Movie("Get Out", Some("HO00004242"), Some("default"), None, Some("419430"), None, None, Some(7.0), Some(360), Some(postBase + "HO00004242.jpg")) -> List(
+      Performance("12:50", true, "2D", ticketBase + "83182", Some("27/03/2017")),
+      Performance("15:20", true, "2D", ticketBase + "83183", Some("27/03/2017")),
+      Performance("18:30", true, "2D", ticketBase + "83268", Some("27/03/2017")),
+      Performance("21:00", true, "2D", ticketBase + "83269", Some("27/03/2017"))
     )
   )
 }

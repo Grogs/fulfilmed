@@ -23,10 +23,12 @@ class TheMovieDB @Inject()(@named("themoviedb.api-key") apiKey: String, ws: WSCl
   protected implicit val formats = DefaultFormats
 
   val baseUrl = "http://api.themoviedb.org/3"
-  lazy val baseImageUrl = {
-    val json = get("configuration")
-    (json \ "images" \ "base_url").extract[String] + "w300"
-  }
+//  lazy val baseImageUrl = {
+//    val json = get("configuration")
+//    (json \ "images" \ "base_url").extract[String] + "w300"
+//  }
+
+  val baseImageUrl: String = "http://image.tmdb.org/t/p/w300"
 
   protected def get(path: String, transform: HttpRequest => HttpRequest = m => m): JValue = {
     val req = transform(
@@ -45,6 +47,13 @@ class TheMovieDB @Inject()(@named("themoviedb.api-key") apiKey: String, ws: WSCl
     Future.traverse(1 to 5)(fetchPage).map(_.flatten)
   }
 
+  def fetchImdbId(tmdbId: String): Future[Option[String]] = {
+    val url = s"$baseUrl/movie/$tmdbId?api_key=$apiKey"
+    ws.url(url)
+      .get()
+      .map(res => (res.json \ "imdb_id").asOpt[String])
+  }
+
   private def fetchPage(page: Int): Future[Seq[TmdbMovie]] = {
     val url = s"$baseUrl/movie/now_playing?api_key=$apiKey&language=en-US&page=$page&region=GB"
     logger.info(s"Fetching now playing page $page")
@@ -53,18 +62,20 @@ class TheMovieDB @Inject()(@named("themoviedb.api-key") apiKey: String, ws: WSCl
       .map(_.json.as[NowShowingResponse].results)
   }
 
-  def alternateTitles(imdbId: String): Seq[String] =
+  private def fetchAlternateTitles(tmdbId: String): Seq[String] =
     Try {
-      val json = get(s"movie/tt$imdbId/alternative_titles")
+      val json = get(s"movie/$tmdbId/alternative_titles")
       val titles = json \ "titles" \ "title"
       titles
         .extractOrElse[Seq[String]](
           Seq(titles.extract[String])
         )
-    }.onFailure(logger.error(s"Unable to retrieve alternate titles for $imdbId from TMDB", _: Throwable))
+    }.onFailure(logger.error(s"Unable to retrieve alternate titles for $tmdbId from TMDB", _: Throwable))
       .getOrElse(Nil)
 
-  def alternateTitles(m: Movie): Seq[String] = (m.imdbId map alternateTitles) getOrElse Nil
+  def alternateTitles(m: Movie): Seq[String] = {
+    m.tmdbId.map(fetchAlternateTitles) getOrElse Nil
+  }
 
 }
 

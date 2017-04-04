@@ -20,4 +20,9 @@ class TheMovieDBSmokeTest extends FunSuite with Matchers with OneAppPerSuite wit
     tmdb.baseImageUrl should include ("image.tmdb.org")
   }
 
+  test("fetch imdb id") {
+    tmdb.fetchImdbId("419430").futureValue shouldBe Some("tt5052448")
+    tmdb.fetchImdbId("9999999999").futureValue shouldBe None
+  }
+
 }

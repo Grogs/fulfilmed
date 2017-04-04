@@ -4,12 +4,15 @@ import fakes.{FakeCineworldRepository, FakeRatings, FakeTheMovieDB}
 import me.gregd.cineworld.dao.cineworld.CineworldRepository.toFilm
 import me.gregd.cineworld.domain.Movie
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FunSuite, Matchers}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class MoviesTest extends FunSuite with ScalaFutures with Matchers {
+
+  implicit val defaultPatienceConfig = PatienceConfig(Span(1500, Millis))
 
   val movieDao = new Movies(FakeTheMovieDB, FakeRatings)
 
@@ -33,9 +36,9 @@ class MoviesTest extends FunSuite with ScalaFutures with Matchers {
 
   private val posterBase = "https://www.cineworld.co.uk/xmedia-cw/repo/feats/posters/"
   val expectedFilmToMovies = List(
-    Movie("Get Out", Some("HO00004242"), Some("default"), None, Some(419430.0), None, None, Some(7.0), Some(360), Some(posterBase + "HO00004242.jpg")),
+    Movie("Get Out", Some("HO00004242"), Some("default"), None, Some("419430"), None, None, Some(7.0), Some(360), Some(posterBase + "HO00004242.jpg")),
     Movie("Fast & Furious 8", Some("HO00004170"), Some("default"), None, None, None, None, None, None, Some(posterBase + "HO00004170.jpg")),
-    Movie("Beauty And The Beast", Some("HO00004168"), Some("default"), None, Some(321612.0), None, None, Some(7.2), Some(537), Some(posterBase + "HO00004168.jpg")),
+    Movie("Beauty And The Beast", Some("HO00004168"), Some("default"), None, Some("321612"), None, None, Some(7.2), Some(537), Some(posterBase + "HO00004168.jpg")),
     Movie("Sing", Some("HO00004050"), Some("default"), None, None, None, None, None, None, Some(posterBase + "HO00004050.jpg")),
     Movie("Angamaly Diaries (Malayalam)", Some("HO00004416"), Some("default"), None, None, None, None, None, None, Some(posterBase + "HO00004416.jpg")),
     Movie("Life (2017)", Some("HO00004250"), Some("default"), None, None, None, None, None, None, Some(posterBase + "HO00004250.jpg")),
@@ -46,9 +49,9 @@ class MoviesTest extends FunSuite with ScalaFutures with Matchers {
   )
 
   val expectedAllMovies = List(
-    Movie("Patriots Day", None, None, None, Some(388399.0), None, None, Some(6.7), Some(170), Some("http://image.tmdb.org/t/p/w300/cDbEiJIRwFcx2GsClJ1hDUY5Vwj.jpg")),
-    Movie("Power Rangers",None,None,None,Some(305470.0),None,None,Some(7.8),Some(9),Some("http://image.tmdb.org/t/p/w300/y5KrW9mxeUmxUIYwNZOgnkYKQ8y.jpg")),
-    Movie("A Cure for Wellness",None,None,None,Some(340837.0),None,None,Some(5.5),Some(170),Some("http://image.tmdb.org/t/p/w300/byeTgTgG7M1RN2c7njWWIkSkNig.jpg"))
+    Movie("Patriots Day", None, None, None, Some("388399"), None, None, Some(6.7), Some(170), Some("http://image.tmdb.org/t/p/w300/cDbEiJIRwFcx2GsClJ1hDUY5Vwj.jpg")),
+    Movie("Power Rangers",None,None,None,Some("305470"),None,None,Some(7.8),Some(9),Some("http://image.tmdb.org/t/p/w300/y5KrW9mxeUmxUIYwNZOgnkYKQ8y.jpg")),
+    Movie("A Cure for Wellness",None,None,None,Some("340837"),None,None,Some(5.5),Some(170),Some("http://image.tmdb.org/t/p/w300/byeTgTgG7M1RN2c7njWWIkSkNig.jpg"))
   )
 
 }

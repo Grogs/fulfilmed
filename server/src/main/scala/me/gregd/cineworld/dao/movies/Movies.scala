@@ -20,22 +20,20 @@ class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with
 
   implicit val formats = DefaultFormats
 
-  val imdbCache = CacheBuilder
-    .newBuilder()
-    .refreshAfterWrite(24, TimeUnit.HOURS)
-    .build((id: String) => ratings.imdbRatingAndVotes(id))
-
-  def getIMDbRating(id: String) = imdbCache(id).map(_._1)
-  def getVotes(id: String) = imdbCache(id).map(_._2)
-
   def toMovie(film: Film): Future[Movie] = {
     logger.debug(s"Creating movie from $film")
-    for (movieOpt <- find(film.cleanTitle)) yield {
-      val format = Format.split(film.title)._1
-      val movie = movieOpt.getOrElse(Movie(film.title))
-      val imdbId = movie.imdbId map ("tt" + _)
-      val rating = imdbId flatMap getIMDbRating
-      val votes = imdbId flatMap getVotes
+
+    def ratingAndVotes(imdbId: Option[String]): Future[(Option[Double], Option[Int])] = {
+      Future.traverse(imdbId.toSeq)(ratings.ratingAndVotes).map(_.headOption.flatten).map(sequence)
+    }
+
+    for {
+      movieOpt <- find(film.cleanTitle)
+      movie = movieOpt.getOrElse(Movie(film.title))
+      imdbId = movie.imdbId map ("tt" + _)
+      (rating, votes) <- ratingAndVotes(imdbId)
+      format = Format.split(film.title)._1
+    } yield
       movie.copy(
         title = film.title,
         cineworldId = Option(film.id),
@@ -44,7 +42,7 @@ class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with
         rating = rating,
         votes = votes
       )
-    }
+
   }
 
   private var cachedMovies: Future[Seq[Movie]] = Future.failed(new UninitializedError)
@@ -60,18 +58,24 @@ class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with
     cachedMovies
   }
 
+  private def fetchImdbIds(tmdbIds: Seq[String]): Future[Map[String, Option[String]]] =
+    Future.traverse(tmdbIds)( id =>
+      tmdb.fetchImdbId(id).map(id -> )
+    ).map(_.toMap)
+
   def allMovies(): Future[Seq[Movie]] = {
     for {
       tmdbNowPlaying <- tmdb.fetchNowPlaying()
+      imdbIds <- fetchImdbIds(tmdbNowPlaying.map(_.id.toString))
     } yield {
 
       val movies = tmdbNowPlaying.map { m =>
         Movie(
           m.title,
           None,
+          imdbIds(m.id.toString),
           None,
-          None,
-          Option(m.id),
+          Option(m.id.toString),
           None,
           None,
           Option(m.vote_average),
@@ -100,6 +104,13 @@ class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with
     val weight = compareFunc(title, matc.title)
     logger.debug(s"Best match for $title was  ${matc.title} ($weight) - ${if (weight > minWeight) "ACCEPTED" else "REJECTED"}")
     if (weight > minWeight) Option(matc) else None
+  }
+
+  def sequence[A, B](ot: Option[(A, B)]): (Option[A], Option[B]) = {
+    ot match {
+      case None => None -> None
+      case Some((a, b)) => Option(a) -> Option(b)
+    }
   }
 
 }

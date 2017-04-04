@@ -2,12 +2,16 @@ package fakes
 
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.model.TmdbMovie
+import me.gregd.cineworld.domain.Movie
 
 import scala.concurrent.Future
 
 object FakeTheMovieDB extends TheMovieDB(null, null) {
 
-  override lazy val baseImageUrl: String = "http://image.tmdb.org/t/p/w300"
+
+  override def alternateTitles(m: Movie): Seq[String] = Nil
+
+  override def fetchImdbId(tmdbId: String): Future[Option[String]] = Future.successful(None)
 
   override def fetchNowPlaying(): Future[List[TmdbMovie]] = Future.successful(
     List(

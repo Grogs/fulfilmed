@@ -13,7 +13,7 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scalacss.StyleA
 
 object FilmPageComponent {
-  type Entry = (Movie, Vector[Performance])
+  type Entry = (Movie, Seq[Performance])
 
   private implicit def styleaToTagMod(s: StyleA): TagMod = ^.className := s.htmlClass //TODO I get linking errors if I don't copy this across
 
@@ -24,7 +24,7 @@ object FilmPageComponent {
     case class State(
                       isLoading: Boolean,
                       cinema: String,
-                      films: Map[Movie, Vector[Performance]],
+                      films: Map[Movie, Seq[Performance]],
                       sorts: Vector[Sort] = Vector(NextShowing, ImdbRating, TmdbRating, TmdbVotes),
                       selectedSort: Sort = NextShowing,
                       dates: Vector[Date] = Vector(Today, Tomorrow),
@@ -50,18 +50,19 @@ object FilmPageComponent {
   }
 
   object components {
-    val FilmCard = (m: Movie, pl: Vector[Performance]) =>
+    val FilmCard = (m: Movie, pl: Seq[Performance]) =>
       <.div(FilmsStyle.filmCard,
         <.div(FilmsStyle.filmInfo,
           <.div(^.classSet("threedee" -> m.format.contains("3D")),
             <.div(FilmsStyle.filmTitle, m.title),
             <.div(FilmsStyle.ratings,
-              <.div(FilmsStyle.imdb, <.a(^.href := m.imdbId.map("http://www.imdb.com/title/tt" + _).get, m.rating.get)),
-              <.div(FilmsStyle.rt, m.tmdbRating.get),
-              <.div(FilmsStyle.rtAudience, m.tmdbVotes.get)
+              m.imdbId.whenDefined( id => <.div(FilmsStyle.imdb, <.a(^.href := s"http://www.imdb.com/title/tt$id", m.rating.get))),
+              m.tmdbRating.whenDefined(<.div(FilmsStyle.tmdb, _))
+//              , m.tmdbVotes.whenDefined(<.div(FilmsStyle.rtAudience, _))
             ),
+//            TmdbRatingSvg.tmdbSection.render,
             <.div(FilmsStyle.times,
-              Composite(for (p <- pl) yield
+              Composite(for (p <- pl.toVector) yield
                 <.a(^.href := p.booking_url,
                   <.div(FilmsStyle.time, p.time)
                 )
@@ -72,7 +73,7 @@ object FilmPageComponent {
       )
 
     val FilmsList =
-      ScalaComponent.build[(Boolean, model.Sort, Map[Movie, Vector[Performance]])]("FilmsList").render_P {
+      ScalaComponent.build[(Boolean, model.Sort, Map[Movie, Seq[Performance]])]("FilmsList").render_P {
         case (loading, sort, films) =>
           def icon(faClasses: String, message: String) = {
             <.div(^.margin := "50px 0 50px 0", ^.color.white, ^.textAlign.center,
@@ -139,10 +140,12 @@ object FilmPageComponent {
         isLoading = true, films = Map.empty,
         selectedDate = date, cinema = cinema
       ))
-      val res = Client[ServerCinemaApi].getMoviesAndPerformances(cinema, date.key).call()
-      val updateMovies = for (movies <- res)
-        yield $.modState(_.copy(isLoading = false, films = movies.mapValues(_.toVector)))
-      clearAndUpdate >> Callback.future(updateMovies)
+      def res = Client[ServerCinemaApi].getMoviesAndPerformances(cinema, date.key).call()
+      val updateMovies = Callback.future(
+        for (movies <- res) yield
+          $.modState(_.copy(isLoading = false, films = movies))
+      )
+      clearAndUpdate >> updateMovies
     }
 
     def render(state: model.State) = {

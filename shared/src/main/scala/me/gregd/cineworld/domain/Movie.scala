@@ -5,7 +5,7 @@ case class Movie (
   cineworldId: Option[String] = None,
   format: Option[String] = None,
   imdbId: Option[String] = None,
-  tmdbId: Option[Double] = None,
+  tmdbId: Option[String] = None,
   rating: Option[Double] = None,
   votes: Option[Int] = None,
   tmdbRating: Option[Double] = None,

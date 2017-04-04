@@ -66,13 +66,13 @@ class CachingCinemaDaoTest extends FunSuite with ScalaFutures with Matchers  {
   private val ticketBase = "https://www.cineworld.co.uk/ecom-tickets?siteId=1010900&prsntId="
   private val postBase = "https://www.cineworld.co.uk/xmedia-cw/repo/feats/posters/"
   private val expectedListings = Map(
-    Movie("Get Out", Some("HO00004242"), Some("default"), None, Some(419430.0), None, None, Some(7.0), Some(360), Some(postBase + "HO00004242.jpg")) -> List(
+    Movie("Get Out", Some("HO00004242"), Some("default"), None, Some("419430"), None, None, Some(7.0), Some(360), Some(postBase + "HO00004242.jpg")) -> List(
       Performance("12:50", true, "2D", ticketBase + "83180", Some("24/03/2017")),
       Performance("15:20", true, "2D", ticketBase + "83181", Some("24/03/2017")),
       Performance("18:30", true, "2D", ticketBase + "83262", Some("24/03/2017")),
       Performance("21:00", true, "2D", ticketBase + "83263", Some("24/03/2017"))
     ),
-    Movie("Beauty And The Beast", Some("HO00004168"), Some("default"), None, Some(321612.0), None, None, Some(7.2), Some(537), Some(postBase + "HO00004168.jpg")) -> List(
+    Movie("Beauty And The Beast", Some("HO00004168"), Some("default"), None, Some("321612"), None, None, Some(7.2), Some(537), Some(postBase + "HO00004168.jpg")) -> List(
       Performance("11:20", true, "2D", ticketBase + "83104", Some("24/03/2017")),
       Performance("12:40", true, "2D", ticketBase + "83276", Some("24/03/2017")),
       Performance("13:20", true, "2D", ticketBase + "83025", Some("24/03/2017")),

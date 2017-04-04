@@ -4,7 +4,7 @@ import webscalajs.SourceMappings
 
 lazy val commonSettings = Seq(
   organization := "me.gregd",
-  version := "1.2.1",
+  version := "1.4",
   scalaVersion := "2.11.8"
 )
 
@@ -68,12 +68,11 @@ lazy val server = project.settings(
     "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test,
     "org.scalatest" %% "scalatest" % "1.9.1" % Test,
     "com.lihaoyi" %% "pprint" % "0.4.3" % Test,
-
+    "org.mapdb" % "mapdb" % "3.0.3",
     "com.vmunier" %% "scalajs-scripts" % "1.0.0"
-
   ),
   libraryDependencies ++= Seq(
-    "org.webjars" %% "webjars-play" % "2.4.0-1",
+    "org.webjars" %% "webjars-play" % "2.5.0",
     "org.webjars" % "font-awesome" % "4.5.0"
   ),
   compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value

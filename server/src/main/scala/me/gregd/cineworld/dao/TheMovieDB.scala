@@ -9,7 +9,7 @@ import me.gregd.cineworld.util.Implicits._
 import org.json4s._
 import org.json4s.native.JsonMethods._
 import play.api.libs.json.{Json, Reads}
-import play.api.libs.ws.WSClient
+import play.api.libs.ws.{WSClient, WSResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -49,9 +49,8 @@ class TheMovieDB @Inject()(@named("themoviedb.api-key") apiKey: String, ws: WSCl
 
   def fetchImdbId(tmdbId: String): Future[Option[String]] = {
     val url = s"$baseUrl/movie/$tmdbId?api_key=$apiKey"
-    ws.url(url)
-      .get()
-      .map(res => (res.json \ "imdb_id").asOpt[String])
+    def extractImdbId(res: WSResponse) = (res.json \ "imdb_id").asOpt[String]
+    ws.url(url).get().map(extractImdbId)
   }
 
   private def fetchPage(page: Int): Future[Seq[TmdbMovie]] = {

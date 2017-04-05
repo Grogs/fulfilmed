@@ -11,6 +11,11 @@ class TheMovieDBSmokeTest extends FunSuite with Matchers with OneAppPerSuite wit
   val ws = app.injector.instanceOf[WSClient]
   val tmdb = new TheMovieDB(Config.tmdbApiKey, ws)
 
+  test("fetch imdb id") {
+    tmdb.fetchImdbId("419430").futureValue shouldBe Some("tt5052448")
+    tmdb.fetchImdbId("9999999999").futureValue shouldBe None
+  }
+
   test("Fetch now playing") {
     val actual = tmdb.fetchNowPlaying().futureValue
     actual.size should be > 10
@@ -18,11 +23,6 @@ class TheMovieDBSmokeTest extends FunSuite with Matchers with OneAppPerSuite wit
 
   test("baseImageUrl") {
     tmdb.baseImageUrl should include ("image.tmdb.org")
-  }
-
-  test("fetch imdb id") {
-    tmdb.fetchImdbId("419430").futureValue shouldBe Some("tt5052448")
-    tmdb.fetchImdbId("9999999999").futureValue shouldBe None
   }
 
 }

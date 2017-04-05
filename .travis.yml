@@ -5,7 +5,7 @@ jdk:
   - oraclejdk8
 
 script:
-  - sbt ++$TRAVIS_SCALA_VERSION client/fastOptJS test
+  - sbt ++$TRAVIS_SCALA_VERSION test
 
 sudo: required
 

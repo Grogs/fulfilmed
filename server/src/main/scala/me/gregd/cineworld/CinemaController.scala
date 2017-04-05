@@ -27,8 +27,8 @@ class CinemaController @Inject() (env: Environment, cinemaService: CinemaService
   val scriptPaths  = List(
     "assets/fulfilmed-scala-frontend-jsdeps.js",
     "assets/fulfilmed-scala-frontend-" + (env.mode match {
-      case Dev | Test => "fastopt.js"
-      case Prod => "opt.js"
+      case Dev => "fastopt.js"
+      case Prod | Test => "opt.js"
     })
   )
 

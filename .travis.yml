@@ -1,40 +1,37 @@
 language: scala
 scala:
-  - 2.11.8
+- 2.11.8
 jdk:
-  - oraclejdk8
-
+- oraclejdk8
 script:
-  - sbt ++$TRAVIS_SCALA_VERSION test
-
+- sbt ++$TRAVIS_SCALA_VERSION test
 sudo: required
-
 services:
-  - docker
-
+- docker
 deploy:
   provider: script
   skip_cleanup: true
   script:
-    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-    - sbt docker:publish
-
+  - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+  - sbt docker:publish
   on:
     branch: master
-
 cache:
   directories:
-  - $HOME/.sbt/0.13
-  - $HOME/.sbt/boot/scala*
-  - $HOME/.sbt/cache
-  - $HOME/.sbt/launchers
-  - $HOME/.ivy2
-  - $HOME/.coursier
-
+  - "$HOME/.sbt/0.13"
+  - "$HOME/.sbt/boot/scala*"
+  - "$HOME/.sbt/cache"
+  - "$HOME/.sbt/launchers"
+  - "$HOME/.ivy2"
+  - "$HOME/.coursier"
 before_cache:
-  - du -h -d 1 $HOME/.ivy2/
-  - du -h -d 2 $HOME/.sbt/
-  - du -h -d 4 $HOME/.coursier/
-  - find $HOME/.sbt -name "*.lock" -type f -delete
-  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete
-  - find $HOME/.coursier/cache -name "*.lock" -type f -delete
+- du -h -d 1 $HOME/.ivy2/
+- du -h -d 2 $HOME/.sbt/
+- du -h -d 4 $HOME/.coursier/
+- find $HOME/.sbt -name "*.lock" -type f -delete
+- find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete
+- find $HOME/.coursier/cache -name "*.lock" -type f -delete
+env:
+  global:
+  - secure: Krcrfk0kiqEJ2JNSgT4Mz/d2e8QRTk73QICgMzJqkFu9e57e/RzWC0XgPJBclrbjwDMZhg1KLq2v0yOD8FwS5UYrWxPNie8V7NFqkWoM2lKwXHFZ9BUuzzZI1jwPJ2clHCSaEQzh9jC6WmaFSQsjb8mRmva/DrwMFZq5toLcEVwLm4L22X3wAk4cBKSKQETX56urqsjI7w5XgjV09tHmu4NHgTEQM+IUiAYNA35fD4cb4cNy2/ezw9JHFSME5PPTXI8u/EgItmdswP9HavK5Qzgm6ARetnn3oUBlJ3MZyd7nzbKEdKZeRU6/2Kn5ygvd4xQS8APPA7UuC/Tn7ULeHpj494ugwxdKzaT7UTcFo9d+gaA1pip3d9xKxBrGC/8B8SkRpPJRbXRzinjytgwiDD8mv39549oowRxQ/x7dpEfEALOSBlSsCG8M7G1rOjQz87ZTYVCX9qtbK37Uai7pv8sOOznhvmafbmTj4/nqGvY/PaVdMB1G88DL4KdHb2ZjTioPfcvmKfHQ888teDRySdeTAW+gvLb0p3khB3N1kekUfgwYpPK8/W+aTmqo+cnHpaTmeeAKDI+NpVzU/K+yjzXsE3M0cxMnr56KgkzMlloDh3q6Ga8vd7tC6Tg8PDSKBU6IY9b80umPSO+8QSg/AMeBeKJmaAd+rSRFMztnY78=
+  - secure: nUPtlM2PHBvCINKs88QCTUjsMD+9/98vvtqsbKtWh9JUK9bSt3vhVqcli6ABTprFc8MknXAJuaReCITlJeqjdui/yEFSrrHFBgFaSv8j9QUGNNHB9/vNhaiEV3WzPZWow4jDtYuXZOLIrmcz/U6TPFAkQOzgR6JQRvyGcxlfmRMUcI1YCK4lGM2BIY1kLttxSAH6w4JB6y4f3kga640oCMqmiIyNfmKXnmLnHt7x/4oO7RhHznclKlA+M5KDWkZq/IOW7WF+t5UgG6NZokWRKlbv0PaZ5iLeTJTXHaeYcnwkFTXbwUk9WGPaU7RvAul4cnqlTY9HZI4gABrmE1yctiPZfhC17zzki4WyYbhL4kUciavvcE4PAqLRDTr12LZ2PrbJncZBtZccq3M4bAvr8+EtT4xvTXSOqtua12hDye/8qsUk9hzpuL7tbPXYbMfV+vvou9sjw+u0W97soqRxqXlz74YHuSibxvOxcDV1jnAEVippm84BNZu+WWfEoyNhExg7HNrsDvTS5tRRDSqzofX3lCDD1/nR3osb0VN/Vf8XJC8zEb2BRbTuS0Rpork0luhZf0huqjd13UjJWVEgZVp4XjLV5c0zzwRTbW0fWJgNM+zksohDJ7Otgu9SOWbqMoobBp5onYJ2PejyeHLvowEIniWNeTuiPP/3Iwgm/Qk=

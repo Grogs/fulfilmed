@@ -1,11 +1,13 @@
 package me.gregd.cineworld.dao.cineworld
 
+import fakes.FakeTheMovieDB
+import me.gregd.cineworld.dao.TheMovieDB
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSuite, Matchers}
-import play.api.test.FakeApplication
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.Random
 
 class CineworldRepositorySmokeTest
     extends FunSuite
@@ -13,9 +15,9 @@ class CineworldRepositorySmokeTest
     with IntegrationPatience
     with Matchers {
 
-  val fakeApp = FakeApplication()
+  val app = new GuiceApplicationBuilder().overrides(bind[TheMovieDB].toInstance(FakeTheMovieDB)).build
 
-  val cineworldDao = fakeApp.injector.instanceOf[CineworldRepository]
+  val cineworldDao = app.injector.instanceOf[CineworldRepository]
 
   test("testRetrieveCinemas") {
     val cinemas = cineworldDao.retrieveCinemas().futureValue

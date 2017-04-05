@@ -49,7 +49,10 @@ class TheMovieDB @Inject()(@named("themoviedb.api-key") apiKey: String, ws: WSCl
 
   def fetchImdbId(tmdbId: String): Future[Option[String]] = {
     val url = s"$baseUrl/movie/$tmdbId?api_key=$apiKey"
-    def extractImdbId(res: WSResponse) = (res.json \ "imdb_id").asOpt[String]
+    def extractImdbId(res: WSResponse) = (res.json \ "imdb_id").asOpt[String] match {
+      case Some(r) => Some(r)
+      case None => println(res.json.toString)
+    }
     ws.url(url).get().map(extractImdbId)
   }
 

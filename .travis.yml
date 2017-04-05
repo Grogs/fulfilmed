@@ -8,11 +8,15 @@ script:
 sudo: required
 services:
 - docker
+
+before_deploy:
+  provider: script
+  script:
+  - docker login -e $DOCKER_EMAIL -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 deploy:
   provider: script
   skip_cleanup: true
   script:
-  - docker login -e $DOCKER_EMAIL -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
   - sbt docker:publish
   on:
     branch: master

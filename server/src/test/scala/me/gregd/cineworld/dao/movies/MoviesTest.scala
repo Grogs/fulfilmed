@@ -12,7 +12,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class MoviesTest extends FunSuite with ScalaFutures with Matchers {
 
-  implicit val defaultPatienceConfig = PatienceConfig(Span(1500, Millis))
+  implicit val defaultPatienceConfig = PatienceConfig(Span(2500, Millis))
 
   val movieDao = new Movies(FakeTheMovieDB, FakeRatings)
 

@@ -9,14 +9,10 @@ import me.gregd.cineworld.frontend.components.{FilmsStyle, IndexPage, IndexStyle
 import org.scalajs.dom._
 
 import scala.scalajs.js.JSApp
-import scala.scalajs.js.annotation.JSExport
 import scalacss.Defaults._
 
-
-@JSExport
 object Main extends JSApp {
 
-  @JSExport
   def main(): Unit = {
 
     val baseUrl = BaseUrl.fromWindowOrigin + "/"

@@ -14,8 +14,9 @@ services:
 
 deploy:
   provider: script
+  skip_cleanup: true
   script:
-#    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
     - sbt docker:publish
 
   on:

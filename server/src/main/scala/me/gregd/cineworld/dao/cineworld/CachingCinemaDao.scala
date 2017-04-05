@@ -34,6 +34,7 @@ class CachingCinemaDao @Inject()(remoteCineworld: RemoteCinemaDao, scheduler: Sc
   scheduler.scheduleOnce(5.seconds)(run())
 
   protected def fetchListings(eventualCinemas: Future[Seq[Cinema]]): Future[Listings] = {
+    val days = (0 to 1).map(clock.today() plusDays _ toString)
     logger.info("Fetching listings")
     (
       for {
@@ -41,13 +42,15 @@ class CachingCinemaDao @Inject()(remoteCineworld: RemoteCinemaDao, scheduler: Sc
       } yield
         for {
           cinema <- cinemas
-          day <- (0 to 1).map(clock.today() plusDays _ toString)
+          day <- days
           listings = remoteCineworld.retrieveMoviesAndPerformances(cinema.id, day)
-          _ = listings.onFailure{ case ex => logger.error(s"Failed to retrieve listings for ${cinema.id} / $day", ex)}
+          position = (cinemas.indexOf(cinema) + 1) * (days.indexOf(day) + 1)
+          total = cinemas.size * days.size
+          _ = listings.onFailure { case ex => logger.error(s"Failed to retrieve listings for ${cinema.id} / $day.", ex) }
         } yield
           for {
             ls <- listings
-            _ = logger.info(s"Retrieved listings for ${cinema.id} / $day")
+            _ = logger.info(s"Retrieved listings for ${cinema.id} / $day.  Item $position of $total.")
           } yield ((cinema.id, day), ls)
     ).map(Future.sequence(_)).flatMap(identity).map(_.toMap)
   }

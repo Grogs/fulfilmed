@@ -4,7 +4,7 @@ import webscalajs.SourceMappings
 
 lazy val commonSettings = Seq(
   organization := "me.gregd",
-  version := "1.4",
+  version := "1.4.1",
   scalaVersion := "2.11.8"
 )
 
@@ -144,9 +144,8 @@ dokkuDeploy <<= (dokkuHost, dokkuHostConfig, dokkuApp, dokkuVersion, target in D
         _ <- exec(deployCmd)
       } yield ()
 
-      res
-    }
-    ()
+      res.left.foreach(msg => throw new RuntimeException(msg))
+    }.left.foreach(msg => throw new RuntimeException(msg))
 }
 
 

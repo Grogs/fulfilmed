@@ -12,9 +12,7 @@ deploy:
   provider: script
   skip_cleanup: true
   script:
-  - echo "Logging into docker"
   - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-  - echo "Publishing to docker hub via SBT"
   - sbt docker:publish
   on:
     branch: master

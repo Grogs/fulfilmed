@@ -1,13 +1,20 @@
 package me.gregd.cineworld.dao.movies
 
+import fakes.{FakeCineworldRepository, FakeRatings, FakeTheMovieDB}
+import me.gregd.cineworld.dao.TheMovieDB
+import me.gregd.cineworld.dao.cineworld.CineworldRepository
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{BeforeAndAfterEach, FunSuite, Matchers}
 import org.scalatestplus.play.OneAppPerSuite
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.ws.WSClient
 
 import scala.concurrent.Future
 
 class RatingsCachingTest extends FunSuite with OneAppPerSuite with Matchers with ScalaFutures with IntegrationPatience with BeforeAndAfterEach {
+
+  override lazy val app = new GuiceApplicationBuilder().overrides(bind[Ratings].toInstance(FakeRatings), bind[TheMovieDB].toInstance(FakeTheMovieDB), bind[CineworldRepository].toInstance(FakeCineworldRepository)).build
 
   val ws: WSClient = app.injector.instanceOf[WSClient]
   val cache = new RatingsCache(collection.mutable.Map(), ()) {

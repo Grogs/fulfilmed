@@ -1,14 +1,11 @@
 package me.gregd.cineworld.dao.movies
 
-import java.util.concurrent.TimeUnit
-import javax.inject.{Inject, Singleton, Named => named}
+import javax.inject.{Inject, Singleton}
 
 import com.rockymadden.stringmetric.similarity.DiceSorensenMetric
 import grizzled.slf4j.Logging
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.domain.{Film, Format, Movie}
-import me.gregd.cineworld.util.Implicits._
-import org.feijoas.mango.common.cache.CacheBuilder
 import org.json4s._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -58,41 +55,33 @@ class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with
     cachedMovies
   }
 
-  private def fetchImdbIds(tmdbIds: Seq[String]): Future[Map[String, Option[String]]] =
-    Future.traverse(tmdbIds)( id =>
-      tmdb.fetchImdbId(id).map(id -> )
-    ).map(_.toMap)
-
-  def allMovies(): Future[Seq[Movie]] = {
+  def allMovies(): Future[Seq[Movie]] = collapse(
     for {
-      tmdbNowPlaying <- tmdb.fetchNowPlaying()
-      imdbIds <- fetchImdbIds(tmdbNowPlaying.map(_.id.toString))
-    } yield {
-
-      val movies = tmdbNowPlaying.map { m =>
-        Movie(
-          m.title,
-          None,
-          imdbIds(m.id.toString),
-          None,
-          Option(m.id.toString),
-          None,
-          None,
-          Option(m.vote_average),
-          Option(m.vote_count.toInt),
-          m.poster_path.map(tmdb.baseImageUrl + _)
-        )
-      }
-
-      val alternateTitles = for {
-        m <- movies
-        altTitle <- tmdb.alternateTitles(m)
-        _ = logger.trace(s"Alternative title for ${m.title}: $altTitle")
-      } yield m.copy(title = altTitle)
-
-      (movies ++ alternateTitles) distinctBy (_.title)
-    }
-  }
+      nowPlaying <- tmdb.fetchNowPlaying()
+    } yield
+      for {
+        movie <- nowPlaying
+      } yield
+        for {
+          alternateTitles <- tmdb.alternateTitles(movie.id.toString)
+          imdbId <- tmdb.fetchImdbId(movie.id.toString)
+        } yield
+          for {
+            altTitle <- (movie.title :: alternateTitles).distinct
+          } yield
+            Movie(
+              movie.title,
+              None,
+              imdbId,
+              None,
+              Option(movie.id.toString),
+              None,
+              None,
+              Option(movie.vote_average),
+              Option(movie.vote_count.toInt),
+              movie.poster_path.map(tmdb.baseImageUrl + _)
+            )
+  )
 
   val compareFunc: (String, String) => Double =
     DiceSorensenMetric(1).compare(_: String, _: String).get
@@ -106,11 +95,14 @@ class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with
     if (weight > minWeight) Option(matc) else None
   }
 
-  def sequence[A, B](ot: Option[(A, B)]): (Option[A], Option[B]) = {
+  private def sequence[A, B](ot: Option[(A, B)]): (Option[A], Option[B]) = {
     ot match {
       case None => None -> None
       case Some((a, b)) => Option(a) -> Option(b)
     }
   }
+
+  private def collapse[T](fsfsT: Future[Seq[Future[Seq[T]]]]): Future[Seq[T]] =
+    fsfsT.map( sfsT => Future.sequence(sfsT).map(_.flatten)).flatMap(identity)
 
 }

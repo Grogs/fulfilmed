@@ -1,12 +1,20 @@
-import com.google.inject.AbstractModule
+import javax.inject.{Named => named}
+
+import com.google.inject.{AbstractModule, Provides => provides}
+import com.typesafe.config.ConfigFactory
 import me.gregd.cineworld.dao.movies.RatingsCache
 import me.gregd.cineworld.util.{Clock, RealClock}
 import monix.execution.Scheduler
-import org.mapdb._
-import scala.collection.JavaConverters._
-import scala.concurrent.duration._
 
 class Module extends AbstractModule {
+
+  val prop = {
+    val config = ConfigFactory.load
+    config.getString _
+  }
+
+  @provides@named("rotten-tomatoes.api-key") def rottenTomatoesApiKey = prop("rotten-tomatoes.api-key")
+  @provides@named("themoviedb.api-key") def tmdbApiKey = prop("themoviedb.api-key")
 
   val ratingsCache = {
 //    val db = DBMaker.fileDB("ratingsCache.mapdb").transactionEnable().make()

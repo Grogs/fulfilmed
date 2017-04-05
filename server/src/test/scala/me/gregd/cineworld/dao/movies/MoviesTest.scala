@@ -31,11 +31,11 @@ class MoviesTest extends FunSuite with ScalaFutures with Matchers {
 
   test("allMovies") {
     val movies = movieDao.allMoviesCached().futureValue.take(3)
-    movies shouldEqual expectedAllMovies
+    movies shouldEqual expectedFirstThreeMovies
   }
 
-  private val posterBase = "https://www.cineworld.co.uk/xmedia-cw/repo/feats/posters/"
-  val expectedFilmToMovies = List(
+  val posterBase = "https://www.cineworld.co.uk/xmedia-cw/repo/feats/posters/"
+  val expectedFilmToMovies = Vector(
     Movie("Get Out", Some("HO00004242"), Some("default"), None, Some("419430"), None, None, Some(7.0), Some(360), Some(posterBase + "HO00004242.jpg")),
     Movie("Fast & Furious 8", Some("HO00004170"), Some("default"), None, None, None, None, None, None, Some(posterBase + "HO00004170.jpg")),
     Movie("Beauty And The Beast", Some("HO00004168"), Some("default"), None, Some("321612"), None, None, Some(7.2), Some(537), Some(posterBase + "HO00004168.jpg")),
@@ -48,10 +48,10 @@ class MoviesTest extends FunSuite with ScalaFutures with Matchers {
     Movie("Trolls: Movies For Juniors", Some("HO00004149"), Some("default"), None, None, None, None, None, None, Some(posterBase + "HO00004149.jpg"))
   )
 
-  val expectedAllMovies = List(
-    Movie("Patriots Day", None, None, None, Some("388399"), None, None, Some(6.7), Some(170), Some("http://image.tmdb.org/t/p/w300/cDbEiJIRwFcx2GsClJ1hDUY5Vwj.jpg")),
-    Movie("Power Rangers",None,None,None,Some("305470"),None,None,Some(7.8),Some(9),Some("http://image.tmdb.org/t/p/w300/y5KrW9mxeUmxUIYwNZOgnkYKQ8y.jpg")),
-    Movie("A Cure for Wellness",None,None,None,Some("340837"),None,None,Some(5.5),Some(170),Some("http://image.tmdb.org/t/p/w300/byeTgTgG7M1RN2c7njWWIkSkNig.jpg"))
+  val tmdbImageBase = "http://image.tmdb.org/t/p/w300/"
+  val expectedFirstThreeMovies = Vector(
+    Movie("Logan", None, None, None, Some("263115"), None, None, Some(7.7), Some(1648), Some(tmdbImageBase + "45Y1G5FEgttPAwjTYic6czC9xCn.jpg")),
+    Movie("Kong: Skull Island", None, None, None, Some("293167"), None, None, Some(6.1), Some(621), Some(tmdbImageBase + "aoUyphk4nwffrwlZRaOa0eijgpr.jpg")),
+    Movie("Beauty and the Beast", None, None, None, Some("321612"), None, None, Some(7.2), Some(537), Some(tmdbImageBase + "tnmL0g604PDRJwGJ5fsUSYKFo9.jpg"))
   )
-
 }

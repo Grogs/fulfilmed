@@ -9,12 +9,12 @@ import scala.concurrent.Future
 object FakeTheMovieDB extends TheMovieDB(null, null) {
 
 
-  override def alternateTitles(m: Movie): Seq[String] = Nil
+  override def alternateTitles(s: String): Future[List[String]] = Future.successful(Nil)
 
   override def fetchImdbId(tmdbId: String): Future[Option[String]] = Future.successful(None)
 
-  override def fetchNowPlaying(): Future[List[TmdbMovie]] = Future.successful(
-    List(
+  override def fetchNowPlaying(): Future[Vector[TmdbMovie]] = Future.successful(
+    Vector(
       TmdbMovie(
         Some("/45Y1G5FEgttPAwjTYic6czC9xCn.jpg"),
         false,

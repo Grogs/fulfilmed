@@ -8,10 +8,14 @@ import scala.concurrent.Future
 
 object FakeTheMovieDB extends TheMovieDB(null, null) {
 
+  val imdbIds = Map(
+    263115 -> "tt3315342",
+    293167 -> "tt3731562"
+  )
 
   override def alternateTitles(s: String): Future[List[String]] = Future.successful(Nil)
 
-  override def fetchImdbId(tmdbId: String): Future[Option[String]] = Future.successful(None)
+  override def fetchImdbId(tmdbId: String): Future[Option[String]] = Future.successful(imdbIds.get(tmdbId.toInt))
 
   override def fetchNowPlaying(): Future[Vector[TmdbMovie]] = Future.successful(
     Vector(

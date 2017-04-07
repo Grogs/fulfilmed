@@ -50,8 +50,8 @@ class MoviesTest extends FunSuite with ScalaFutures with Matchers {
 
   val tmdbImageBase = "http://image.tmdb.org/t/p/w300/"
   val expectedFirstThreeMovies = Vector(
-    Movie("Logan", None, None, None, Some("263115"), None, None, Some(7.7), Some(1648), Some(tmdbImageBase + "45Y1G5FEgttPAwjTYic6czC9xCn.jpg")),
-    Movie("Kong: Skull Island", None, None, None, Some("293167"), None, None, Some(6.1), Some(621), Some(tmdbImageBase + "aoUyphk4nwffrwlZRaOa0eijgpr.jpg")),
+    Movie("Logan", None, None, Some("tt3315342"), Some("263115"), Some(8.5), Some(204588), Some(7.7), Some(1648), Some(tmdbImageBase + "45Y1G5FEgttPAwjTYic6czC9xCn.jpg")),
+    Movie("Kong: Skull Island", None, None, Some("tt3731562"), Some("293167"), Some(7.1), Some(59166), Some(6.1), Some(621), Some(tmdbImageBase + "aoUyphk4nwffrwlZRaOa0eijgpr.jpg")),
     Movie("Beauty and the Beast", None, None, None, Some("321612"), None, None, Some(7.2), Some(537), Some(tmdbImageBase + "tnmL0g604PDRJwGJ5fsUSYKFo9.jpg"))
   )
 }

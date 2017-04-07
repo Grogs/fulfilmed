@@ -20,24 +20,16 @@ class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with
   def toMovie(film: Film): Future[Movie] = {
     logger.debug(s"Creating movie from $film")
 
-    def ratingAndVotes(imdbId: Option[String]): Future[(Option[Double], Option[Int])] = {
-      Future.traverse(imdbId.toSeq)(ratings.ratingAndVotes).map(_.headOption.flatten).map(sequence)
-    }
-
     for {
       movieOpt <- find(film.cleanTitle)
       movie = movieOpt.getOrElse(Movie(film.title))
-      imdbId = movie.imdbId map ("tt" + _)
-      (rating, votes) <- ratingAndVotes(imdbId)
       format = Format.split(film.title)._1
     } yield
       movie.copy(
         title = film.title,
         cineworldId = Option(film.id),
         format = Option(format),
-        posterUrl = Option(film.poster_url),
-        rating = rating,
-        votes = votes
+        posterUrl = Option(film.poster_url)
       )
 
   }
@@ -55,32 +47,37 @@ class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with
     cachedMovies
   }
 
+  private def ratingAndVotes(imdbId: Option[String]): Future[(Option[Double], Option[Int])] = {
+    imdbId
+      .map(ratings.ratingAndVotes)
+      .getOrElse(Future.successful(None))
+      .map(sequence)
+  }
+
   def allMovies(): Future[Seq[Movie]] = collapse(
     for {
       nowPlaying <- tmdb.fetchNowPlaying()
+    } yield for {
+      movie <- nowPlaying
+    } yield for {
+      alternateTitles <- tmdb.alternateTitles(movie.id.toString)
+      imdbId <- tmdb.fetchImdbId(movie.id.toString)
+      (rating, votes) <- ratingAndVotes(imdbId)
+    } yield for {
+      altTitle <- (movie.title :: alternateTitles).distinct
     } yield
-      for {
-        movie <- nowPlaying
-      } yield
-        for {
-          alternateTitles <- tmdb.alternateTitles(movie.id.toString)
-          imdbId <- tmdb.fetchImdbId(movie.id.toString)
-        } yield
-          for {
-            altTitle <- (movie.title :: alternateTitles).distinct
-          } yield
-            Movie(
-              movie.title,
-              None,
-              imdbId,
-              None,
-              Option(movie.id.toString),
-              None,
-              None,
-              Option(movie.vote_average),
-              Option(movie.vote_count.toInt),
-              movie.poster_path.map(tmdb.baseImageUrl + _)
-            )
+      Movie(
+        movie.title,
+        None,
+        None,
+        imdbId,
+        Option(movie.id.toString),
+        rating,
+        votes,
+        Option(movie.vote_average),
+        Option(movie.vote_count.toInt),
+        movie.poster_path.map(tmdb.baseImageUrl + _)
+      )
   )
 
   val compareFunc: (String, String) => Double =

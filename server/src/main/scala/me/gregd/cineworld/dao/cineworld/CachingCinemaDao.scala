@@ -25,7 +25,7 @@ class CachingCinemaDao @Inject()(remoteCineworld: RemoteCinemaDao, scheduler: Sc
   def run(): Unit = {
     val someMinutes = (1.5.hours.toSeconds + Random.nextInt(1.5.hours.toSeconds.toInt)).seconds
     scheduler.scheduleOnce(someMinutes) {
-      refresh()
+      refresh().foreach( _ => logger.info("Refresh completed"))
       run()
     }
   }
@@ -50,7 +50,7 @@ class CachingCinemaDao @Inject()(remoteCineworld: RemoteCinemaDao, scheduler: Sc
         } yield
           for {
             ls <- listings
-            _ = logger.info(s"Retrieved listings for ${cinema.id} / $day.  Item $position of $total.")
+            _ = logger.debug(s"Retrieved listings for ${cinema.id} / $day.  Item $position of $total.")
           } yield ((cinema.id, day), ls)
     ).map(Future.sequence(_)).flatMap(identity).map(_.toMap)
   }

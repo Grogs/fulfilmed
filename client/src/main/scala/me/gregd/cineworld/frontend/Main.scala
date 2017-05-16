@@ -5,11 +5,14 @@ import japgolly.scalajs.react.extra._
 import japgolly.scalajs.react.extra.router._
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
+import me.gregd.cineworld.frontend.components.FilmPageComponent.model.{Date, Today, Tomorrow}
 import me.gregd.cineworld.frontend.components.{FilmsStyle, IndexPage, IndexStyle}
 import org.scalajs.dom._
 
 import scala.scalajs.js.JSApp
 import scalacss.Defaults._
+
+import scala.PartialFunction.condOpt
 
 object Main extends JSApp {
 
@@ -19,11 +22,17 @@ object Main extends JSApp {
     IndexStyle.addToDocument()
     FilmsStyle.addToDocument()
 
+
+
     val routerConfig = RouterConfigDsl[Page].buildConfig{ dsl =>
       import dsl._
+      def date = string("(today|tomorrow)").xmap[Date]{
+        case "tomorrow" => Tomorrow
+        case "today" | _ => Today
+      }(_.key)
       (removeTrailingSlashes
       |staticRoute(root, Home) ~> renderR( IndexPage(_)() )
-      |dynamicRouteCT("#!/films" / string("[0-9]+").caseClass[Films]) ~> dynRender( components.FilmPageComponent(_) )
+      |dynamicRouteCT(("#!/films" / string("[0-9]+") / date).caseClass[Films]) ~> dynRender( components.FilmPageComponent(_) )
       ).notFound(redirectToPage(Home)(Redirect.Replace))
     }
     val router = Router(baseUrl, routerConfig)

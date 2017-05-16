@@ -1,16 +1,12 @@
 package me.gregd.cineworld.frontend.components
 
 import japgolly.scalajs.react._
-import japgolly.scalajs.react.component._
-import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.TagMod.Composite
+import japgolly.scalajs.react.vdom.html_<^._
+import me.gregd.cineworld.frontend.components.FilmPageComponent.model.Today
 import me.gregd.cineworld.frontend.{Films, Page}
-import org.scalajs.dom._
-import org.scalajs.dom.html.Select
 
-import scala.scalajs.js.debugger
-import scalacss.Defaults._
 import scalacss._
 //import scalacss.ScalaCssReact._
 
@@ -20,7 +16,7 @@ object IndexPage {
   def apply(router: RouterCtl[Page]) = ScalaComponent.static("IndexPage", {
     def selectCinema(e: ReactEventFromInput): Callback = {
       val cinemaId = e.target.value
-      router.set(Films(cinemaId))
+      router.set(Films(cinemaId, Today))
     }
 
     implicit def styleaToTagMod(s: StyleA): TagMod = ^.className := s.htmlClass //TODO I get linking errors if I don't copy this across

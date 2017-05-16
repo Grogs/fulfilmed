@@ -79,7 +79,6 @@ object FilmPageComponent {
     val FilmsList =
       ScalaComponent.build[(Boolean, model.Sort, Map[Movie, Seq[Performance]])]("FilmsList").render_P {
         case (loading, sort, films) =>
-          println(s"rendering FilmsList. loading: $loading")
           def icon(faClasses: String, message: String) = {
             <.div(^.margin := "50px 0 50px 0", ^.color.white, ^.textAlign.center,
               <.i(^.`class` := s"fa $faClasses fa-5x"),
@@ -125,7 +124,6 @@ object FilmPageComponent {
     def updateDate(event: ReactEventFromInput) = {
       val key = event.target.value
       val date = dates.find(_.key == key).get
-      println("changed to: "+date)
       $.modState(_.copy( isLoading = true, selectedDate = date)) >> updateMovies
     }
 
@@ -134,7 +132,6 @@ object FilmPageComponent {
     def updateMovies = $.state.async >>= ( state => Callback.future {
       for {
         s <- state
-      _ = println(s"using ${s.selectedDate}")
         movies <- Client[ServerCinemaApi].getMoviesAndPerformances(s.cinema, s.selectedDate.key).call()
       } yield $.modState(_.copy(isLoading = false, films = movies))
     })

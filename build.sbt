@@ -69,7 +69,8 @@ lazy val server = project.settings(
     "org.scalatest" %% "scalatest" % "1.9.1" % Test,
     "com.lihaoyi" %% "pprint" % "0.4.3" % Test,
     "org.mapdb" % "mapdb" % "3.0.3",
-    "com.vmunier" %% "scalajs-scripts" % "1.0.0"
+    "com.vmunier" %% "scalajs-scripts" % "1.0.0",
+    "com.github.cb372" %% "scalacache-memcached" % "0.9.3"
   ),
   libraryDependencies ++= Seq(
     "org.webjars" %% "webjars-play" % "2.5.0",

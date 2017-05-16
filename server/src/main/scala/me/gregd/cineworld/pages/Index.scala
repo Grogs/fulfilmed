@@ -3,7 +3,7 @@ package me.gregd.cineworld.pages
 import scalatags.Text.all._
 import scalatags.Text.tags2.{title => titleElem}
 
-class Index {
+object Index {
   def apply(scriptPaths: List[String]) =
     html(
       head(
@@ -20,5 +20,3 @@ class Index {
     )
 
 }
-
-object Index extends Index

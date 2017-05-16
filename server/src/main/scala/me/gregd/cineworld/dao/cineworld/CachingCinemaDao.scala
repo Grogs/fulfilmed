@@ -31,7 +31,7 @@ class CachingCinemaDao @Inject()(remoteCineworld: RemoteCinemaDao, scheduler: Sc
   }
 
   logger.info("Scheduling refresh")
-  scheduler.scheduleOnce(5.seconds)(run())
+  scheduler.scheduleOnce(1.hour)(run())
 
   protected def fetchListings(eventualCinemas: Future[Seq[Cinema]]): Future[Listings] = {
     val days = (0 to 1).map(clock.today() plusDays _ toString)

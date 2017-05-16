@@ -4,16 +4,21 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
+import me.gregd.cineworld.Cache
 import me.gregd.cineworld.domain.{Cinema, Film, Movie, Performance}
 import org.json4s._
 import org.json4s.native.JsonMethods._
 import play.api.libs.ws._
 
 import scala.concurrent.{ExecutionContext, Future}
+import scalacache.memoization._
+import scala.concurrent.duration._
 
-class CineworldRepository @Inject()(ws: WSClient) {
+class CineworldRepository @Inject()(ws: WSClient, cache: Cache) {
 
-  object StringToLong
+  implicit val _ = cache.scalaCache
+
+  private object StringToLong
       extends CustomSerializer[Long](format =>
         ({
           case JString(x) => x.toLong
@@ -21,7 +26,7 @@ class CineworldRepository @Inject()(ws: WSClient) {
           case x: Long => JInt(x)
         }))
 
-  object StringToInt
+  private object StringToInt
       extends CustomSerializer[Int](format =>
         ({
           case JString(x) => x.toInt
@@ -29,18 +34,29 @@ class CineworldRepository @Inject()(ws: WSClient) {
           case x: Long => JInt(x)
         }))
 
-  implicit val formats = DefaultFormats + StringToLong + StringToInt
-  implicit val ec = ExecutionContext.global
+  private implicit val formats = DefaultFormats + StringToLong + StringToInt
+  private implicit val ec = ExecutionContext.global
 
-  def retrieveCinemas(): Future[Seq[CinemaResp]] =
+  private def curlCinemas(): Future[String] = memoize(1.day) {
     ws.url("https://www.cineworld.co.uk/getSites?json=1&max=200")
       .get()
-      .map(r => parse(r.body).children.map(_.extract[CinemaResp]))
+      .map(_.body)
+  }
 
-  def retrieve7DayListings(cinema: String): Future[Seq[MovieResp]] =
-    ws.url(s"https://www.cineworld.co.uk/pgm-site?si=$cinema&max=365")
+  private def curl7DayListings(cinema: String): Future[String] = memoize(6.hours) {
+    val url = s"https://www.cineworld.co.uk/pgm-site?si=$cinema&max=365"
+    ws.url(url)
       .get()
-      .map(r => parse(r.body).children.map(_.extract[MovieResp]))
+      .map(_.body)
+  }
+
+  def retrieveCinemas(): Future[Seq[CinemaResp]] = {
+    curlCinemas().map(r => parse(r).children.map(_.extract[CinemaResp]))
+  }
+
+  def retrieve7DayListings(cinema: String): Future[Seq[MovieResp]] = {
+    curl7DayListings(cinema).map(r => parse(r).children.map(_.extract[MovieResp]))
+  }
 
 }
 

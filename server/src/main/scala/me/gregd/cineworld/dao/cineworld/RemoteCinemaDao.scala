@@ -23,7 +23,6 @@ class RemoteCinemaDao @Inject()(
 ) extends CinemaDao
     with Logging {
 
-  val decode = java.net.URLDecoder.decode(_: String, "UTF-8")
   implicit val formats = DefaultFormats
 
   private def getDate(s: String): Try[LocalDate] = {

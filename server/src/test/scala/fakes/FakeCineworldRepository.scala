@@ -4,7 +4,7 @@ import me.gregd.cineworld.dao.cineworld._
 
 import scala.concurrent.Future
 
-object FakeCineworldRepository extends CineworldRepository(null) {
+object FakeCineworldRepository extends CineworldRepository(null, null) {
   override def retrieveCinemas(): Future[Seq[CinemaResp]] =
     Future.successful(
       List(

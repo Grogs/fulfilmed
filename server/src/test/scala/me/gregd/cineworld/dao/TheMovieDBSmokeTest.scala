@@ -26,8 +26,8 @@ class TheMovieDBSmokeTest extends FunSuite with Matchers with OneAppPerSuite wit
     val size1 = tmdb.alternateTitles("550").futureValue.size
     val size2 = tmdb.alternateTitles("419430").futureValue.size
 
-    size1 shouldBe 6
-    size2 shouldBe 0
+    size1 shouldBe 7
+    size2 shouldBe 3
   }
 
   test("baseImageUrl") {

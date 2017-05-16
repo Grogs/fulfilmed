@@ -46,7 +46,7 @@ class Ratings @Inject()(ws: WSClient, cache: RatingsCache) extends slf4j.Logging
           extract(resp.json) match {
             case Success(r) => Some(r)
             case Failure(ex) =>
-              logger.error(s"Failed parse OMDB response for $id", ex)
+              logger.info(s"Failed parse OMDB response for $id", ex)
               None
           }
         }

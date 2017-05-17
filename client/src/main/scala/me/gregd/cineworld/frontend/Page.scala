@@ -1,6 +1,6 @@
 package me.gregd.cineworld.frontend
 
-import me.gregd.cineworld.frontend.components.FilmPageComponent.model.Date
+import me.gregd.cineworld.frontend.components.film.FilmPageComponent.Date
 
 
 sealed trait Page

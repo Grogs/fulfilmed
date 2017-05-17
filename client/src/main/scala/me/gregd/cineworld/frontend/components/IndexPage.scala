@@ -4,7 +4,7 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.TagMod.Composite
 import japgolly.scalajs.react.vdom.html_<^._
-import me.gregd.cineworld.frontend.components.FilmPageComponent.model.Today
+import me.gregd.cineworld.frontend.components.film.FilmPageComponent.Today
 import me.gregd.cineworld.frontend.{Films, Page}
 
 import scalacss._

@@ -1,4 +1,4 @@
-package me.gregd.cineworld.frontend.components
+package me.gregd.cineworld.frontend.components.film
 
 import scalacss.Defaults._
 

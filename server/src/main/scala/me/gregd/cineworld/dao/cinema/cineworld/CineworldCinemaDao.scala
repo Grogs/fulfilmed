@@ -1,10 +1,12 @@
-package me.gregd.cineworld.dao.cineworld
+package me.gregd.cineworld.dao.cinema.cineworld
 
 import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
 
 import grizzled.slf4j.Logging
 import me.gregd.cineworld.dao.TheMovieDB
+import me.gregd.cineworld.dao.cinema.CinemaDao
+import me.gregd.cineworld.dao.cinema.cineworld.raw.{CineworldRepository, CineworldRepositoryTransformer}
 import me.gregd.cineworld.dao.movies.MovieDao
 import me.gregd.cineworld.domain.{Cinema, Film, Movie, Performance}
 import me.gregd.cineworld.util.Clock
@@ -15,7 +17,7 @@ import scala.concurrent.Future
 import scala.util.Try
 
 @Singleton
-class RemoteCinemaDao @Inject()(
+class CineworldCinemaDao @Inject()(
     imdb: MovieDao,
     tmdb: TheMovieDB,
     dao: CineworldRepository,
@@ -37,7 +39,7 @@ class RemoteCinemaDao @Inject()(
     dao
       .retrieveCinemas()
       .map(
-        _.map(CineworldRepository.toCinema)
+        _.map(CineworldRepositoryTransformer.toCinema)
       )
 
   override def retrieveMoviesAndPerformances(cinemaId: String, dateRaw: String): Future[Map[Movie, List[Performance]]] = {
@@ -51,7 +53,7 @@ class RemoteCinemaDao @Inject()(
       logger.debug(s"Retrieving listings for $cinemaId:$dateRaw")
       val res = for {
         movieResp <- rawMovies
-        (film, allPerformances) <- CineworldRepository.toMovie(cinemaId, movieResp)
+        (film, allPerformances) <- CineworldRepositoryTransformer.toMovie(cinemaId, movieResp)
         movie = imdb.toMovie(film)
         date = getDate(dateRaw).get
         performances = allPerformances.getOrElse(date, Nil).toList

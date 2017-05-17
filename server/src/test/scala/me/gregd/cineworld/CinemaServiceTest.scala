@@ -3,7 +3,7 @@ package me.gregd.cineworld
 import java.time.LocalDate
 
 import fakes.{FakeCineworldRepository, FakeRatings, FakeTheMovieDB}
-import me.gregd.cineworld.dao.cineworld.RemoteCinemaDao
+import me.gregd.cineworld.dao.cinema.cineworld.CineworldCinemaDao
 import me.gregd.cineworld.dao.movies.Movies
 import me.gregd.cineworld.util.FixedClock
 import org.scalatest.{FunSuite, Matchers}
@@ -22,7 +22,7 @@ class CinemaServiceTest extends FunSuite with ScalaFutures with Matchers {
 
   val movieDao = new Movies(FakeTheMovieDB, FakeRatings)
   val clock = FixedClock(LocalDate.parse("2017-03-23"))
-  val cinemaDao = new RemoteCinemaDao(movieDao, FakeTheMovieDB, FakeCineworldRepository, clock)
+  val cinemaDao = new CineworldCinemaDao(movieDao, FakeTheMovieDB, FakeCineworldRepository, clock)
 
   val cinemaService = new CinemaService(movieDao, cinemaDao, clock)
 

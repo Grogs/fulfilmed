@@ -1,7 +1,7 @@
 package me.gregd.cineworld.dao.movies
 
 import fakes.{FakeCineworldRepository, FakeRatings, FakeTheMovieDB}
-import me.gregd.cineworld.dao.cineworld.CineworldRepository.toFilm
+import me.gregd.cineworld.dao.cinema.cineworld.raw.CineworldRepositoryTransformer.toFilm
 import me.gregd.cineworld.domain.Movie
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Span}

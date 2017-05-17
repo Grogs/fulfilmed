@@ -1,10 +1,13 @@
 package fakes
 
-import me.gregd.cineworld.dao.cineworld._
+import me.gregd.cineworld.Cache
+import me.gregd.cineworld.dao.cinema.cineworld.raw._
+import me.gregd.cineworld.dao.cinema.cineworld.raw.model.{CinemaResp, Day, MovieResp, Showing}
 
 import scala.concurrent.Future
+import scalacache.ScalaCache
 
-object FakeCineworldRepository extends CineworldRepository(null, null) {
+object FakeCineworldRepository extends CineworldRepository(null, Cache(ScalaCache(NoOpCache))) {
   override def retrieveCinemas(): Future[Seq[CinemaResp]] =
     Future.successful(
       List(
@@ -14,7 +17,7 @@ object FakeCineworldRepository extends CineworldRepository(null, null) {
           "Harvey Centre, Harlow CM20 1XR",
           39,
           "Harlow - Harvey Centre",
-          "0871 200 2000",
+          Some("0871 200 2000"),
           0.09356900304555893,
           51.76919937133789,
           "harlow-harvey-centre"
@@ -24,7 +27,7 @@ object FakeCineworldRepository extends CineworldRepository(null, null) {
                    "Yeo Leisure Park, Old Station Way, Yeovil BA20 1NP",
                    97,
                    "Yeovil",
-                   "0871 200 2000",
+                   Some("0871 200 2000"),
                    -2.6255300045013428,
                    50.940399169921875,
                    "yeovil"),
@@ -33,7 +36,7 @@ object FakeCineworldRepository extends CineworldRepository(null, null) {
                    "The Crescent, Station Road, Hinckley LE10 1AW",
                    44,
                    "Hinckley",
-                   "0871 200 2000",
+                   Some("0871 200 2000"),
                    -1.3728400468826294,
                    52.53929901123047,
                    "hinckley"),
@@ -42,7 +45,7 @@ object FakeCineworldRepository extends CineworldRepository(null, null) {
                    "",
                    61,
                    "London - Staples Corner - CLOSED",
-                   "",
+                   None,
                    0.0,
                    0.0,
                    "london-staples-corner"),
@@ -52,7 +55,7 @@ object FakeCineworldRepository extends CineworldRepository(null, null) {
           "The Mall Wood Green, High Road, London N22 6LU",
           66,
           "London - Wood Green",
-          "0871 200 2000",
+          Some("0871 200 2000"),
           -0.10645700246095657,
           51.59450149536133,
           "london-wood-green"
@@ -63,7 +66,7 @@ object FakeCineworldRepository extends CineworldRepository(null, null) {
           "Hertsmere Road, West India Quay, London E14 4AL",
           65,
           "London - West India Quay",
-          "0871 200 2000",
+          Some("0871 200 2000"),
           -0.023843999952077866,
           51.507598876953125,
           "london-west-india-quay"
@@ -73,7 +76,7 @@ object FakeCineworldRepository extends CineworldRepository(null, null) {
                    "The Valley, 15 Eagley Brook Way, Bolton BL1 8TS",
                    11,
                    "Bolton",
-                   "0871 200 2000",
+                   Some("0871 200 2000"),
                    -2.423959970474243,
                    53.597198486328125,
                    "bolton"),
@@ -82,7 +85,7 @@ object FakeCineworldRepository extends CineworldRepository(null, null) {
                    "Festival Leisure Park, Basildon SS14 3WB",
                    6,
                    "Basildon",
-                   "0871 200 2000",
+                   Some("0871 200 2000"),
                    0.46250298619270325,
                    51.584999084472656,
                    "basildon"),
@@ -91,7 +94,7 @@ object FakeCineworldRepository extends CineworldRepository(null, null) {
                    "Riverside, Link Road, Yate BS37 4FT",
                    96,
                    "Yate",
-                   "0871 200 2000",
+                   Some("0871 200 2000"),
                    -2.4091200828552246,
                    51.539100646972656,
                    "yate"),
@@ -100,7 +103,7 @@ object FakeCineworldRepository extends CineworldRepository(null, null) {
                    "Mary Ann Street, Cardiff CF10 2EN",
                    20,
                    "Cardiff",
-                   "0871 200 2000",
+                   Some("0871 200 2000"),
                    -3.1733999252319336,
                    51.47869873046875,
                    "cardiff")

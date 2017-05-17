@@ -2,7 +2,7 @@ package me.gregd.cineworld.dao.movies
 
 import fakes.{FakeCineworldRepository, FakeRatings, FakeTheMovieDB}
 import me.gregd.cineworld.dao.TheMovieDB
-import me.gregd.cineworld.dao.cineworld.CineworldRepository
+import me.gregd.cineworld.dao.cinema.cineworld.raw.CineworldRepository
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{BeforeAndAfterEach, FunSuite, Matchers}
 import org.scalatestplus.play.OneAppPerSuite

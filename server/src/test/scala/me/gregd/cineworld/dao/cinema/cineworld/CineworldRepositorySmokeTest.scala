@@ -1,7 +1,8 @@
-package me.gregd.cineworld.dao.cineworld
+package me.gregd.cineworld.dao.cinema.cineworld
 
 import fakes.FakeTheMovieDB
 import me.gregd.cineworld.dao.TheMovieDB
+import me.gregd.cineworld.dao.cinema.cineworld.raw.{CineworldRepository, CineworldRepositoryTransformer}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSuite, Matchers}
 import play.api.inject.bind
@@ -23,7 +24,7 @@ class CineworldRepositorySmokeTest
     val cinemas = cineworldDao.retrieveCinemas().futureValue
 
     val (london, rest) = cinemas
-      .map(CineworldRepository.toCinema)
+      .map(CineworldRepositoryTransformer.toCinema)
       .partition(_.name.startsWith("London - "))
 
     london should not be empty

@@ -1,4 +1,4 @@
-package me.gregd.cineworld.dao.cineworld
+package me.gregd.cineworld.dao.cinema.cineworld
 
 import java.time.LocalDate
 
@@ -10,12 +10,12 @@ import org.scalatest.{FunSuite, Matchers}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Span}
 
-class RemoteCinemaDaoTest extends FunSuite with ScalaFutures with Matchers {
+class CineworldCinemaDaoTest extends FunSuite with ScalaFutures with Matchers {
 
   implicit val defaultPatienceConfig = PatienceConfig(Span(2000, Millis))
 
   val movieDao = new Movies(FakeTheMovieDB, FakeRatings)
-  val remoteCinemaDao = new RemoteCinemaDao(movieDao, FakeTheMovieDB, FakeCineworldRepository, FixedClock(LocalDate.parse("2017-03-23")))
+  val remoteCinemaDao = new CineworldCinemaDao(movieDao, FakeTheMovieDB, FakeCineworldRepository, FixedClock(LocalDate.parse("2017-03-23")))
 
   test("retrieveCinemas") {
     val cinemas = remoteCinemaDao.retrieveCinemas().futureValue

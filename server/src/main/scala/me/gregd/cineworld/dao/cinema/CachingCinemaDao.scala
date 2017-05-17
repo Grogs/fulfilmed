@@ -1,10 +1,12 @@
-package me.gregd.cineworld.dao.cineworld
+package me.gregd.cineworld.dao.cinema
 
 import javax.inject.{Inject, Singleton}
 
 import grizzled.slf4j.Logging
+import me.gregd.cineworld.dao.cinema.cineworld.CineworldCinemaDao
 import me.gregd.cineworld.domain._
 import me.gregd.cineworld.util.Clock
+import me.gregd.cineworld.util.Implicits.FutureOrElse
 import monix.execution.Scheduler
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -12,10 +14,8 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.{Failure, Random, Success}
 
-import me.gregd.cineworld.util.Implicits.FutureOrElse
-
 @Singleton
-class CachingCinemaDao @Inject()(remoteCineworld: RemoteCinemaDao, scheduler: Scheduler, clock: Clock) extends CinemaDao with Logging {
+class CachingCinemaDao @Inject()(remoteCineworld: CineworldCinemaDao, scheduler: Scheduler, clock: Clock) extends CinemaDao with Logging {
 
   type Listings = Map[(String, String), Map[Movie, List[Performance]]]
 

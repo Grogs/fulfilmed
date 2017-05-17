@@ -2,7 +2,7 @@ package me.gregd.cineworld
 
 import fakes.{FakeCineworldRepository, FakeRatings, FakeTheMovieDB}
 import me.gregd.cineworld.dao.TheMovieDB
-import me.gregd.cineworld.dao.cineworld.CineworldRepository
+import me.gregd.cineworld.dao.cinema.cineworld.raw.CineworldRepository
 import me.gregd.cineworld.dao.movies.Ratings
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.selenium.HtmlUnit

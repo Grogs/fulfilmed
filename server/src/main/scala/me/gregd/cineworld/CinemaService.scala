@@ -2,7 +2,7 @@ package me.gregd.cineworld
 
 import javax.inject.Inject
 
-import me.gregd.cineworld.dao.cineworld.CinemaDao
+import me.gregd.cineworld.dao.cinema.CinemaDao
 import me.gregd.cineworld.dao.movies.MovieDao
 import me.gregd.cineworld.domain.{Cinema, Movie, Performance}
 import me.gregd.cineworld.util.Clock

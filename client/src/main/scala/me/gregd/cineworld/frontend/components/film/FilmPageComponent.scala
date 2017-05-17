@@ -5,8 +5,7 @@ import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.TagMod.Composite
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.{BackendScope, Callback, _}
-import me.gregd.cineworld.ServerCinemaApi
-import me.gregd.cineworld.domain.{Movie, Performance}
+import me.gregd.cineworld.domain.{CinemaApi, Movie, Performance}
 import me.gregd.cineworld.frontend._
 import me.gregd.cineworld.frontend.components.film.Sort.{NextShowing, Sort}
 import me.gregd.cineworld.frontend.components.film
@@ -75,7 +74,7 @@ object FilmPageComponent {
     def updateMovies = $.state.async >>= ( state => Callback.future {
       for {
         s <- state
-        movies <- Client[ServerCinemaApi].getMoviesAndPerformances(s.cinema, s.selectedDate.key).call()
+        movies <- Client[CinemaApi].getMoviesAndPerformances(s.cinema, s.selectedDate.key).call()
       } yield $.modState(_.loaded(movies))
     })
 

@@ -4,13 +4,13 @@ import javax.inject.Inject
 
 import me.gregd.cineworld.dao.cinema.CinemaDao
 import me.gregd.cineworld.dao.movies.MovieDao
-import me.gregd.cineworld.domain.{Cinema, Movie, Performance}
+import me.gregd.cineworld.domain.{Cinema, CinemaApi, Movie, Performance}
 import me.gregd.cineworld.util.Clock
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class CinemaService @Inject()(movieDao: MovieDao, cinemaDao: CinemaDao, clock: Clock) extends ServerCinemaApi {
+class CinemaService @Inject()(movieDao: MovieDao, cinemaDao: CinemaDao, clock: Clock) extends CinemaApi {
 
   override def getMoviesAndPerformances(cinemaId: String, dateRaw: String): Future[Map[Movie, List[Performance]]] =
     cinemaDao.retrieveMoviesAndPerformances(cinemaId, parse(dateRaw))

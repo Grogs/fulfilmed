@@ -42,7 +42,7 @@ class CinemaController @Inject() (env: Environment, cinemaService: CinemaService
     val path = pathRaw.split("/")
     val body = request.body.asText.getOrElse("")
     val args = upickle.json.read(body).asInstanceOf[Obj].value.toMap
-    ApiServer.route[ServerCinemaApi](cinemaService)(
+    ApiServer.route[CinemaApi](cinemaService)(
       Request(path, args)
     ).map( res =>
       Ok(upickle.json.write(res))

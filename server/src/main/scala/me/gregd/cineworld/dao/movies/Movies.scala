@@ -5,6 +5,7 @@ import javax.inject.{Inject, Singleton}
 import com.rockymadden.stringmetric.similarity.DiceSorensenMetric
 import grizzled.slf4j.Logging
 import me.gregd.cineworld.dao.TheMovieDB
+import me.gregd.cineworld.dao.model.TmdbMovie
 import me.gregd.cineworld.domain.{Film, Format, Movie}
 import org.json4s._
 
@@ -58,27 +59,32 @@ class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with
     for {
       nowPlaying <- tmdb.fetchNowPlaying()
     } yield for {
-      movie <- nowPlaying
+      tmdbMovie <- nowPlaying
+      tmdbId = tmdbMovie.id.toString
     } yield for {
-      alternateTitles <- tmdb.alternateTitles(movie.id.toString)
-      imdbId <- tmdb.fetchImdbId(movie.id.toString)
+      alternateTitles <- tmdb.alternateTitles(tmdbId)
+      imdbId <- tmdb.fetchImdbId(tmdbId)
       (rating, votes) <- ratingAndVotes(imdbId)
     } yield for {
-      altTitle <- (movie.title :: alternateTitles).distinct
+      altTitle <- (tmdbMovie.title :: alternateTitles).distinct
     } yield
-      Movie(
-        movie.title,
-        None,
-        None,
-        imdbId,
-        Option(movie.id.toString),
-        rating,
-        votes,
-        Option(movie.vote_average),
-        Option(movie.vote_count.toInt),
-        movie.poster_path.map(tmdb.baseImageUrl + _)
-      )
+      toMovie(tmdbMovie, tmdbId, imdbId, rating, votes)
   )
+
+  private def toMovie(tmdbMovie: TmdbMovie, tmdbId: String, imdbId: Option[String], rating: Option[Double], votes: Option[Int]) = {
+    Movie(
+      tmdbMovie.title,
+      None,
+      None,
+      imdbId,
+      Option(tmdbId),
+      rating,
+      votes,
+      Option(tmdbMovie.vote_average),
+      Option(tmdbMovie.vote_count.toInt),
+      tmdbMovie.poster_path.map(tmdb.baseImageUrl + _)
+    )
+  }
 
   val compareFunc: (String, String) => Double =
     DiceSorensenMetric(1).compare(_: String, _: String).get

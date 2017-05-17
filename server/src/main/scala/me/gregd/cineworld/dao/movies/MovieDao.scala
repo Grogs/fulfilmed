@@ -10,6 +10,4 @@ trait MovieDao {
 
   def toMovie(film: Film): Future[Movie]
 
-  def find(title: String): Future[Option[Movie]]
-
 }

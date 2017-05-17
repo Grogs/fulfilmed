@@ -1,13 +1,11 @@
 package fakes
 
-import me.gregd.cineworld.Cache
 import me.gregd.cineworld.dao.cinema.cineworld.raw._
 import me.gregd.cineworld.dao.cinema.cineworld.raw.model.{CinemaResp, Day, MovieResp, Showing}
 
 import scala.concurrent.Future
-import scalacache.ScalaCache
 
-object FakeCineworldRepository extends CineworldRepository(null, Cache(ScalaCache(NoOpCache))) {
+object FakeCineworldRepository extends CineworldRepository(null, NoOpCache.cache) {
   override def retrieveCinemas(): Future[Seq[CinemaResp]] =
     Future.successful(
       List(

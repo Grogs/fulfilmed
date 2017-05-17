@@ -22,16 +22,7 @@ class Module extends AbstractModule {
 
   val scalaCache = Cache(ScalaCache(new FileCache(Files.createTempDirectory("fulfilmed-cache").toString)))
 
-  val ratingsCache = {
-//    val db = DBMaker.fileDB("ratingsCache.mapdb").transactionEnable().make()
-//    val map = db
-//      .hashMap("ratings-cache", Serializer.STRING, Serializer.JAVA.asInstanceOf[Serializer[(Double, Int)]])
-//      .expireAfterCreate(1.day.toMillis)
-//      .expireAfterUpdate(1.day.toMillis)
-//      .createOrOpen()
-//    new RatingsCache(map.asScala, db.commit())
-    new RatingsCache(collection.mutable.Map(), ())
-  }
+  val ratingsCache = new RatingsCache(collection.mutable.Map())
 
   override def configure(): Unit = {
     bind(classOf[Scheduler]).toInstance(monix.execution.Scheduler.global)

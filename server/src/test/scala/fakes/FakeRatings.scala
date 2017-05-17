@@ -4,7 +4,7 @@ import me.gregd.cineworld.dao.movies.{Ratings, RatingsCache}
 
 import scala.concurrent.Future
 
-object FakeRatings extends Ratings(null, new RatingsCache(collection.mutable.Map(), ())) {
+object FakeRatings extends Ratings(null, NoOpCache.cache) {
 
   val entries = Map(
     "tt3315342" -> (8.5, 204588),

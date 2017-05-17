@@ -1,11 +1,15 @@
 package fakes
 
+import me.gregd.cineworld.Cache
+
 import scala.concurrent.Future
 import scala.concurrent.duration.Duration
-import scalacache.Cache
+import scalacache.ScalaCache
 import scalacache.serialization.Codec
 
-object NoOpCache extends Cache[Array[Byte]] {
+object NoOpCache extends scalacache.Cache[Array[Byte]] {
+  val cache = Cache(ScalaCache(this))
+
   def get[V](key: String)(implicit codec: Codec[V, Array[Byte]]): Future[Option[V]] =
     Future.successful(None)
 

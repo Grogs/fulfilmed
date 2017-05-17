@@ -4,8 +4,8 @@ import webscalajs.SourceMappings
 
 lazy val commonSettings = Seq(
   organization := "me.gregd",
-  version := "1.4.2",
-  scalaVersion := "2.11.8"
+  version := "1.5",
+  scalaVersion := "2.11.11"
 )
 
 resolvers += Resolver.sonatypeRepo("releases")
@@ -18,8 +18,8 @@ lazy val client = project.enablePlugins(ScalaJSPlugin, ScalaJSWeb).settings(
   persistLauncher in Test := false,
   libraryDependencies ++= Seq(
     "org.scala-js" %%% "scalajs-dom" % "0.9.1",
-    "com.github.japgolly.scalajs-react" %%% "core" % "1.0.0-RC1",
-    "com.github.japgolly.scalajs-react" %%% "extra" % "1.0.0-RC1",
+    "com.github.japgolly.scalajs-react" %%% "core" % "1.0.0",
+    "com.github.japgolly.scalajs-react" %%% "extra" % "1.0.0",
     "com.github.japgolly.scalacss" %%% "core" % "0.5.1",
     "com.github.japgolly.scalacss" %%% "ext-react" % "0.5.1",
     "org.scala-js" %%% "scalajs-java-time" % "0.2.0"
@@ -40,7 +40,6 @@ lazy val server = project.settings(
   scalaJSProjects := Seq(client),
   pipelineStages in Assets := Seq(scalaJSPipeline),
   WebKeys.packagePrefix in Assets := "public/",
-//  managedClasspath in Runtime += (packageBin in Assets).value,
   libraryDependencies ++= Seq(
     "org.scala-lang" % "scala-library" % "2.11.7",
     "org.scala-lang" % "scala-compiler" % "2.11.7",

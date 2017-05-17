@@ -1,6 +1,7 @@
 package me.gregd.cineworld.frontend.components
 
 import autowire._
+import japgolly.scalajs.react.extra.router.RouterCtl
 import japgolly.scalajs.react.vdom.TagMod.Composite
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.{BackendScope, Callback, _}
@@ -10,6 +11,7 @@ import me.gregd.cineworld.frontend._
 import me.gregd.cineworld.frontend.components.FilmPageComponent.model._
 import org.scalajs.dom.document
 
+import scala.language.implicitConversions
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scalacss.StyleA
 
@@ -21,9 +23,11 @@ object FilmPageComponent {
 
   private implicit def styleaToTagMod(s: StyleA): TagMod = ^.className := s.htmlClass //TODO I get linking errors if I don't copy this across
 
-  def apply(page: Films) = components.FilmPage(page)
+  def apply(props: Props) = components.FilmPage(props)
 
   object model {
+
+    case class Props(router: RouterCtl[Page], page: Films)
 
     case class State(
                       isLoading: Boolean,
@@ -31,7 +35,11 @@ object FilmPageComponent {
                       films: Map[Movie, Seq[Performance]],
                       selectedSort: Sort = NextShowing,
                       selectedDate: Date = Today
-                    )
+                    ) {
+      def loading(date: Date): State = copy(isLoading = true, selectedDate = date)
+      def loaded(films: Map[Movie, Seq[Performance]]): State = copy(isLoading = false, films = films)
+      def sortBy(sort: Sort): State = copy(selectedSort = sort)
+    }
 
     case class Sort(key: String, description: String, ordering: Ordering[Entry])
 
@@ -52,19 +60,12 @@ object FilmPageComponent {
   }
 
   object components {
-    val FilmCard = (m: Movie, pl: Seq[Performance]) =>
+    val filmCard = (m: Movie, pl: Seq[Performance]) =>
       <.div(FilmsStyle.filmCard,
         <.div(FilmsStyle.filmInfo,
           <.div(^.classSet("threedee" -> m.format.contains("3D")),
             <.div(FilmsStyle.filmTitle, m.title),
-            <.div(FilmsStyle.ratings,
-              m.rating.flatMap( r => m.imdbId.map(_ -> r)).whenDefined{ case (id , rating) =>
-                <.div(FilmsStyle.imdb, <.a(^.href := s"http://www.imdb.com/title/tt$id", rating))
-              },
-              m.tmdbRating.whenDefined(<.div(FilmsStyle.tmdb, _))
-//              , m.tmdbVotes.whenDefined(<.div(FilmsStyle.rtAudience, _))
-            ),
-//            TmdbRatingSvg.tmdbSection.render,
+            <.div(FilmsStyle.ratings, imdbLink(m), tmdbLink(m)),
             <.div(FilmsStyle.times,
               Composite(for (p <- pl.toVector) yield
                 <.a(^.href := p.booking_url,
@@ -76,8 +77,17 @@ object FilmPageComponent {
         <.img(FilmsStyle.filmBackground, ^.src := m.posterUrl.get)
       )
 
+    def tmdbLink(m: Movie) = m.tmdbRating.whenDefined(<.div(FilmsStyle.tmdb, _))
+
+    def imdbLink(m: Movie) = {
+      for {
+        rating <- m.rating
+        id <- m.imdbId
+      } yield <.div(FilmsStyle.imdb, <.a(^.href := s"http://www.imdb.com/title/tt$id", rating))
+    }.whenDefined
+
     val FilmsList =
-      ScalaComponent.build[(Boolean, model.Sort, Map[Movie, Seq[Performance]])]("FilmsList").render_P {
+      ScalaComponent.builder[(Boolean, Sort, Map[Movie, Seq[Performance]])]("FilmsList").render_P {
         case (loading, sort, films) =>
           def icon(faClasses: String, message: String) = {
             <.div(^.margin := "50px 0 50px 0", ^.color.white, ^.textAlign.center,
@@ -86,9 +96,9 @@ object FilmPageComponent {
             )
           }
 
-          def spinner = icon("fa-refresh fa-spin", "Loading movies")
+          val spinner = icon("fa-refresh fa-spin", "Loading movies")
 
-          def frown = icon("fa-frown-o", "No movies found!")
+          val frown = icon("fa-frown-o", "No movies found!")
 
           val movies = films.toVector.sorted(sort.ordering)
           if (movies.isEmpty)
@@ -96,47 +106,46 @@ object FilmPageComponent {
           else
             <.div(
               FilmsStyle.filmListContainer,
-              Composite(for (m <- movies) yield FilmCard.tupled(m))
+              Composite(for (m <- movies) yield filmCard.tupled(m))
             )
       }.build
 
     val FilmPage = {
-      ScalaComponent.build[Films]("FilmPage")
-        .initialState_P( props => model.State(isLoading = true, cinema = props.cinemaId, Map.empty, selectedDate = props.initialDate))
+      ScalaComponent.builder[Props]("FilmPage")
+        .initialStateFromProps($ => State(isLoading = true, cinema = $.page.cinemaId, Map.empty, selectedDate = $.page.initialDate))
         .renderBackend[Backend]
         .componentWillMountConst(Callback(document.body.style.background = "#111"))
         .componentWillUnmountConst(Callback(document.body.style.background = null))
-        .componentDidMount(c => c.backend.updateMovies)
+        .componentDidMount(_.backend.updateMovies)
         .build
     }
-
   }
 
-
-  class Backend($: BackendScope[Films, model.State]) {
+  class Backend($: BackendScope[Props, State]) {
 
     def updateSort(event: ReactEventFromInput) = {
       val key = event.target.value
       val sort = sorts.find(_.key == key).get
-      $.modState(_.copy(selectedSort = sort))
+      $.modState(_.sortBy(sort))
     }
 
     def updateDate(event: ReactEventFromInput) = {
       val key = event.target.value
       val date = dates.find(_.key == key).get
-      $.modState(_.copy( isLoading = true, selectedDate = date)) >> updateMovies
+      val updateUrl = $.props >>= (p => p.router.set(p.page.on(date)))
+      updateUrl >> $.modState(_.loading(date)) >> updateMovies
     }
 
-    def sortBy(sort: model.Sort) = $.modState(_.copy(selectedSort = sort))
+    def sortBy(sort: Sort) = $.modState(_.sortBy(sort))
 
     def updateMovies = $.state.async >>= ( state => Callback.future {
       for {
         s <- state
         movies <- Client[ServerCinemaApi].getMoviesAndPerformances(s.cinema, s.selectedDate.key).call()
-      } yield $.modState(_.copy(isLoading = false, films = movies))
+      } yield $.modState(_.loaded(movies))
     })
 
-    def render(state: model.State) = {
+    def render(state: State) = {
 
       val sortSelection = <.div(FilmsStyle.menuGroup,
         <.i(^.`class` := "fa fa-sort-alpha-asc fa-lg", ^.color.white),
@@ -153,10 +162,8 @@ object FilmPageComponent {
 
       val attribution = <.div(FilmsStyle.attribution,
         "Powered by: ",
-        <.a(^.href := "http://www.cineworld.co.uk/", "Cineworld's API"), ", ",
         <.a(^.href := "http://www.omdbapi.com/", "The OMDb API"), ", ",
-        <.a(^.href := "http://www.themoviedb.org/", "TheMovieDB"), " and ",
-        <.a(^.href := "http://www.rottentomatoes.com/", "Rotten Tomatoes"))
+        <.a(^.href := "http://www.themoviedb.org/", "TheMovieDB"))
 
       <.div(^.id := "films", FilmsStyle.container,
         menu,

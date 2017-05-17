@@ -5,7 +5,7 @@ import japgolly.scalajs.react.extra._
 import japgolly.scalajs.react.extra.router._
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
-import me.gregd.cineworld.frontend.components.FilmPageComponent.model.{Date, Today, Tomorrow}
+import me.gregd.cineworld.frontend.components.FilmPageComponent.model.{Date, Today, Tomorrow, Props}
 import me.gregd.cineworld.frontend.components.{FilmsStyle, IndexPage, IndexStyle}
 import org.scalajs.dom._
 
@@ -32,7 +32,7 @@ object Main extends JSApp {
       }(_.key)
       (removeTrailingSlashes
       |staticRoute(root, Home) ~> renderR( IndexPage(_)() )
-      |dynamicRouteCT(("#!/films" / string("[0-9]+") / date).caseClass[Films]) ~> dynRender( components.FilmPageComponent(_) )
+      |dynamicRouteCT(("#!/films" / string("[0-9]+") / date).caseClass[Films]) ~> dynRenderR{ case (p:Films,r) => components.FilmPageComponent(Props(r,p)) }
       ).notFound(redirectToPage(Home)(Redirect.Replace))
     }
     val router = Router(baseUrl, routerConfig)

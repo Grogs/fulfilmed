@@ -8,18 +8,18 @@ import me.gregd.cineworld.frontend.components.FilmPageComponent.model.Today
 import me.gregd.cineworld.frontend.{Films, Page}
 
 import scalacss._
-//import scalacss.ScalaCssReact._
 
 object IndexPage {
   val label = "label".reactAttr
 
-  def apply(router: RouterCtl[Page]) = ScalaComponent.static("IndexPage", {
+  def apply(router: RouterCtl[Page]) = ScalaComponent.static("IndexPage"){
     def selectCinema(e: ReactEventFromInput): Callback = {
       val cinemaId = e.target.value
       router.set(Films(cinemaId, Today))
     }
 
     implicit def styleaToTagMod(s: StyleA): TagMod = ^.className := s.htmlClass //TODO I get linking errors if I don't copy this across
+
     <.div(^.id := "indexPage",
       <.div(IndexStyle.top,
         <.div(IndexStyle.title,
@@ -55,7 +55,6 @@ object IndexPage {
 
     )
   }
-  )
   //    .componentWillMountCB(Callback(document.body.style.background = "white"))
   //    .componentWillUnmountCB(Callback(document.body.style.background = null))
   //    .build

@@ -8,8 +8,9 @@ import org.json4s._
 import org.json4s.native.JsonMethods._
 import play.api.libs.ws._
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.concurrent.duration._
-import scala.concurrent.{ExecutionContext, Future}
 import scalacache.memoization._
 
 class CineworldRepository @Inject()(ws: WSClient, cache: Cache) {
@@ -33,7 +34,6 @@ class CineworldRepository @Inject()(ws: WSClient, cache: Cache) {
         }))
 
   private implicit val formats = DefaultFormats + StringToLong + StringToInt
-  private implicit val ec = ExecutionContext.global
 
   private def curlCinemas(): Future[String] = memoize(1.day) {
     ws.url("https://www.cineworld.co.uk/getSites?json=1&max=200")

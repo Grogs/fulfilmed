@@ -1,6 +1,7 @@
 package stub
 
 import fakes.NoOpCache
+import me.gregd.cineworld.config.CineworldUrl
 import me.gregd.cineworld.dao.cinema.cineworld.raw.CineworldRepository
 import me.gregd.cineworld.dao.cinema.vue.raw.VueRepository
 import play.api.mvc.Action
@@ -22,7 +23,7 @@ object Stubs {
         }
     } { implicit port =>
       WsTestClient.withClient { client =>
-        block(new CineworldRepository(client, NoOpCache.cache, ""))
+        block(new CineworldRepository(client, NoOpCache.cache, CineworldUrl("")))
       }
     }
   }

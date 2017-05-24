@@ -21,8 +21,8 @@ class CinemaServiceTest extends FunSuite with ScalaFutures with Matchers {
   implicit val defaultPatienceConfig = PatienceConfig(Span(1500, Millis))
 
   val movieDao = new Movies(FakeTheMovieDB, FakeRatings)
+  val cinemaDao = new CineworldCinemaDao(movieDao, FakeTheMovieDB, FakeCineworldRepository)
   val clock = FixedClock(LocalDate.parse("2017-03-23"))
-  val cinemaDao = new CineworldCinemaDao(movieDao, FakeTheMovieDB, FakeCineworldRepository, clock)
 
   val cinemaService = new CinemaService(movieDao, cinemaDao, clock)
 

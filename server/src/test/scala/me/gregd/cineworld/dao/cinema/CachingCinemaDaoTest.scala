@@ -17,7 +17,7 @@ class CachingCinemaDaoTest extends FunSuite with ScalaFutures with Matchers  {
 
   implicit val defaultPatienceConfig = PatienceConfig(Span(1500, Millis))
 
-  val fakeRemoteCinemaDao = new CineworldCinemaDao(new Movies(FakeTheMovieDB, FakeRatings), FakeTheMovieDB, FakeCineworldRepository, FixedClock(LocalDate.parse("2017-03-23")))
+  val fakeRemoteCinemaDao = new CineworldCinemaDao(new Movies(FakeTheMovieDB, FakeRatings), FakeTheMovieDB, FakeCineworldRepository)
 
   val cachingCinemaDao = new CachingCinemaDao(fakeRemoteCinemaDao, monix.execution.Scheduler.global, FixedClock(LocalDate.parse("2017-03-23"))) {
     var refreshCinemaInvocations = 0

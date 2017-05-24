@@ -5,7 +5,7 @@ import me.gregd.cineworld.dao.cinema.cineworld.raw.model.{CinemaResp, Day, Movie
 
 import scala.concurrent.Future
 
-object FakeCineworldRepository extends CineworldRepository(null, NoOpCache.cache) {
+object FakeCineworldRepository extends CineworldRepository(null, NoOpCache.cache, null) {
   override def retrieveCinemas(): Future[Seq[CinemaResp]] =
     Future.successful(
       List(

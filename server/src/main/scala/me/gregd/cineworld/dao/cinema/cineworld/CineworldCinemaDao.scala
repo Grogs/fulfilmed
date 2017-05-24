@@ -20,20 +20,11 @@ import scala.util.Try
 class CineworldCinemaDao @Inject()(
     imdb: MovieDao,
     tmdb: TheMovieDB,
-    dao: CineworldRepository,
-    clock: Clock
+    dao: CineworldRepository
 ) extends CinemaDao
     with Logging {
 
   implicit val formats = DefaultFormats
-
-  private def getDate(s: String): Try[LocalDate] = {
-    Try(LocalDate.parse(s))
-      .filter { date =>
-        val fromToday = date.toEpochDay - clock.today().toEpochDay
-        fromToday >= 0 && fromToday <= 7
-      }
-  }
 
   override def retrieveCinemas(): Future[Seq[Cinema]] =
     dao
@@ -55,7 +46,7 @@ class CineworldCinemaDao @Inject()(
         movieResp <- rawMovies
         (film, allPerformances) <- CineworldRepositoryTransformer.toMovie(cinemaId, movieResp)
         movie = imdb.toMovie(film)
-        date = getDate(dateRaw).get
+        date = LocalDate.parse(dateRaw)
         performances = allPerformances.getOrElse(date, Nil).toList
         if performances.nonEmpty
       } yield movie -> performances

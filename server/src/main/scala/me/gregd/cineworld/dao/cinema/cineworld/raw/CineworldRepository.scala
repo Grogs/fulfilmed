@@ -3,7 +3,7 @@ package me.gregd.cineworld.dao.cinema.cineworld.raw
 import javax.inject.Inject
 
 import me.gregd.cineworld.Cache
-import me.gregd.cineworld.config.CineworldUrl
+import me.gregd.cineworld.config.values.CineworldUrl
 import me.gregd.cineworld.dao.cinema.cineworld.raw.model._
 import org.json4s._
 import org.json4s.native.JsonMethods._

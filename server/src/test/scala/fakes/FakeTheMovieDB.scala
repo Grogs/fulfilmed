@@ -1,12 +1,12 @@
 package fakes
 
+import me.gregd.cineworld.config.values.TmdbKey
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.model.TmdbMovie
-import me.gregd.cineworld.domain.Movie
 
 import scala.concurrent.Future
 
-object FakeTheMovieDB extends TheMovieDB(null, null) {
+object FakeTheMovieDB extends TheMovieDB(TmdbKey(""), null) {
 
   val imdbIds = Map(
     263115 -> "tt3315342",

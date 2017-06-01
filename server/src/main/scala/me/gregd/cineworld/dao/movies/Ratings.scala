@@ -4,7 +4,7 @@ import javax.inject.Inject
 
 import grizzled.slf4j
 import me.gregd.cineworld.Cache
-import me.gregd.cineworld.config.ApiKeys
+import me.gregd.cineworld.config.values.OmdbKey
 import org.json4s.DefaultFormats
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
@@ -14,7 +14,8 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
 import scalacache.memoization._
-class Ratings @Inject()(ws: WSClient, cache: Cache, apiKeys: ApiKeys) extends slf4j.Logging {
+
+class Ratings @Inject()(ws: WSClient, cache: Cache, apiKey: OmdbKey) extends slf4j.Logging {
 
   implicit val _ = cache.scalaCache
 
@@ -41,7 +42,7 @@ class Ratings @Inject()(ws: WSClient, cache: Cache, apiKeys: ApiKeys) extends sl
 
 
   private def curlFromRemote(id: String): Future[String] = memoize(1.day) {
-    ws.url(s"http://www.omdbapi.com/?i=$id&apikey=${apiKeys.omdb}")
+    ws.url(s"http://www.omdbapi.com/?i=$id&apikey=${apiKey.key}")
       .get()
       .map(_.body)
   }

@@ -3,19 +3,21 @@ package me.gregd.cineworld.dao
 import javax.inject.{Inject, Singleton, Named => named}
 
 import grizzled.slf4j.Logging
+import me.gregd.cineworld.config.values.TmdbKey
 import me.gregd.cineworld.dao.model.{NowShowingResponse, TmdbMovie}
 import org.json4s._
 import play.api.libs.json.Json
 import play.api.libs.ws.{WSClient, WSResponse}
 
-import scala.collection.breakOut
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class TheMovieDB @Inject()(@named("themoviedb.api-key") apiKey: String, ws: WSClient) extends Logging {
+class TheMovieDB @Inject()(apiKey: TmdbKey, ws: WSClient) extends Logging {
 
   protected implicit val formats = DefaultFormats
+
+  private val key = apiKey.key
 
   val baseUrl = "http://api.themoviedb.org/3"
 //  lazy val baseImageUrl = {
@@ -29,13 +31,13 @@ class TheMovieDB @Inject()(@named("themoviedb.api-key") apiKey: String, ws: WSCl
     Future.traverse(1 to 5)(fetchPage).map(_.flatten.toVector)
 
   def fetchImdbId(tmdbId: String): Future[Option[String]] = {
-    val url = s"$baseUrl/movie/$tmdbId?api_key=$apiKey"
+    val url = s"$baseUrl/movie/$tmdbId?api_key=$key"
     def extractImdbId(res: WSResponse) = (res.json \ "imdb_id").asOpt[String]
     ws.url(url).get().map(extractImdbId)
   }
 
   private def fetchPage(page: Int): Future[Vector[TmdbMovie]] = {
-    val url = s"$baseUrl/movie/now_playing?api_key=$apiKey&language=en-US&page=$page&region=GB"
+    val url = s"$baseUrl/movie/now_playing?api_key=$key&language=en-US&page=$page&region=GB"
     logger.info(s"Fetching now playing page $page")
     ws.url(url)
       .get()
@@ -43,7 +45,7 @@ class TheMovieDB @Inject()(@named("themoviedb.api-key") apiKey: String, ws: WSCl
   }
 
   private def fetchAlternateTitles(tmdbId: String): Future[List[String]] = {
-    val url = s"$baseUrl/movie/$tmdbId/alternative_titles?api_key=$apiKey"
+    val url = s"$baseUrl/movie/$tmdbId/alternative_titles?api_key=$key"
     def extract(r: WSResponse): List[String] = (r.json \\ "title").map(_.as[String]).toList
     ws.url(url).get().map(extract).recover{
       case ex =>

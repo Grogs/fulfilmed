@@ -1,7 +1,8 @@
 package stub
 
 import fakes.NoOpCache
-import me.gregd.cineworld.config.CineworldUrl
+import me.gregd.cineworld.config.values.{CineworldUrl, TmdbKey}
+import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.cinema.cineworld.raw.CineworldRepository
 import me.gregd.cineworld.dao.cinema.vue.raw.VueRepository
 import play.api.mvc.Action
@@ -39,6 +40,21 @@ object Stubs {
     } { implicit port =>
       WsTestClient.withClient { client =>
         block(new VueRepository(client, NoOpCache.cache, ""))
+      }
+    }
+  }
+
+  def withStubbedTMDB[T](block: TheMovieDB => T): T = {
+    Server.withRouter() {
+      case GET(p"/data/locations") => Action {
+        Ok.sendResource("vue/locations.json")
+      }
+      case GET(p"/data/filmswithshowings/10032") => Action {
+        Ok.sendResource("vue/filmswithshowings-10032.json")
+      }
+    } { implicit port =>
+      WsTestClient.withClient { client =>
+        block(new TheMovieDB(TmdbKey(""), client))
       }
     }
   }

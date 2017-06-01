@@ -4,12 +4,13 @@ import javax.inject.Inject
 
 import me.gregd.cineworld.dao.cinema.CinemaDao
 import me.gregd.cineworld.dao.cinema.vue.raw.VueRepository
-import me.gregd.cineworld.domain.{Cinema, Movie, Performance}
+import me.gregd.cineworld.dao.movies.MovieDao
+import me.gregd.cineworld.domain.{Cinema, Film, Movie, Performance}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class VueCinemaDao @Inject() (vueRepository: VueRepository) extends CinemaDao {
+class VueCinemaDao @Inject() (vueRepository: VueRepository, imdb: MovieDao) extends CinemaDao {
 
   def retrieveCinemas(): Future[Seq[Cinema]] = {
     vueRepository.retrieveCinemas().map( raw =>
@@ -18,17 +19,19 @@ class VueCinemaDao @Inject() (vueRepository: VueRepository) extends CinemaDao {
   }
 
   def retrieveMoviesAndPerformances(cinemaId: String, dateRaw: String): Future[Map[Movie, List[Performance]]] = {
-    vueRepository.retrieveListings(cinemaId).map { raw =>
+    vueRepository.retrieveListings(cinemaId).flatMap { raw =>
 
       val converted = for {
         f <- raw.films
-        movie = Movie(f.title, None, None, None, None, None, None, None, None, Option(f.image_poster)) //TODO
+        image = ImageUrl.resolve(f.image_poster)
+        film = Film(f.id, f.title, image)
+        movie = imdb.toMovie(film)
         performances = f.showings.map { s =>
           Performance(s.date_time, available = true, "", "", None) //TODO
         }
-      } yield movie -> performances
+      } yield movie.map(_ -> performances)
 
-      converted.toMap
+      Future.sequence(converted).map(_.toMap)
     }
   }
 }

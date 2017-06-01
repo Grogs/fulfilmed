@@ -1,6 +1,7 @@
 package me.gregd.cineworld.dao
 
 import fakes.{FakeCineworldRepository, FakeTheMovieDB}
+import me.gregd.cineworld.config.values.TmdbKey
 import me.gregd.cineworld.dao.cinema.cineworld.raw.CineworldRepository
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSuite, Matchers}
@@ -14,7 +15,7 @@ class TheMovieDBSmokeTest extends FunSuite with Matchers with OneAppPerSuite wit
   override lazy val app = new GuiceApplicationBuilder().overrides(bind[TheMovieDB].toInstance(FakeTheMovieDB), bind[CineworldRepository].toInstance(FakeCineworldRepository)).build
 
   val ws = app.injector.instanceOf[WSClient]
-  val apiKey = app.configuration.getString("themoviedb.api-key").get
+  val apiKey = app.injector.instanceOf[TmdbKey]
   val tmdb = new TheMovieDB(apiKey, ws)
 
   test("fetch imdb id") {

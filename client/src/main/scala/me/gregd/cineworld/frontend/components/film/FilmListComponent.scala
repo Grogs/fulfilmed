@@ -7,11 +7,9 @@ import me.gregd.cineworld.domain.{Movie, Performance}
 import me.gregd.cineworld.frontend.components.film.Sort.Sort
 
 import scala.language.implicitConversions
-import scalacss.StyleA
+import scalacss.ScalaCssReact.scalacssStyleaToTagMod
 
 object FilmListComponent {
-  private implicit def styleaToTagMod(s: StyleA): TagMod = ^.className := s.htmlClass //TODO I get linking errors if I don't copy this across
-
   val filmCard = (m: Movie, pl: Seq[Performance]) =>
     <.div(FilmsStyle.filmCard,
       <.div(FilmsStyle.filmInfo,

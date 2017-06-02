@@ -7,21 +7,19 @@ import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.{BackendScope, Callback, _}
 import me.gregd.cineworld.domain.{CinemaApi, Movie, Performance}
 import me.gregd.cineworld.frontend._
-import me.gregd.cineworld.frontend.components.film.Sort.{NextShowing, Sort}
 import me.gregd.cineworld.frontend.components.film
+import me.gregd.cineworld.frontend.components.film.Sort.{NextShowing, Sort}
 import org.scalajs.dom.document
 
 import scala.language.implicitConversions
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-import scalacss.StyleA
+import scalacss.ScalaCssReact.scalacssStyleaToTagMod
 
 object FilmPageComponent {
   type Entry = (Movie, Seq[Performance])
 
   val sorts: Vector[Sort] = Sort.all
   val dates: Vector[Date] = Vector(Today, Tomorrow)
-
-  private implicit def styleaToTagMod(s: StyleA): TagMod = ^.className := s.htmlClass //TODO I get linking errors if I don't copy this across
 
   def apply(props: Props) = component(props)
 

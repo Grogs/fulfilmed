@@ -20,8 +20,8 @@ lazy val client = project.enablePlugins(ScalaJSPlugin, ScalaJSWeb).settings(
     "org.scala-js" %%% "scalajs-dom" % "0.9.1",
     "com.github.japgolly.scalajs-react" %%% "core" % "1.0.0",
     "com.github.japgolly.scalajs-react" %%% "extra" % "1.0.0",
-    "com.github.japgolly.scalacss" %%% "core" % "0.5.1",
-    "com.github.japgolly.scalacss" %%% "ext-react" % "0.5.1",
+    "com.github.japgolly.scalacss" %%% "core" % "0.5.3",
+    "com.github.japgolly.scalacss" %%% "ext-react" % "0.5.3",
     "org.scala-js" %%% "scalajs-java-time" % "0.2.0"
   ),
   jsDependencies ++= Seq(

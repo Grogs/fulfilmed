@@ -7,7 +7,7 @@ import japgolly.scalajs.react.vdom.html_<^._
 import me.gregd.cineworld.frontend.components.film.FilmPageComponent.Today
 import me.gregd.cineworld.frontend.{Films, Page}
 
-import scalacss._
+import scalacss.ScalaCssReact.scalacssStyleaToTagMod
 
 object IndexPage {
   val label = "label".reactAttr
@@ -18,7 +18,20 @@ object IndexPage {
       router.set(Films(cinemaId, Today))
     }
 
-    implicit def styleaToTagMod(s: StyleA): TagMod = ^.className := s.htmlClass //TODO I get linking errors if I don't copy this across
+    val cinemaDropdowns = Composite(for {
+      (typ, cinemas) <- cinemas.toVector
+    } yield
+      <.div(
+        <.select(IndexStyle.selectWithOffset, ^.id := "cinemas", ^.`class` := ".flat", ^.onChange ==> selectCinema,
+          <.option(^.value := "?", ^.selected := "selected", ^.disabled := true, typ),
+          Composite(for {(groupName, cinemas) <- cinemas.toVector} yield
+            <.optgroup(label := groupName,
+              Composite(for (cinema <- cinemas) yield
+                <.option(^.value := cinema.id, cinema.name)
+              ))
+          ))
+      )
+    )
 
     <.div(^.id := "indexPage",
       <.div(IndexStyle.top,
@@ -27,20 +40,7 @@ object IndexPage {
         <.div(IndexStyle.blurb,
           "A better way to find the best films at your local cinema")
         ,
-        Composite(for {
-          (typ, cinemas) <- cinemas.toVector
-        } yield
-          <.div(
-            <.select(IndexStyle.selectWithOffset, ^.id := "cinemas", ^.`class` := ".flat", ^.onChange ==> selectCinema,
-              <.option(^.value := "?", ^.selected := "selected", ^.disabled := true, typ),
-              Composite(for {(groupName, cinemas) <- cinemas.toVector} yield
-                <.optgroup(label := groupName,
-                  Composite(for (cinema <- cinemas) yield
-                    <.option(^.value := cinema.id, cinema.name)
-                  ))
-              ))
-          )
-        )),
+        cinemaDropdowns),
       <.div(IndexStyle.description, ^.id := "description",
         <.h3("What?"),
         <.p("Fulfilmed lets you view the movies airing at your local cinema. It adds some features over your Cinema's standard website; inline movie ratings, sorting/filtering by rating, mark films as watched."),
@@ -55,9 +55,6 @@ object IndexPage {
 
     )
   }
-  //    .componentWillMountCB(Callback(document.body.style.background = "white"))
-  //    .componentWillUnmountCB(Callback(document.body.style.background = null))
-  //    .build
 
   case class Cinema(name: String, id: String)
 

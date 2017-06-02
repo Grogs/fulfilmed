@@ -11,7 +11,9 @@ object FakeRatings extends Ratings(null, NoOpCache.cache, null) {
   val entries = Map(
     "tt3315342" -> (8.5, 204588),
     "tt3731562" ->  (7.1, 59166),
-    "tt3315342" -> someRatingAndVotes
+    "tt3315342" -> someRatingAndVotes,
+    "tt3228088" -> someRatingAndVotes,
+    "tt7777777" -> someRatingAndVotes
   )
 
   override def ratingAndVotes(id: String): Future[Option[(Double, Int)]] = Future.successful(entries.get(id))

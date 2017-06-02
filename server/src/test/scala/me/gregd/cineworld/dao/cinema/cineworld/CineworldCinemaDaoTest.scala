@@ -1,31 +1,35 @@
 package me.gregd.cineworld.dao.cinema.cineworld
 
-import fakes.{FakeRatings, FakeTheMovieDB}
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
+import fakes.{FakeRatings, FakeTheMovieDB, NoOpCache}
 import me.gregd.cineworld.dao.cinema.cineworld.raw.CineworldRepository
 import me.gregd.cineworld.dao.movies.Movies
 import me.gregd.cineworld.domain.{Cinema, Movie, Performance}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FunSuite, Matchers}
+import play.api.libs.ws.ahc.AhcWSClient
 import stub.Stubs
 
 class CineworldCinemaDaoTest extends FunSuite with ScalaFutures with Matchers {
 
   implicit val defaultPatienceConfig = PatienceConfig(Span(2000, Millis))
 
+  val wsClient = AhcWSClient()(ActorMaterializer()(ActorSystem()))
   val movieDao = new Movies(FakeTheMovieDB, FakeRatings)
-  def cineworldCinemaDao(repo: CineworldRepository) = new CineworldCinemaDao(movieDao, FakeTheMovieDB, repo)
-  def withCineworldCinemaDao[T](f: CineworldCinemaDao => T) = Stubs.withStubbedCineworld(cineworldCinemaDao _ andThen f)
+  val cineworldRaw = new CineworldRepository(wsClient, NoOpCache.cache, Stubs.cineworld.baseUrl)
+  val cineworld = new CineworldCinemaDao(movieDao, FakeTheMovieDB, cineworldRaw)
 
-  test("retrieveCinemas")(withCineworldCinemaDao { cineworld =>
+  test("retrieveCinemas") {
     val cinemas = cineworld.retrieveCinemas().futureValue.take(3)
     cinemas shouldEqual expectedCinemas
-  })
+  }
 
-  test("retrieveMoviesAndPerformances")(withCineworldCinemaDao { cineworld =>
+  test("retrieveMoviesAndPerformances") {
     val showings = cineworld.retrieveMoviesAndPerformances("1010882", "2017-05-23").futureValue.take(3)
     showings shouldEqual expectedShowings
-  })
+  }
 
   val expectedCinemas = List(Cinema("1010804", "Aberdeen - Queens Links"), Cinema("1010808", "Aberdeen - Union Square"), Cinema("1010805", "Aldershot"))
 

@@ -33,14 +33,14 @@ class VueRepository @Inject()(ws: WSClient, cache: Cache, baseUrl: String) {
   }
 
   def curlCinemas(): Future[String] = memoize(7.days) {
-    ws.url("/data/locations/")
+    ws.url(s"$baseUrl/data/locations/")
       .withHeaders(X_REQUESTED_WITH -> "XMLHttpRequest")
       .get()
       .map(_.body)
   }
 
   def curlListings(cinemaId: String): Future[String] = memoize(1.day) {
-    ws.url(s"/data/filmswithshowings/$cinemaId")
+    ws.url(s"$baseUrl/data/filmswithshowings/$cinemaId")
       .withHeaders(X_REQUESTED_WITH -> "XMLHttpRequest")
       .get()
       .map(_.body)

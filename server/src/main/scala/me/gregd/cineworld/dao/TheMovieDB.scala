@@ -3,7 +3,7 @@ package me.gregd.cineworld.dao
 import javax.inject.{Inject, Singleton, Named => named}
 
 import grizzled.slf4j.Logging
-import me.gregd.cineworld.config.values.TmdbKey
+import me.gregd.cineworld.config.values.{TmdbKey, TmdbUrl}
 import me.gregd.cineworld.dao.model.{NowShowingResponse, TmdbMovie}
 import org.json4s._
 import play.api.libs.json.Json
@@ -13,13 +13,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class TheMovieDB @Inject()(apiKey: TmdbKey, ws: WSClient) extends Logging {
+class TheMovieDB @Inject()(apiKey: TmdbKey, ws: WSClient, url: TmdbUrl) extends Logging {
 
   protected implicit val formats = DefaultFormats
 
   private val key = apiKey.key
 
-  val baseUrl = "http://api.themoviedb.org/3"
+  private val baseUrl = url.value
 //  lazy val baseImageUrl = {
 //    val json = get("configuration")
 //    (json \ "images" \ "base_url").extract[String] + "w300"
@@ -31,13 +31,13 @@ class TheMovieDB @Inject()(apiKey: TmdbKey, ws: WSClient) extends Logging {
     Future.traverse(1 to 5)(fetchPage).map(_.flatten.toVector)
 
   def fetchImdbId(tmdbId: String): Future[Option[String]] = {
-    val url = s"$baseUrl/movie/$tmdbId?api_key=$key"
+    val url = s"$baseUrl/3/movie/$tmdbId?api_key=$key"
     def extractImdbId(res: WSResponse) = (res.json \ "imdb_id").asOpt[String]
     ws.url(url).get().map(extractImdbId)
   }
 
   private def fetchPage(page: Int): Future[Vector[TmdbMovie]] = {
-    val url = s"$baseUrl/movie/now_playing?api_key=$key&language=en-US&page=$page&region=GB"
+    val url = s"$baseUrl/3/movie/now_playing?api_key=$key&language=en-US&page=$page&region=GB"
     logger.info(s"Fetching now playing page $page")
     ws.url(url)
       .get()
@@ -45,7 +45,7 @@ class TheMovieDB @Inject()(apiKey: TmdbKey, ws: WSClient) extends Logging {
   }
 
   private def fetchAlternateTitles(tmdbId: String): Future[List[String]] = {
-    val url = s"$baseUrl/movie/$tmdbId/alternative_titles?api_key=$key"
+    val url = s"$baseUrl/3/movie/$tmdbId/alternative_titles?api_key=$key"
     def extract(r: WSResponse): List[String] = (r.json \\ "title").map(_.as[String]).toList
     ws.url(url).get().map(extract).recover{
       case ex =>

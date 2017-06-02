@@ -1,7 +1,7 @@
 package me.gregd.cineworld.dao
 
 import fakes.{FakeCineworldRepository, FakeTheMovieDB}
-import me.gregd.cineworld.config.values.TmdbKey
+import me.gregd.cineworld.config.values.{TmdbKey, TmdbUrl}
 import me.gregd.cineworld.dao.cinema.cineworld.raw.CineworldRepository
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSuite, Matchers}
@@ -16,7 +16,8 @@ class TheMovieDBSmokeTest extends FunSuite with Matchers with OneAppPerSuite wit
 
   val ws = app.injector.instanceOf[WSClient]
   val apiKey = app.injector.instanceOf[TmdbKey]
-  val tmdb = new TheMovieDB(apiKey, ws)
+  val baseUrl = app.injector.instanceOf[TmdbUrl]
+  val tmdb = new TheMovieDB(apiKey, ws, baseUrl)
 
   test("fetch imdb id") {
     tmdb.fetchImdbId("419430").futureValue shouldBe Some("tt5052448")

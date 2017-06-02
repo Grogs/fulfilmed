@@ -1,19 +1,60 @@
 package stub
 
+import akka.actor.ActorSystem
 import fakes.NoOpCache
-import me.gregd.cineworld.config.values.{CineworldUrl, TmdbKey}
-import me.gregd.cineworld.dao.TheMovieDB
+import me.gregd.cineworld.config.values.{CineworldUrl, TmdbUrl}
 import me.gregd.cineworld.dao.cinema.cineworld.raw.CineworldRepository
 import me.gregd.cineworld.dao.cinema.vue.raw.VueRepository
+import play.api.BuiltInComponents
+import play.api.http.ContentTypes.JSON
 import play.api.mvc.Action
-import play.api.mvc.Results.Ok
+import play.api.mvc.Results.{NotFound, Ok}
+import play.api.routing.Router
 import play.api.routing.sird._
 import play.api.test.WsTestClient
-import play.core.server.Server
+import play.core.server.{NettyServerComponents, Server, ServerConfig}
 
 object Stubs {
-  def withStubbedCineworld[T](block: CineworldRepository => T): T = {
-    Server.withRouter() {
+
+  private val return404: Router.Routes = {
+    case other => Action{
+      println(s"Returning 404 for ${other.uri}")
+      NotFound
+    }
+  }
+
+  private lazy val server =
+    new NettyServerComponents with BuiltInComponents {
+      override lazy val serverConfig = ServerConfig(port = Some(0))
+      override lazy val actorSystem: ActorSystem = ActorSystem("TmdbStub")
+      lazy val router = Router.from(
+        tmdb.routes orElse cineworld.routes orElse vue.routes orElse return404
+      )
+    }.server
+
+  lazy val serverBase = s"http://127.0.0.1:${server.httpPort.get}"
+
+  object tmdb {
+    val routes: Router.Routes = {
+      case GET(p"/3/movie/now_playing" ? q"api_key=$key" & q"language=$_" & q"page=$page" & q"region=$_") =>
+        Action {
+          Ok.sendResource(s"tmdb/now_playing-$page.json").as(JSON)
+        }
+      case GET(p"/3/movie/$id/alternative_titles" ? q"api_key=$_") =>
+        Action {
+          Ok(s"""{"id":$id,"titles":[]}""").as(JSON)
+        }
+      case GET(p"/3/movie/$tmdbId" ? q"api_key=$_") =>
+        Action {
+          Ok("""{"imdb_id":"tt7777777"}""").as(JSON)
+        }
+    }
+
+    lazy val baseUrl = TmdbUrl(serverBase)
+  }
+
+  object cineworld {
+    val routes: Router.Routes = {
       case GET(p"/getSites" ? q"json=$_" & q"max=$max") =>
         Action {
           Ok.sendResource("cineworld/cinemas.json")
@@ -22,40 +63,21 @@ object Stubs {
         Action {
           Ok.sendResource(s"cineworld/listings-$cinemaId.json")
         }
-    } { implicit port =>
-      WsTestClient.withClient { client =>
-        block(new CineworldRepository(client, NoOpCache.cache, CineworldUrl("")))
-      }
     }
+
+    lazy val baseUrl = CineworldUrl(serverBase)
   }
 
-  def withStubbedVue[T](block: VueRepository => T): T = {
-    Server.withRouter() {
+  object vue {
+    val routes: Router.Routes = {
       case GET(p"/data/locations") => Action {
         Ok.sendResource("vue/locations.json")
       }
       case GET(p"/data/filmswithshowings/10032") => Action {
         Ok.sendResource("vue/filmswithshowings-10032.json")
       }
-    } { implicit port =>
-      WsTestClient.withClient { client =>
-        block(new VueRepository(client, NoOpCache.cache, ""))
-      }
     }
-  }
 
-  def withStubbedTMDB[T](block: TheMovieDB => T): T = {
-    Server.withRouter() {
-      case GET(p"/data/locations") => Action {
-        Ok.sendResource("vue/locations.json")
-      }
-      case GET(p"/data/filmswithshowings/10032") => Action {
-        Ok.sendResource("vue/filmswithshowings-10032.json")
-      }
-    } { implicit port =>
-      WsTestClient.withClient { client =>
-        block(new TheMovieDB(TmdbKey(""), client))
-      }
-    }
+    lazy val baseUrl = serverBase
   }
 }

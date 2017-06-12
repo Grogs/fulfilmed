@@ -2,7 +2,7 @@ package stub
 
 import akka.actor.ActorSystem
 import fakes.NoOpCache
-import me.gregd.cineworld.config.values.{CineworldUrl, TmdbUrl}
+import me.gregd.cineworld.config.values.{CineworldUrl, TmdbUrl, VueUrl}
 import me.gregd.cineworld.dao.cinema.cineworld.raw.CineworldRepository
 import me.gregd.cineworld.dao.cinema.vue.raw.VueRepository
 import play.api.BuiltInComponents
@@ -78,6 +78,6 @@ object Stubs {
       }
     }
 
-    lazy val baseUrl = serverBase
+    lazy val baseUrl = VueUrl(serverBase)
   }
 }

@@ -1,8 +1,9 @@
 package me.gregd.cineworld.dao
 
-import javax.inject.{Inject, Singleton, Named => named}
+import javax.inject.{Inject, Singleton}
 
-import grizzled.slf4j.Logging
+import com.typesafe.scalalogging.slf4j.LazyLogging
+import me.gregd.cineworld.Cache
 import me.gregd.cineworld.config.values.{TmdbKey, TmdbUrl}
 import me.gregd.cineworld.dao.model.{NowShowingResponse, TmdbMovie}
 import org.json4s._
@@ -11,15 +12,18 @@ import play.api.libs.ws.{WSClient, WSResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.duration._
+import scalacache.memoization._
 
 @Singleton
-class TheMovieDB @Inject()(apiKey: TmdbKey, ws: WSClient, url: TmdbUrl) extends Logging {
+class TheMovieDB @Inject()(apiKey: TmdbKey, ws: WSClient, url: TmdbUrl, cache: Cache) extends LazyLogging {
 
   protected implicit val formats = DefaultFormats
+  lazy private implicit val _ = cache.scalaCache
 
-  private val key = apiKey.key
+  private def key = apiKey.key
 
-  private val baseUrl = url.value
+  private def baseUrl = url.value
 //  lazy val baseImageUrl = {
 //    val json = get("configuration")
 //    (json \ "images" \ "base_url").extract[String] + "w300"
@@ -30,13 +34,13 @@ class TheMovieDB @Inject()(apiKey: TmdbKey, ws: WSClient, url: TmdbUrl) extends 
   def fetchNowPlaying(): Future[Vector[TmdbMovie]] =
     Future.traverse(1 to 5)(fetchPage).map(_.flatten.toVector)
 
-  def fetchImdbId(tmdbId: String): Future[Option[String]] = {
+  def fetchImdbId(tmdbId: String): Future[Option[String]] = memoize(1.day){
     val url = s"$baseUrl/3/movie/$tmdbId?api_key=$key"
     def extractImdbId(res: WSResponse) = (res.json \ "imdb_id").asOpt[String]
     ws.url(url).get().map(extractImdbId)
   }
 
-  private def fetchPage(page: Int): Future[Vector[TmdbMovie]] = {
+  private def fetchPage(page: Int): Future[Vector[TmdbMovie]] = memoize(1.day){
     val url = s"$baseUrl/3/movie/now_playing?api_key=$key&language=en-US&page=$page&region=GB"
     logger.info(s"Fetching now playing page $page")
     ws.url(url)
@@ -44,7 +48,7 @@ class TheMovieDB @Inject()(apiKey: TmdbKey, ws: WSClient, url: TmdbUrl) extends 
       .map(_.json.as[NowShowingResponse].results)
   }
 
-  private def fetchAlternateTitles(tmdbId: String): Future[List[String]] = {
+  def alternateTitles(tmdbId: String): Future[List[String]] = memoize(7.days){
     val url = s"$baseUrl/3/movie/$tmdbId/alternative_titles?api_key=$key"
     def extract(r: WSResponse): List[String] = (r.json \\ "title").map(_.as[String]).toList
     ws.url(url).get().map(extract).recover{
@@ -53,11 +57,6 @@ class TheMovieDB @Inject()(apiKey: TmdbKey, ws: WSClient, url: TmdbUrl) extends 
         Nil
     }
   }
-
-  def alternateTitles(tmdbId: String): Future[List[String]] = {
-    fetchAlternateTitles(tmdbId)
-  }
-
 }
 
 package model {

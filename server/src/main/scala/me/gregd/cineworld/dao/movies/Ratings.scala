@@ -2,7 +2,7 @@ package me.gregd.cineworld.dao.movies
 
 import javax.inject.Inject
 
-import grizzled.slf4j
+import com.typesafe.scalalogging.slf4j.LazyLogging
 import me.gregd.cineworld.Cache
 import me.gregd.cineworld.config.values.OmdbKey
 import org.json4s.DefaultFormats
@@ -15,9 +15,9 @@ import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
 import scalacache.memoization._
 
-class Ratings @Inject()(ws: WSClient, cache: Cache, apiKey: OmdbKey) extends slf4j.Logging {
+class Ratings @Inject()(ws: WSClient, cache: Cache, apiKey: OmdbKey) extends LazyLogging {
 
-  implicit val _ = cache.scalaCache
+  lazy implicit val _ = cache.scalaCache
 
   implicit val formats = DefaultFormats
 

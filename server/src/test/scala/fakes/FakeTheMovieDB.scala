@@ -6,7 +6,7 @@ import me.gregd.cineworld.dao.model.TmdbMovie
 
 import scala.concurrent.Future
 
-object FakeTheMovieDB extends TheMovieDB(TmdbKey(""), null, TmdbUrl("")) {
+object FakeTheMovieDB extends TheMovieDB(TmdbKey(""), null, TmdbUrl(""), NoOpCache.cache) {
 
   val imdbIds = Map(
     263115 -> "tt3315342",

@@ -3,7 +3,7 @@ package me.gregd.cineworld.dao.movies
 import javax.inject.{Inject, Singleton}
 
 import com.rockymadden.stringmetric.similarity.DiceSorensenMetric
-import grizzled.slf4j.Logging
+import com.typesafe.scalalogging.slf4j.LazyLogging
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.model.TmdbMovie
 import me.gregd.cineworld.domain.{Film, Format, Movie}
@@ -14,7 +14,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 
 @Singleton
-class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with Logging {
+class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with LazyLogging {
 
   implicit val formats = DefaultFormats
 
@@ -25,12 +25,13 @@ class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with
       movieOpt <- find(film.cleanTitle)
       movie = movieOpt.getOrElse(Movie(film.title))
       format = Format.split(film.title)._1
+      poster = movie.posterUrl orElse Option(film.poster_url).filter( ! _.isEmpty)
     } yield
       movie.copy(
         title = film.title,
         cineworldId = Option(film.id),
         format = Option(format),
-        posterUrl = Option(film.poster_url)
+        posterUrl = poster
       )
 
   }
@@ -55,21 +56,23 @@ class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with
       .map(sequence)
   }
 
-  def allMovies(): Future[Seq[Movie]] = collapse(
-    for {
-      nowPlaying <- tmdb.fetchNowPlaying()
-    } yield for {
-      tmdbMovie <- nowPlaying
-      tmdbId = tmdbMovie.id.toString
-    } yield for {
-      alternateTitles <- tmdb.alternateTitles(tmdbId)
-      imdbId <- tmdb.fetchImdbId(tmdbId)
-      (rating, votes) <- ratingAndVotes(imdbId)
-    } yield for {
-      altTitle <- (tmdbMovie.title :: alternateTitles).distinct
-    } yield
-      toMovie(tmdbMovie, tmdbId, imdbId, rating, votes)
-  )
+  private def allMovies(): Future[Seq[Movie]] = {
+    collapse(
+      for {
+        nowPlaying <- tmdb.fetchNowPlaying()
+      } yield for {
+        tmdbMovie <- nowPlaying
+        tmdbId = tmdbMovie.id.toString
+      } yield for {
+        alternateTitles <- tmdb.alternateTitles(tmdbId)
+        imdbId <- tmdb.fetchImdbId(tmdbId)
+        (rating, votes) <- ratingAndVotes(imdbId)
+      } yield for {
+        altTitle <- (tmdbMovie.title :: alternateTitles).distinct
+      } yield
+        toMovie(tmdbMovie, tmdbId, imdbId, rating, votes)
+    )
+  }
 
   private def toMovie(tmdbMovie: TmdbMovie, tmdbId: String, imdbId: Option[String], rating: Option[Double], votes: Option[Int]) = {
     Movie(

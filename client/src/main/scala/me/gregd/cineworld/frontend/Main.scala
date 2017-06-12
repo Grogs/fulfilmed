@@ -26,8 +26,8 @@ object Main extends JSApp {
         case "today" | _ => Today
       }(_.key)
       (removeTrailingSlashes
-      |staticRoute(root, Home) ~> renderR( IndexPage(_)() )
-      |dynamicRouteCT(("#!/films" / string("[0-9]+") / date).caseClass[Films]) ~> dynRenderR{ case (p:Films,r) => FilmPageComponent(Props(r,p)) }
+      |staticRoute(root, Home) ~> renderR( rtr => IndexPage(rtr) )
+      |dynamicRouteCT(("#!/films" / string("[0-9]+") / date).caseClass[Films]) ~> dynRenderR((p,r) => FilmPageComponent(Props(r,p)))
       ).notFound(redirectToPage(Home)(Redirect.Replace))
     }
 

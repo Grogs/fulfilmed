@@ -3,7 +3,7 @@ package me.gregd.cineworld.dao.cinema.cineworld
 import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
 
-import grizzled.slf4j.Logging
+import com.typesafe.scalalogging.slf4j.LazyLogging
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.cinema.CinemaDao
 import me.gregd.cineworld.dao.cinema.cineworld.raw.{CineworldRepository, CineworldRepositoryTransformer}
@@ -22,7 +22,7 @@ class CineworldCinemaDao @Inject()(
     tmdb: TheMovieDB,
     dao: CineworldRepository
 ) extends CinemaDao
-    with Logging {
+    with LazyLogging {
 
   implicit val formats = DefaultFormats
 
@@ -40,13 +40,14 @@ class CineworldCinemaDao @Inject()(
       Traverse[({type M[A] = Map[V, A] })#M].sequence(m.map(_.swap)).map(_.map(_.swap))
     }
 
+    val date = LocalDate.parse(dateRaw)
+
     dao.retrieve7DayListings(cinemaId).flatMap { rawMovies =>
       logger.debug(s"Retrieving listings for $cinemaId:$dateRaw")
       val res = for {
         movieResp <- rawMovies
         (film, allPerformances) <- CineworldRepositoryTransformer.toMovie(cinemaId, movieResp)
         movie = imdb.toMovie(film)
-        date = LocalDate.parse(dateRaw)
         performances = allPerformances.getOrElse(date, Nil).toList
         if performances.nonEmpty
       } yield movie -> performances

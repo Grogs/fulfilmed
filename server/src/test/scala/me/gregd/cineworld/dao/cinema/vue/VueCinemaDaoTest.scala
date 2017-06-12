@@ -15,21 +15,24 @@ import stub.Stubs
 class VueCinemaDaoTest extends FunSuite with ScalaFutures with IntegrationPatience with Matchers {
 
   val wsClient = AhcWSClient()(ActorMaterializer()(ActorSystem()))
-  val tmdb = new TheMovieDB(TmdbKey(""), wsClient, Stubs.tmdb.baseUrl)
+  val tmdb = new TheMovieDB(TmdbKey(""), wsClient, Stubs.tmdb.baseUrl, NoOpCache.cache)
   val repo = new VueRepository(wsClient, NoOpCache.cache, Stubs.vue.baseUrl)
   val movieDao = new Movies(tmdb, FakeRatings)
   val dao = new VueCinemaDao(repo, movieDao)
 
   test("retrieveCinemas") {
-      dao.retrieveCinemas().futureValue should not be empty
+    dao.retrieveCinemas().futureValue should not be empty
   }
 
   test("retrieveMoviesAndPerformances for 1010882") {
-      val listings = dao.retrieveMoviesAndPerformances("10032", "2017-05-23").futureValue
-      val Some((movie, performances)) = listings.find(_._1.tmdbId.isDefined)
-      movie.title should not be empty
-      movie.posterUrl should not be empty
-      movie.tmdbId should not be empty
-      movie.imdbId should not be empty
+    val listings = dao.retrieveMoviesAndPerformances("10032", "2017-05-23").futureValue
+    val Some((movie, performances)) = listings.find(_._1.tmdbId.isDefined)
+
+    movie.title should not be empty
+    movie.posterUrl should not be empty
+    movie.tmdbId should not be empty
+    movie.imdbId should not be empty
+
+    performances should not be empty
   }
 }

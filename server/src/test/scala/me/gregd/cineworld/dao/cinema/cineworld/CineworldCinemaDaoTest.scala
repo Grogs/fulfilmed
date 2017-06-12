@@ -2,7 +2,9 @@ package me.gregd.cineworld.dao.cinema.cineworld
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import fakes.{FakeRatings, FakeTheMovieDB, NoOpCache}
+import fakes.{FakeRatings, NoOpCache}
+import me.gregd.cineworld.config.values.TmdbKey
+import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.cinema.cineworld.raw.CineworldRepository
 import me.gregd.cineworld.dao.movies.Movies
 import me.gregd.cineworld.domain.{Cinema, Movie, Performance}
@@ -17,9 +19,10 @@ class CineworldCinemaDaoTest extends FunSuite with ScalaFutures with Matchers {
   implicit val defaultPatienceConfig = PatienceConfig(Span(2000, Millis))
 
   val wsClient = AhcWSClient()(ActorMaterializer()(ActorSystem()))
-  val movieDao = new Movies(FakeTheMovieDB, FakeRatings)
+  val tmdb = new TheMovieDB(TmdbKey(""), wsClient, Stubs.tmdb.baseUrl, NoOpCache.cache)
+  val movieDao = new Movies(tmdb, FakeRatings)
   val cineworldRaw = new CineworldRepository(wsClient, NoOpCache.cache, Stubs.cineworld.baseUrl)
-  val cineworld = new CineworldCinemaDao(movieDao, FakeTheMovieDB, cineworldRaw)
+  val cineworld = new CineworldCinemaDao(movieDao, tmdb, cineworldRaw)
 
   test("retrieveCinemas") {
     val cinemas = cineworld.retrieveCinemas().futureValue.take(3)
@@ -28,6 +31,7 @@ class CineworldCinemaDaoTest extends FunSuite with ScalaFutures with Matchers {
 
   test("retrieveMoviesAndPerformances") {
     val showings = cineworld.retrieveMoviesAndPerformances("1010882", "2017-05-23").futureValue.take(3)
+    pprint.pprintln(showings, width = 190)
     showings shouldEqual expectedShowings
   }
 
@@ -44,11 +48,11 @@ class CineworldCinemaDaoTest extends FunSuite with ScalaFutures with Matchers {
       Performance("11:20", true, "2D", s"$ticketBase=85584", Some("23/05/2017")),
       Performance("15:20", true, "2D", s"$ticketBase=85674", Some("23/05/2017"))
     ),
-    Movie("Guardians Of The Galaxy Vol. 2", Some("HO00004330"), Some("default"), None, None, None, None, None, None, Some(s"$postBase/HO00004330.jpg")) -> List(
-      Performance("11:20", true, "2D", s"$ticketBase=85588", Some("23/05/2017")),
-      Performance("14:20", true, "2D", s"$ticketBase=85589", Some("23/05/2017")),
-      Performance("17:20", true, "2D", s"$ticketBase=85590", Some("23/05/2017")),
-      Performance("20:20", true, "2D", s"$ticketBase=85591", Some("23/05/2017"))
+    Movie("The Secret Scripture", Some("HO00004373"), Some("default"), None, None, None, None, None, None, Some(s"$postBase/HO00004373.jpg")) -> List(
+      Performance("11:00", true, "2D", s"$ticketBase=85687", Some("23/05/2017")),
+      Performance("13:30", true, "2D", s"$ticketBase=85688", Some("23/05/2017")),
+      Performance("20:50", true, "2D", s"$ticketBase=85695", Some("23/05/2017"))
     )
   )
+
 }

@@ -4,7 +4,7 @@ import webscalajs.SourceMappings
 
 lazy val commonSettings = Seq(
   organization := "me.gregd",
-  version := "1.5",
+  version := "1.6",
   scalaVersion := "2.11.11"
 )
 
@@ -41,36 +41,26 @@ lazy val server = project.settings(
   pipelineStages in Assets := Seq(scalaJSPipeline),
   WebKeys.packagePrefix in Assets := "public/",
   libraryDependencies ++= Seq(
-    "org.scala-lang" % "scala-library" % "2.11.7",
-    "org.scala-lang" % "scala-compiler" % "2.11.7",
+    "org.scala-lang" % "scala-library" % "2.11.11",
+    "org.scala-lang" % "scala-compiler" % "2.11.11",
     "com.rockymadden.stringmetric" %% "stringmetric-core" % "0.27.4",
-    "com.chuusai" %% "shapeless" % "2.2.4",
-    "com.typesafe.slick" %% "slick" % "2.1.0",
-    "com.h2database" % "h2" % "1.3.164",
     "org.scalaj" %% "scalaj-http" % "1.1.5",
     "org.json4s" %% "json4s-native" % "3.2.11",
     "org.json4s" %% "json4s-jackson" % "3.2.11",
-    "org.scalatra" %% "scalatra" % "2.3.1",
-    "org.scalatra" %% "scalatra-json" % "2.3.1",
-    "com.google.guava" % "guava" % "16.0.1",
     "com.google.code.findbugs" % "jsr305" % "3.0.1",
     "com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2",
     "ch.qos.logback" % "logback-classic" % "1.0.13",
-    "org.jsoup" % "jsoup" % "1.7.3",
-    "org.feijoas" %% "mango" % "0.11",
     "com.lihaoyi" %% "scalatags" % "0.5.4",
     "org.typelevel" %% "cats" % "0.9.0",
     "io.monix" %% "monix" % "2.2.2",
-    ws,
-    filters,
-    "org.scalatra" %% "scalatra-scalatest" % "2.3.1" % Test,
-    "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test,
-    "org.scalatest" %% "scalatest" % "1.9.1" % Test,
-    "com.lihaoyi" %% "pprint" % "0.4.3" % Test,
-    "org.mapdb" % "mapdb" % "3.0.3",
     "com.vmunier" %% "scalajs-scripts" % "1.0.0",
     "com.github.cb372" %% "scalacache-memcached" % "0.9.3",
-    "com.github.pureconfig" %% "pureconfig" % "0.7.0"
+    ws,
+    filters,
+    "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0" % Test,
+    "org.scalatest" %% "scalatest" % "3.0.1" % Test,
+    "com.lihaoyi" %% "pprint" % "0.4.3" % Test,
+    "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % Test
   ),
   libraryDependencies ++= Seq(
     "org.webjars" %% "webjars-play" % "2.5.0",

@@ -1,26 +1,19 @@
-Fulfilmed
-====
-###UK Cinema movie listings and ratings
+# Fulfilmed [![Build Status](https://travis-ci.org/Grogs/cinema-service.svg?branch=master)](https://travis-ci.org/Grogs/cinema-service)
 
-Getting Started
-====
-Configuration
-----
+UK Cinema movie listings and ratings, supports Cineworld and Vue cinemas.
+
+### Getting Started
+
+#### Configuration
+
 The application requires API keys for; Rotten Tomatoes, Cineworld, and The Movie Database.
 After obtaining the API keys, you'll need to modify src/main/resources/application.conf to include them.
 
-Running locally
-----
-If you have gradle installed, type 'gradle run' in your terminal. If not, './gradlew run'.
+#### Running locally
+Execute `sbt run` in the terminal, then browse to http://localhost:9000. 
 
-Check it's working by browsing to the listings for [my local cinema](http://localhost:9001/api/cinema/66).
 
-Making Changes
-----
-When call 'gradle run', 'JettyBootstrap' is executed - which is using the 'Config' object where all the main components of the service are setup.
-
-License (GPLv3)
-----
+### License (GPLv3)
 Copyright (c) Greg Dorrell
 
 This program is free software: you can redistribute it and/or modify

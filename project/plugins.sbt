@@ -9,5 +9,6 @@ addSbtPlugin("com.vmunier" % "sbt-web-scalajs" % "1.0.3")
 
 addSbtPlugin("io.get-coursier" % "sbt-coursier" % "1.0.0-M14")
 
+addSbtPlugin("com.typesafe.sbt" % "sbt-git" % "0.9.3")
 
 libraryDependencies += "com.veact" %% "scala-ssh" % "0.8.0"

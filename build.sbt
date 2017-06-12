@@ -68,7 +68,7 @@ lazy val server = project.settings(
   ),
   compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value
 )
-  .enablePlugins(PlayScala)
+  .enablePlugins(PlayScala, GitVersioning)
   .disablePlugins(PlayLayoutPlugin)
   .dependsOn(sharedJvm)
 

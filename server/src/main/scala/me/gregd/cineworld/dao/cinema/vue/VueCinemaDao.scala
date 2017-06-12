@@ -16,7 +16,7 @@ class VueCinemaDao @Inject() (vueRepository: VueRepository, imdb: MovieDao) exte
 
   def retrieveCinemas(): Future[Seq[Cinema]] = {
     vueRepository.retrieveCinemas().map( raw =>
-      for { c <- raw } yield Cinema(c.id, c.name)
+      for { c <- raw } yield Cinema(c.id, c.search_term)
     )
   }
 

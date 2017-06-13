@@ -1,12 +1,13 @@
 package me.gregd.cineworld.util
 
-import java.time.{LocalDate, LocalDateTime, ZoneOffset}
+import java.time._
 
 import scala.concurrent.duration._
 
 
 trait Clock {
   def today(): LocalDate
+  def time(): LocalTime
   def now(): Timestamp
 }
 
@@ -19,10 +20,13 @@ object RealClock extends Clock {
   def today(): LocalDate = LocalDate.now()
 
   def now(): Timestamp = Timestamp(System.currentTimeMillis())
+
+  def time(): LocalTime = LocalTime.now(ZoneId.of("GB"))
 }
 
 case class FixedClock(date: LocalDate) extends Clock {
   def today(): LocalDate = date
+  def time(): LocalTime = LocalTime.of(12,0,0)
   def now(): Timestamp = {
     val year = date.getYear
     val month = date.getMonthValue
@@ -32,8 +36,8 @@ case class FixedClock(date: LocalDate) extends Clock {
   }
 }
 
-case class MutableClock(var time: LocalDateTime) extends Clock {
-  def today(): LocalDate = time.toLocalDate
-
-  def now(): Timestamp = Timestamp(time.toEpochSecond(ZoneOffset.UTC))
+case class MutableClock(var current: LocalDateTime) extends Clock {
+  def today(): LocalDate = current.toLocalDate
+  def time(): LocalTime = current.toLocalTime
+  def now(): Timestamp = Timestamp(current.toEpochSecond(ZoneOffset.UTC))
 }

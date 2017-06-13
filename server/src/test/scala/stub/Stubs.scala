@@ -14,6 +14,8 @@ import play.api.routing.sird._
 import play.api.test.WsTestClient
 import play.core.server.{NettyServerComponents, Server, ServerConfig}
 
+import scala.util.Try
+
 object Stubs {
 
   private val return404: Router.Routes = {
@@ -42,7 +44,9 @@ object Stubs {
         }
       case GET(p"/3/movie/$id/alternative_titles" ? q"api_key=$_") =>
         Action {
-          Ok(s"""{"id":$id,"titles":[]}""").as(JSON)
+          Try{
+            Ok.sendResource(s"tmdb/alternate-titles-$id.json").as(JSON)
+          } getOrElse Ok(s"""{"id":$id,"titles":[]}""").as(JSON)
         }
       case GET(p"/3/movie/$tmdbId" ? q"api_key=$_") =>
         Action {

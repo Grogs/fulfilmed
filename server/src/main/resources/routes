@@ -3,5 +3,8 @@ GET     /                          me.gregd.cineworld.CinemaController.index()
 GET     /api/*path                      me.gregd.cineworld.CinemaController.api(path)
 POST    /api/*path                      me.gregd.cineworld.CinemaController.api(path)
 
+GET     /debug/tmdbNowPlaying                me.gregd.cineworld.DebugController.tmdbNowPlaying()
+GET     /debug/allMovies                me.gregd.cineworld.DebugController.allMovies()
+
 GET     /assets/*file                   controllers.Assets.at(path="/public", file)
 GET     /webjars/*file                  controllers.WebJarAssets.at(file)

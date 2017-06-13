@@ -1,6 +1,7 @@
 import com.decodified.scalassh.{HostConfig, PublicKeyLogin, SSH, SshLogin}
 import com.decodified.scalassh.HostKeyVerifiers.DontVerify
 import webscalajs.SourceMappings
+import ReleaseTransformations._
 
 lazy val commonSettings = Seq(
   organization := "me.gregd",
@@ -86,6 +87,22 @@ lazy val sharedJvm = shared.jvm
 lazy val sharedJs = shared.js
 
 onLoad in Global := (Command.process("project server", _: State)) compose (onLoad in Global).value
+
+
+
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  runTest,
+  setReleaseVersion,
+  commitReleaseVersion,   // performs the initial git checks
+  tagRelease,
+  ReleaseStep(releaseStepTask(publish in Docker)),
+  setNextVersion,
+  commitNextVersion,
+  pushChanges             // also checks that an upstream branch is properly configured
+)
+
 
 
 lazy val dokkuHost = settingKey[String]("Host for Dokku deployment")

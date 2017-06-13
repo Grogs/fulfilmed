@@ -70,7 +70,7 @@ class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with
       } yield for {
         altTitle <- (tmdbMovie.title :: alternateTitles).distinct
       } yield
-        toMovie(tmdbMovie, tmdbId, imdbId, rating, votes)
+        toMovie(tmdbMovie.copy(title = altTitle), tmdbId, imdbId, rating, votes)
     )
   }
 

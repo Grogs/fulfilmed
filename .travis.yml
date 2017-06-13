@@ -8,11 +8,8 @@ sudo: required
 services:
 - docker
 
-before_script:
-- sbt ++$TRAVIS_SCALA_VERSION compile
-
 script:
-- sbt ++$TRAVIS_SCALA_VERSION test
+- sbt test
 
 before_deploy:
 - docker login -e $DOCKER_EMAIL -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
@@ -21,7 +18,7 @@ deploy:
   provider: script
   skip_cleanup: true
   script:
-  - sbt docker:publish
+  - sbt docker:publish deploy
   on:
     branch: master
 

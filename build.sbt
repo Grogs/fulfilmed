@@ -1,13 +1,10 @@
-import com.decodified.scalassh.{HostConfig, PublicKeyLogin, SSH, SshLogin}
-import com.decodified.scalassh.HostKeyVerifiers.DontVerify
-import webscalajs.SourceMappings
-import ReleaseTransformations._
-
 lazy val commonSettings = Seq(
   organization := "me.gregd",
   version := "1.6",
   scalaVersion := "2.11.11"
 )
+
+lazy val deploy = taskKey[Unit]("Deploy docker image with dokku")
 
 resolvers += Resolver.sonatypeRepo("releases")
 
@@ -67,7 +64,21 @@ lazy val server = project.settings(
     "org.webjars" %% "webjars-play" % "2.5.0",
     "org.webjars" % "font-awesome" % "4.5.0"
   ),
-  compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value
+  compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value,
+  deploy := {
+
+    val v = version.value
+    val dockerImage = (dockerTarget in Docker).value
+    val dokkuApp = "fulfilmed"
+
+    val pull = s"docker pull $dockerImage"
+    val tag = s"docker tag $dockerImage dokku/$dokkuApp:$v"
+    val deploy = s"dokku tags:deploy $dokkuApp $v"
+
+    val status = Process("ssh", Seq("root@fulfilmed.com", s"$pull && $tag && $deploy")) !
+
+    if (status != 0) throw new IllegalArgumentException("Deploy failed.")
+  }
 )
   .enablePlugins(PlayScala, GitVersioning)
   .disablePlugins(PlayLayoutPlugin)
@@ -87,76 +98,3 @@ lazy val sharedJvm = shared.jvm
 lazy val sharedJs = shared.js
 
 onLoad in Global := (Command.process("project server", _: State)) compose (onLoad in Global).value
-
-
-
-releaseProcess := Seq[ReleaseStep](
-  checkSnapshotDependencies,
-  inquireVersions,
-  runTest,
-  setReleaseVersion,
-  commitReleaseVersion,   // performs the initial git checks
-  tagRelease,
-  ReleaseStep(releaseStepTask(publish in Docker)),
-  setNextVersion,
-  commitNextVersion,
-  pushChanges             // also checks that an upstream branch is properly configured
-)
-
-
-
-lazy val dokkuHost = settingKey[String]("Host for Dokku deployment")
-lazy val dokkuUser = settingKey[String]("Remote Dokku user (normally 'dokku')")
-lazy val dokkuApp = settingKey[String]("Your Dokku app name")
-lazy val dokkuVersion = settingKey[String]("Dokku app version - defaults to project version")
-lazy val dokkuLogin = settingKey[SshLogin]("SSH Login for Dokku deployment")
-lazy val dokkuHostConfig = settingKey[HostConfig]("Host config for Dokku deployment")
-lazy val dokkuDeploy = taskKey[Unit]("Deploy docker image with dokku")
-
-
-
-dokkuUser := "root"
-dokkuVersion := version.value
-dokkuLogin := PublicKeyLogin(dokkuUser.value)
-
-dokkuHostConfig := HostConfig(dokkuLogin.value)
-
-dokkuApp := "fulfilmed"
-
-dokkuHost := "fulfilmed.com"
-
-dokkuDeploy <<= (dokkuHost, dokkuHostConfig, dokkuApp, dokkuVersion, target in Docker, streams) map {
-  (host, hostConfig, app, version, dockerTag, streams) =>
-    import streams.log
-
-    val tagCmd = s"echo docker tag $dockerTag dokku/$app:$version"
-    val deployCmd = s"echo dokku tags:deploy $app $version"
-
-    SSH(host, hostConfig) { client =>
-
-      def exec(tagCmd: String) = {
-        val res = client.execPTY(tagCmd)
-        res match {
-          case Left(failure) =>
-            log.error(failure)
-          case Right(success) =>
-            println(success.stdOutAsString())
-        }
-        res.right
-      }
-
-      val res = for {
-        _ <- Right(log.info("Tagging docker image")).right
-        _ <- exec(tagCmd)
-        _ <- Right(log.info("Deploying")).right
-        _ <- exec(deployCmd)
-      } yield ()
-
-      res.left.foreach(msg => throw new RuntimeException(msg))
-    }.left.foreach(msg => throw new RuntimeException(msg))
-}
-
-
-
-
-

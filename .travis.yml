@@ -5,8 +5,12 @@ jdk:
 - oraclejdk8
 
 sudo: required
+
 services:
 - docker
+
+addons:
+  ssh_known_hosts: fulfilmed.com
 
 script:
 - sbt test

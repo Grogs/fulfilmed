@@ -7,9 +7,10 @@ import com.typesafe.scalalogging.slf4j.LazyLogging
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.model.TmdbMovie
 import me.gregd.cineworld.domain.{Film, Format, Movie}
+import monix.execution.FutureUtils.extensions._
+import monix.execution.Scheduler.Implicits.global
 import org.json4s._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
@@ -45,9 +46,11 @@ class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with
       lastCached = System.currentTimeMillis()
     }
     val age = System.currentTimeMillis() - lastCached
-    if (age.millis > 10.hours) refresh
+    this.synchronized(
+      if (age.millis > 10.hours) refresh
+    )
     cachedMovies
-  }
+  }.timeoutTo(5.seconds, Future.successful(Seq.empty))
 
   private def ratingAndVotes(imdbId: Option[String]): Future[(Option[Double], Option[Int])] = {
     imdbId

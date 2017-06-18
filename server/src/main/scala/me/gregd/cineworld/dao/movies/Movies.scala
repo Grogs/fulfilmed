@@ -13,6 +13,7 @@ import org.json4s._
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
+import scala.util.{Failure, Success}
 
 @Singleton
 class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with LazyLogging {
@@ -26,7 +27,7 @@ class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with
       movieOpt <- find(film.cleanTitle)
       movie = movieOpt.getOrElse(Movie(film.title))
       format = Format.split(film.title)._1
-      poster = movie.posterUrl orElse Option(film.poster_url).filter( ! _.isEmpty)
+      poster = movie.posterUrl orElse Option(film.poster_url).filter(!_.isEmpty)
     } yield
       movie.copy(
         title = film.title,
@@ -42,7 +43,13 @@ class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with
   def allMoviesCached() = {
     def refresh = {
       logger.info(s"refreshing movies cache, old value:\n$cachedMovies")
+      val start = System.currentTimeMillis()
       cachedMovies = allMovies()
+      def elapsed = (System.currentTimeMillis() - start) / 1000
+      cachedMovies.onComplete{
+        case Failure(ex) => logger.error(s"Failed to update movie cache (after $elapsed seconds)", ex)
+        case Success(movies) => logger.info(s"Movies cache updates with ${movies.length} items. Took $elapsed seconds.")
+      }
       lastCached = System.currentTimeMillis()
     }
     val age = System.currentTimeMillis() - lastCached
@@ -50,7 +57,7 @@ class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with
       if (age.millis > 10.hours) refresh
     )
     cachedMovies
-  }.timeoutTo(5.seconds, Future.successful(Seq.empty))
+  }.timeoutTo(300.millis, Future.successful(Seq.empty))
 
   private def ratingAndVotes(imdbId: Option[String]): Future[(Option[Double], Option[Int])] = {
     imdbId
@@ -63,17 +70,19 @@ class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with
     collapse(
       for {
         nowPlaying <- tmdb.fetchNowPlaying()
-      } yield for {
-        tmdbMovie <- nowPlaying
-        tmdbId = tmdbMovie.id.toString
-      } yield for {
-        alternateTitles <- tmdb.alternateTitles(tmdbId)
-        imdbId <- tmdb.fetchImdbId(tmdbId)
-        (rating, votes) <- ratingAndVotes(imdbId)
-      } yield for {
-        altTitle <- (tmdbMovie.title :: alternateTitles).distinct
       } yield
-        toMovie(tmdbMovie.copy(title = altTitle), tmdbId, imdbId, rating, votes)
+        for {
+          tmdbMovie <- nowPlaying.distinct
+          tmdbId = tmdbMovie.id.toString
+        } yield
+          for {
+            alternateTitles <- tmdb.alternateTitles(tmdbId)
+            imdbId <- tmdb.fetchImdbId(tmdbId)
+            (rating, votes) <- ratingAndVotes(imdbId)
+          } yield
+            for {
+              altTitle <- (tmdbMovie.title :: alternateTitles).distinct
+            } yield toMovie(tmdbMovie.copy(title = altTitle), tmdbId, imdbId, rating, votes)
     )
   }
 
@@ -98,10 +107,13 @@ class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with
   val minWeight = 0.8
 
   def find(title: String): Future[Option[Movie]] = for (allMovies <- allMoviesCached()) yield {
-    val matc = allMovies.maxBy(m => compareFunc(title, m.title))
-    val weight = compareFunc(title, matc.title)
-    logger.debug(s"Best match for $title was  ${matc.title} ($weight) - ${if (weight > minWeight) "ACCEPTED" else "REJECTED"}")
-    if (weight > minWeight) Option(matc) else None
+    if (allMovies.nonEmpty) {
+      val matc = allMovies.maxBy(m => compareFunc(title, m.title))
+      val weight = compareFunc(title, matc.title)
+      logger.debug(s"Best match for $title was  ${matc.title} ($weight) - ${if (weight > minWeight) "ACCEPTED" else "REJECTED"}")
+      if (weight > minWeight) Option(matc) else None
+    } else
+      None
   }
 
   private def sequence[A, B](ot: Option[(A, B)]): (Option[A], Option[B]) = {
@@ -112,6 +124,6 @@ class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with
   }
 
   private def collapse[T](fsfsT: Future[Seq[Future[Seq[T]]]]): Future[Seq[T]] =
-    fsfsT.map( sfsT => Future.sequence(sfsT).map(_.flatten)).flatMap(identity)
+    fsfsT.map(sfsT => Future.sequence(sfsT).map(_.flatten)).flatMap(identity)
 
 }

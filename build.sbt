@@ -12,8 +12,9 @@ addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3")
 
 lazy val client = project.enablePlugins(ScalaJSPlugin, ScalaJSWeb).settings(
   commonSettings,
-  persistLauncher := true,
-  persistLauncher in Test := false,
+  name := "fulfilmed-scala-frontend",
+  scalaJSUseMainModuleInitializer in Compile := true,
+  scalaJSUseMainModuleInitializer in Test := false,
   libraryDependencies ++= Seq(
     "org.scala-js" %%% "scalajs-dom" % "0.9.1",
     "com.github.japgolly.scalajs-react" %%% "core" % "1.0.0",

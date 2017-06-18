@@ -28,7 +28,7 @@ class Ratings @Inject()(ws: WSClient, cache: Cache, apiKey: OmdbKey) extends Laz
       rating -> votes
     } match {
       case f@Failure(ex) =>
-        logger.warn(s"Failed parse OMDB response", ex)
+        logger.warn(s"Failed parse OMDB response: ${ex.getClass.getSimpleName}: ${ex.getMessage}")
         f
       case s@Success(_) => s
     }

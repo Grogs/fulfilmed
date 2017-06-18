@@ -29,4 +29,10 @@ class DebugController @Inject()(tmdb: TheMovieDB, movies: Movies) extends Contro
     )
   )
 
+  def imdbId(tmdbId: String) = Action.async(
+    tmdb.fetchImdbId(tmdbId).map( imdbId =>
+      Ok(Json.toJson(imdbId))
+    )
+  )
+
 }

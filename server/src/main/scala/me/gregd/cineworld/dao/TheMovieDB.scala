@@ -1,13 +1,12 @@
 package me.gregd.cineworld.dao
 
-import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import me.gregd.cineworld.Cache
 import me.gregd.cineworld.config.values.{TmdbKey, TmdbUrl}
 import me.gregd.cineworld.dao.model.{NowShowingResponse, TmdbMovie}
-import me.gregd.cineworld.util.FutureLimiter
+import me.gregd.cineworld.util.RateLimiter
 import monix.execution.Scheduler
 import org.json4s._
 import play.api.libs.json.Json
@@ -26,7 +25,7 @@ class TheMovieDB @Inject()(apiKey: TmdbKey, ws: WSClient, url: TmdbUrl, cache: C
 
   private def key = apiKey.key
 
-  val limiter = FutureLimiter(TimeUnit.MILLISECONDS, 280, scheduler)
+  val limiter = RateLimiter(10.5.seconds, 40)
 
   private def baseUrl = url.value
 //  lazy val baseImageUrl = {
@@ -40,10 +39,10 @@ class TheMovieDB @Inject()(apiKey: TmdbKey, ws: WSClient, url: TmdbUrl, cache: C
     Future.traverse(1 to 5)(fetchPage).map(_.flatten.toVector)
 
   def fetchImdbId(tmdbId: String): Future[Option[String]] = memoize(1.day){
-    limiter.request{
+    limiter{
       val url = s"$baseUrl/3/movie/$tmdbId?api_key=$key"
       def extractImdbId(res: WSResponse) = {
-        logger.info(s"Response for $tmdbId: ${res.body}")
+//        logger.info(s"Response for $tmdbId: ${res.body}")
         (res.json \ "imdb_id").asOpt[String]
       }
       ws.url(url).get().map(extractImdbId)
@@ -51,7 +50,7 @@ class TheMovieDB @Inject()(apiKey: TmdbKey, ws: WSClient, url: TmdbUrl, cache: C
   }
 
   private def fetchPage(page: Int): Future[Vector[TmdbMovie]] = memoize(1.day){
-    limiter.request {
+    limiter {
       val url = s"$baseUrl/3/movie/now_playing?api_key=$key&language=en-US&page=$page&region=GB"
       logger.info(s"Fetching now playing page $page")
       ws.url(url)
@@ -61,7 +60,7 @@ class TheMovieDB @Inject()(apiKey: TmdbKey, ws: WSClient, url: TmdbUrl, cache: C
   }
 
   def alternateTitles(tmdbId: String): Future[List[String]] = memoize(3.days){
-    limiter.request{
+    limiter{
       val url = s"$baseUrl/3/movie/$tmdbId/alternative_titles?api_key=$key"
       def extract(r: WSResponse): List[String] = (r.json \\ "title").map(_.as[String]).toList
       ws.url(url).get().map(extract).recover{

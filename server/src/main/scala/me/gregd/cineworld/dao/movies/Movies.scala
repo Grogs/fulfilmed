@@ -6,6 +6,7 @@ import com.rockymadden.stringmetric.similarity.DiceSorensenMetric
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.model.TmdbMovie
+import me.gregd.cineworld.dao.ratings.{Ratings, RatingsResult}
 import me.gregd.cineworld.domain.{Film, Format, Movie}
 import monix.execution.FutureUtils.extensions._
 import monix.execution.Scheduler.Implicits.global
@@ -59,13 +60,6 @@ class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with
     cachedMovies
   }.timeoutTo(300.millis, Future.successful(Seq.empty))
 
-  private def ratingAndVotes(imdbId: Option[String]): Future[(Option[Double], Option[Int])] = {
-    imdbId
-      .map(ratings.ratingAndVotes)
-      .getOrElse(Future.successful(None))
-      .map(sequence)
-  }
-
   private def allMovies(): Future[Seq[Movie]] = {
     collapse(
       for {
@@ -78,26 +72,28 @@ class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with
           for {
             alternateTitles <- tmdb.alternateTitles(tmdbId)
             imdbId <- tmdb.fetchImdbId(tmdbId)
-            (rating, votes) <- ratingAndVotes(imdbId)
+            ratingsResult <- imdbId.map(ratings.fetchRatings).getOrElse(Future.successful(RatingsResult(None, None, None, None)))
           } yield
             for {
               altTitle <- (tmdbMovie.title :: alternateTitles).distinct
-            } yield toMovie(tmdbMovie.copy(title = altTitle), tmdbId, imdbId, rating, votes)
+            } yield toMovie(tmdbMovie.copy(title = altTitle), imdbId, ratingsResult)
     )
   }
 
-  private def toMovie(tmdbMovie: TmdbMovie, tmdbId: String, imdbId: Option[String], rating: Option[Double], votes: Option[Int]) = {
+  private def toMovie(tmdbMovie: TmdbMovie, imdbId: Option[String], ratingsResult: RatingsResult) = {
     Movie(
       tmdbMovie.title,
       None,
       None,
       imdbId,
-      Option(tmdbId),
-      rating,
-      votes,
+      Option(tmdbMovie.id.toString),
+      ratingsResult.imdbRating,
+      ratingsResult.imdbVotes,
       Option(tmdbMovie.vote_average),
       Option(tmdbMovie.vote_count.toInt),
-      tmdbMovie.poster_path.map(tmdb.baseImageUrl + _)
+      tmdbMovie.poster_path.map(tmdb.baseImageUrl + _),
+      ratingsResult.metascore,
+      ratingsResult.rottenTomatoes
     )
   }
 

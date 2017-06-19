@@ -32,9 +32,9 @@ class CineworldCinemaDaoTest extends FunSuite with ScalaFutures with Matchers {
   }
 
   test("retrieveMoviesAndPerformances") {
-    val showings = cineworld.retrieveMoviesAndPerformances("1010882", "2017-05-23").futureValue.take(3)
+    val showings = cineworld.retrieveMoviesAndPerformances("1010882", "2017-05-23").futureValue
     pprint.pprintln(showings, width = 190)
-    showings shouldEqual expectedShowings
+    showings should contain allElementsOf expectedShowings
   }
 
   val expectedCinemas = List(Cinema("1010804", "Aberdeen - Queens Links"), Cinema("1010808", "Aberdeen - Union Square"), Cinema("1010805", "Aldershot"))

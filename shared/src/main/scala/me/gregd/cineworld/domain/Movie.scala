@@ -10,7 +10,9 @@ case class Movie (
   votes: Option[Int] = None,
   tmdbRating: Option[Double] = None,
   tmdbVotes: Option[Int] = None,
-  posterUrl: Option[String] = None
+  posterUrl: Option[String] = None,
+  metascore: Option[Int] = None,
+  rottenTomatoes: Option[String] = None
 )
 
 object Format {

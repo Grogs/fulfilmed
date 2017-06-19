@@ -1,8 +1,8 @@
 package me.gregd.cineworld.dao.movies
 
-import fakes.FakeRatings
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.model.TmdbMovie
+import me.gregd.cineworld.dao.ratings.{Ratings, RatingsResult}
 import me.gregd.cineworld.domain.{Film, Movie}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures
@@ -25,7 +25,7 @@ class MoviesTest extends FunSuite with ScalaFutures with Matchers with MockFacto
   }}
   (tmdb.alternateTitles _).when(*).returns(Future.successful(Nil))
 
-  (ratings.ratingAndVotes _).when(*).returns(Future.successful(Some((7.1, 59166))))
+  (ratings.fetchRatings _).when(*).returns(Future.successful(RatingsResult(Some(7.1), Some(59166), None, None)))
 
   val movieDao = new Movies(tmdb, ratings)
 

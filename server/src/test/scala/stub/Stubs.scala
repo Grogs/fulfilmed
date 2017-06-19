@@ -1,18 +1,14 @@
 package stub
 
 import akka.actor.ActorSystem
-import fakes.NoOpCache
-import me.gregd.cineworld.config.values.{CineworldUrl, TmdbUrl, VueUrl}
-import me.gregd.cineworld.dao.cinema.cineworld.raw.CineworldRepository
-import me.gregd.cineworld.dao.cinema.vue.raw.VueRepository
+import me.gregd.cineworld.config.values.{CineworldUrl, OmdbUrl, TmdbUrl, VueUrl}
 import play.api.BuiltInComponents
 import play.api.http.ContentTypes.JSON
 import play.api.mvc.Action
 import play.api.mvc.Results.{NotFound, Ok}
 import play.api.routing.Router
 import play.api.routing.sird._
-import play.api.test.WsTestClient
-import play.core.server.{NettyServerComponents, Server, ServerConfig}
+import play.core.server.{NettyServerComponents, ServerConfig}
 
 import scala.util.Try
 
@@ -30,7 +26,7 @@ object Stubs {
       override lazy val serverConfig = ServerConfig(port = Some(0))
       override lazy val actorSystem: ActorSystem = ActorSystem("TmdbStub")
       lazy val router = Router.from(
-        tmdb.routes orElse cineworld.routes orElse vue.routes orElse return404
+        tmdb.routes orElse cineworld.routes orElse vue.routes orElse omdb.routes orElse return404
       )
     }.server
 
@@ -83,5 +79,15 @@ object Stubs {
     }
 
     lazy val baseUrl = VueUrl(serverBase)
+  }
+
+  object omdb {
+    val routes: Router.Routes = {
+      case GET(p"/" ? q"i=$imdbId" & q"apikey=$_") => Action {
+        Ok.sendResource(s"omdb/$imdbId.json")
+      }
+    }
+
+    lazy val baseUrl = OmdbUrl(serverBase)
   }
 }

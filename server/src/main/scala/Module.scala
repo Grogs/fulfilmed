@@ -33,6 +33,7 @@ class Module extends AbstractModule {
     bind(classOf[CineworldUrl]).toInstance(CineworldUrl(prop("base-urls.cineworld")))
     bind(classOf[VueUrl]).toInstance(VueUrl(prop("base-urls.vue")))
     bind(classOf[TmdbUrl]).toInstance(TmdbUrl(prop("base-urls.tmdb")))
+    bind(classOf[OmdbUrl]).toInstance(OmdbUrl(prop("base-urls.omdb")))
     bind(classOf[TmdbRateLimit]).toInstance(tmdbRateLimit)
     bind(classOf[Scheduler]).toInstance(monix.execution.Scheduler.global)
     bind(classOf[Clock]).toInstance(RealClock)

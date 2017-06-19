@@ -15,7 +15,7 @@ object FilmListComponent {
       <.div(FilmsStyle.filmInfo,
         <.div(^.classSet("threedee" -> m.format.contains("3D")),
           <.div(FilmsStyle.filmTitle, m.title),
-          <.div(FilmsStyle.ratings, imdbLink(m), tmdbLink(m)),
+          <.div(FilmsStyle.ratings, imdbLink(m), tmdbLink(m), rtLink(m)),
           <.div(FilmsStyle.times,
             Composite(for (p <- pl.toVector) yield
               <.a(^.href := p.booking_url,
@@ -28,6 +28,8 @@ object FilmListComponent {
     )
 
   def tmdbLink(m: Movie) = m.tmdbRating.whenDefined(<.div(FilmsStyle.tmdb, _))
+
+  def rtLink(m: Movie) = m.rottenTomatoes.whenDefined(<.div(FilmsStyle.rtAudience, _))
 
   def imdbLink(m: Movie) = {
     for {

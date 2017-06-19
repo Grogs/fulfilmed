@@ -1,0 +1,40 @@
+{
+  "Title": "Wonder Woman",
+  "Year": "2017",
+  "Rated": "PG-13",
+  "Released": "02 Jun 2017",
+  "Runtime": "141 min",
+  "Genre": "Action, Adventure, Fantasy",
+  "Director": "Patty Jenkins",
+  "Writer": "Allan Heinberg",
+  "Actors": "Gal Gadot, Chris Pine, Connie Nielsen, Robin Wright",
+  "Plot": "Before she was Wonder Woman she was Diana, princess of the Amazons, trained warrior. When a pilot crashes and tells of conflict in the outside world, she leaves home to fight a war to end all wars, discovering her full powers and true destiny.",
+  "Language": "English, German",
+  "Country": "USA, China, Hong Kong",
+  "Awards": "1 nomination.",
+  "Poster": "https://images-na.ssl-images-amazon.com/images/M/MV5BNDFmZjgyMTEtYTk5MC00NmY0LWJhZjktOWY2MzI5YjkzODNlXkEyXkFqcGdeQXVyMDA4NzMyOA@@._V1_SX300.jpg",
+  "Ratings": [
+    {
+      "Source": "Internet Movie Database",
+      "Value": "8.3/10"
+    },
+    {
+      "Source": "Rotten Tomatoes",
+      "Value": "93%"
+    },
+    {
+      "Source": "Metacritic",
+      "Value": "76/100"
+    }
+  ],
+  "Metascore": "76",
+  "imdbRating": "8.3",
+  "imdbVotes": "61,125",
+  "imdbID": "tt0451279",
+  "Type": "movie",
+  "DVD": "N/A",
+  "BoxOffice": "$103,251,471",
+  "Production": "Warner Bros. Pictures",
+  "Website": "http://wonderwomanfilm.com/",
+  "Response": "True"
+}

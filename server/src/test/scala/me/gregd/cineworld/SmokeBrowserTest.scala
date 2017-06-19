@@ -2,7 +2,7 @@ package me.gregd.cineworld
 
 import fakes.FakeRatings
 import me.gregd.cineworld.config.values.{CineworldUrl, TmdbUrl}
-import me.gregd.cineworld.dao.movies.Ratings
+import me.gregd.cineworld.dao.ratings.Ratings
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.selenium.HtmlUnit
 import org.scalatest.{FunSuite, Matchers}

@@ -1,13 +1,14 @@
 package fakes
 
-import me.gregd.cineworld.config.values.{TmdbKey, TmdbUrl}
+import me.gregd.cineworld.config.values.{TmdbKey, TmdbRateLimit, TmdbUrl}
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.model.TmdbMovie
 import monix.execution.Scheduler
 
 import scala.concurrent.Future
+import scala.concurrent.duration._
 
-object FakeTheMovieDB extends TheMovieDB(TmdbKey(""), null, TmdbUrl(""), NoOpCache.cache, Scheduler.global) {
+object FakeTheMovieDB extends TheMovieDB(TmdbKey(""), null, TmdbUrl(""), NoOpCache.cache, Scheduler.global, TmdbRateLimit(1.second, 1000)) {
 
   val imdbIds = Map(
     263115 -> "tt3315342",

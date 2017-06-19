@@ -3,7 +3,7 @@ package me.gregd.cineworld.dao.cinema.cineworld
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import fakes.{FakeRatings, NoOpCache}
-import me.gregd.cineworld.config.values.TmdbKey
+import me.gregd.cineworld.config.values.{TmdbKey, TmdbRateLimit}
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.cinema.cineworld.raw.CineworldRepository
 import me.gregd.cineworld.dao.movies.Movies
@@ -14,13 +14,14 @@ import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FunSuite, Matchers}
 import play.api.libs.ws.ahc.AhcWSClient
 import stub.Stubs
+import scala.concurrent.duration._
 
 class CineworldCinemaDaoTest extends FunSuite with ScalaFutures with Matchers {
 
   implicit val defaultPatienceConfig = PatienceConfig(Span(2000, Millis))
 
   val wsClient = AhcWSClient()(ActorMaterializer()(ActorSystem()))
-  val tmdb = new TheMovieDB(TmdbKey(""), wsClient, Stubs.tmdb.baseUrl, NoOpCache.cache, Scheduler.global)
+  val tmdb = new TheMovieDB(TmdbKey(""), wsClient, Stubs.tmdb.baseUrl, NoOpCache.cache, Scheduler.global, TmdbRateLimit(1.second, 1000))
   val movieDao = new Movies(tmdb, FakeRatings)
   val cineworldRaw = new CineworldRepository(wsClient, NoOpCache.cache, Stubs.cineworld.baseUrl)
   val cineworld = new CineworldCinemaDao(movieDao, tmdb, cineworldRaw)

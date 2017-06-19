@@ -4,7 +4,7 @@ import javax.inject.{Inject, Singleton}
 
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import me.gregd.cineworld.Cache
-import me.gregd.cineworld.config.values.{TmdbKey, TmdbUrl}
+import me.gregd.cineworld.config.values.{TmdbKey, TmdbRateLimit, TmdbUrl}
 import me.gregd.cineworld.dao.model.{NowShowingResponse, TmdbMovie}
 import me.gregd.cineworld.util.RateLimiter
 import monix.execution.Scheduler
@@ -18,14 +18,14 @@ import scala.concurrent.duration._
 import scalacache.memoization._
 
 @Singleton
-class TheMovieDB @Inject()(apiKey: TmdbKey, ws: WSClient, url: TmdbUrl, cache: Cache, scheduler: Scheduler) extends LazyLogging {
+class TheMovieDB @Inject()(apiKey: TmdbKey, ws: WSClient, url: TmdbUrl, cache: Cache, scheduler: Scheduler, rateLimit: TmdbRateLimit) extends LazyLogging {
 
   protected implicit val formats = DefaultFormats
   lazy private implicit val _ = cache.scalaCache
 
   private def key = apiKey.key
 
-  val limiter = RateLimiter(10.5.seconds, 40)
+  val limiter = RateLimiter(rateLimit.duration, rateLimit.amount)
 
   private def baseUrl = url.value
 //  lazy val baseImageUrl = {

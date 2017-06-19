@@ -31,7 +31,7 @@ class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with
       poster = movie.posterUrl orElse Option(film.poster_url).filter(!_.isEmpty)
     } yield
       movie.copy(
-        title = film.title,
+        title = film.cleanTitle,
         cineworldId = Option(film.id),
         format = Option(format),
         posterUrl = poster

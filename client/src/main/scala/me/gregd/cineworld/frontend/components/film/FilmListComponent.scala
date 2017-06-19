@@ -35,7 +35,7 @@ object FilmListComponent {
     for {
       rating <- m.rating
       id <- m.imdbId
-    } yield <.div(FilmsStyle.imdb, <.a(^.href := s"http://www.imdb.com/title/tt$id", rating))
+    } yield <.div(FilmsStyle.imdb, <.a(^.href := s"http://www.imdb.com/title/$id", rating))
   }.whenDefined
 
   val FilmsList =

@@ -25,7 +25,7 @@ class TheMovieDB @Inject()(apiKey: TmdbKey, ws: WSClient, url: TmdbUrl, cache: C
 
   private def key = apiKey.key
 
-  val limiter = RateLimiter(rateLimit.duration, rateLimit.amount)
+  lazy val limiter = RateLimiter(rateLimit.duration, rateLimit.amount)
 
   private def baseUrl = url.value
 //  lazy val baseImageUrl = {

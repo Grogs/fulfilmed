@@ -46,12 +46,15 @@ class VueCinemaDao @Inject() (vueRepository: VueRepository, imdb: MovieDao, cloc
   }
 
   private def filterAndBuild(date: LocalDate, showings: List[Showings], urlBuilder: String => String) = {
+
+    def isStale(time: LocalTime) = date == clock.today() && (time.minusHours(1) isBefore clock.time())
+
     for {
       s <- showings
       if date == LocalDate.parse(s.date_time)
       t <- s.times
       time = LocalTime.parse(t.time, timeFormat)
-      if time.minusHours(1) isAfter clock.time()
+      if !isStale(time)
     } yield
       Performance(t.time, available = true, t.screen_type, urlBuilder(t.session_id), Option(s.date_time))
 

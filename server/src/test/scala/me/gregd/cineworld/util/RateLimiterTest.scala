@@ -21,7 +21,5 @@ class RateLimiterTest extends FunSuite with Matchers {
 
     elapsed should be > 400L
     elapsed should be < 800L
-
   }
-
 }

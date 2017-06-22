@@ -9,14 +9,15 @@ import me.gregd.cineworld.dao.cinema.cineworld.raw.CineworldRepository
 import me.gregd.cineworld.dao.movies.Movies
 import me.gregd.cineworld.domain.{Cinema, Movie, Performance}
 import monix.execution.Scheduler
-import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FunSuite, Matchers}
 import play.api.libs.ws.ahc.AhcWSClient
 import stub.Stubs
+
 import scala.concurrent.duration._
 
-class CineworldCinemaDaoTest extends FunSuite with ScalaFutures with Matchers {
+class CineworldCinemaDaoTest extends FunSuite with ScalaFutures with Matchers with Eventually {
 
   implicit val defaultPatienceConfig = PatienceConfig(Span(2000, Millis))
 
@@ -33,7 +34,6 @@ class CineworldCinemaDaoTest extends FunSuite with ScalaFutures with Matchers {
 
   test("retrieveMoviesAndPerformances") {
     val showings = cineworld.retrieveMoviesAndPerformances("1010882", "2017-05-23").futureValue
-    pprint.pprintln(showings, width = 190)
     showings should contain allElementsOf expectedShowings
   }
 
@@ -43,7 +43,7 @@ class CineworldCinemaDaoTest extends FunSuite with ScalaFutures with Matchers {
   private val postBase = "https://www.cineworld.co.uk/xmedia-cw/repo/feats/posters"
 
   val expectedShowings = Map(
-    Movie("Half Girlfriend (Hindi)", Some("HO00004553"), Some("default"), None, None, None, None, None, None, Some(s"$postBase/HO00004553.jpg")) -> List(
+    Movie("Half Girlfriend", Some("HO00004553"), Some("default"), None, None, None, None, None, None, Some(s"$postBase/HO00004553.jpg")) -> List(
       Performance("20:00", true, "2D", s"$ticketBase=85595", Some("23/05/2017"))
     ),
     Movie("Whisky Galore!", Some("HO00004360"), Some("default"), None, None, None, None, None, None, Some(s"$postBase/HO00004360.jpg")) -> List(

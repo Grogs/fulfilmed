@@ -3,7 +3,7 @@ package me.gregd.cineworld.dao.cinema.cineworld
 import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
 
-import com.typesafe.scalalogging.slf4j.LazyLogging
+import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.cinema.CinemaDao
 import me.gregd.cineworld.dao.cinema.cineworld.raw.{CineworldRepository, CineworldRepositoryTransformer}

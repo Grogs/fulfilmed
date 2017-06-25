@@ -2,7 +2,7 @@ package me.gregd.cineworld.dao
 
 import javax.inject.{Inject, Singleton}
 
-import com.typesafe.scalalogging.slf4j.LazyLogging
+import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.Cache
 import me.gregd.cineworld.config.values.{TmdbKey, TmdbRateLimit, TmdbUrl}
 import me.gregd.cineworld.dao.model.{NowShowingResponse, TmdbMovie}

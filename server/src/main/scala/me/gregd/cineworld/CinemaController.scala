@@ -3,13 +3,13 @@ package me.gregd.cineworld
 import javax.inject.Inject
 
 import autowire.Core.Request
-import com.typesafe.scalalogging.slf4j.LazyLogging
+import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.domain._
 import me.gregd.cineworld.pages.Index
 import play.api.Environment
 import play.api.Mode._
 import play.api.libs.json.Json
-import play.api.mvc.Action
+import play.api.mvc.{Action, InjectedController}
 import play.api.mvc.Results.Ok
 import play.mvc.Controller
 import upickle.Js
@@ -18,7 +18,7 @@ import upickle.default.{Reader, Writer}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class CinemaController @Inject() (env: Environment, cinemaService: CinemaService) extends Controller with LazyLogging {
+class CinemaController @Inject() (env: Environment, cinemaService: CinemaService) extends InjectedController with LazyLogging {
 
   implicit val cinemaFormat = Json.format[Cinema]
   implicit val performanceFormat = Json.format[Performance]

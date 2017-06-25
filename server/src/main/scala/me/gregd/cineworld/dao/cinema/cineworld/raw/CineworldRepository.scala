@@ -5,8 +5,7 @@ import javax.inject.Inject
 import me.gregd.cineworld.Cache
 import me.gregd.cineworld.config.values.CineworldUrl
 import me.gregd.cineworld.dao.cinema.cineworld.raw.model._
-import org.json4s._
-import org.json4s.native.JsonMethods._
+import play.api.libs.json.Json
 import play.api.libs.ws._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -18,23 +17,10 @@ class CineworldRepository @Inject()(ws: WSClient, cache: Cache, cineworldUrl: Ci
 
   implicit val _ = cache.scalaCache
 
-  private object StringToLong
-      extends CustomSerializer[Long](format =>
-        ({
-          case JString(x) => x.toLong
-        }, {
-          case x: Long => JInt(x)
-        }))
-
-  private object StringToInt
-      extends CustomSerializer[Int](format =>
-        ({
-          case JString(x) => x.toInt
-        }, {
-          case x: Long => JInt(x)
-        }))
-
-  private implicit val formats = DefaultFormats + StringToLong + StringToInt
+  implicit val d = Json.format[Showing]
+  implicit val c = Json.format[Day]
+  implicit val b = Json.format[MovieResp]
+  implicit val a = Json.format[CinemaResp]
 
   private def curlCinemas(): Future[String] = memoize(1.day) {
     ws.url(s"${cineworldUrl.value}/getSites?json=1&max=200")
@@ -50,11 +36,11 @@ class CineworldRepository @Inject()(ws: WSClient, cache: Cache, cineworldUrl: Ci
   }
 
   def retrieveCinemas(): Future[Seq[CinemaResp]] = {
-    curlCinemas().map(r => parse(r).children.map(_.extract[CinemaResp]))
+    curlCinemas().map( r => Json.parse(r).as[Seq[CinemaResp]])
   }
 
   def retrieve7DayListings(cinema: String): Future[Seq[MovieResp]] = {
-    curl7DayListings(cinema).map(r => parse(r).children.map(_.extract[MovieResp]))
+    curl7DayListings(cinema).map(r => Json.parse(r).as[Seq[MovieResp]])
   }
 
 }

@@ -1,7 +1,7 @@
 lazy val commonSettings = Seq(
   organization := "me.gregd",
   version := "1.6",
-  scalaVersion := "2.11.11"
+  scalaVersion := "2.12.2"
 )
 
 lazy val deploy = taskKey[Unit]("Deploy docker image with dokku")
@@ -40,46 +40,47 @@ lazy val server = project.settings(
   pipelineStages in Assets := Seq(scalaJSPipeline),
   WebKeys.packagePrefix in Assets := "public/",
   libraryDependencies ++= Seq(
-    "org.scala-lang" % "scala-library" % "2.11.11",
-    "org.scala-lang" % "scala-compiler" % "2.11.11",
-    "com.rockymadden.stringmetric" %% "stringmetric-core" % "0.27.4",
-    "org.scalaj" %% "scalaj-http" % "1.1.5",
-    "org.json4s" %% "json4s-native" % "3.2.11",
-    "org.json4s" %% "json4s-jackson" % "3.2.11",
+    "org.scala-lang" % "scala-library" % "2.12.2",
+    "org.scala-lang" % "scala-compiler" % "2.12.2",
+    "info.debatty" % "java-string-similarity" % "0.24",
+    "org.scalaj" %% "scalaj-http" % "2.3.0",
+    "org.json4s" %% "json4s-native" % "3.5.2",
+    "org.json4s" %% "json4s-jackson" % "3.5.2",
     "com.google.code.findbugs" % "jsr305" % "3.0.1",
-    "com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2",
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0",
     "ch.qos.logback" % "logback-classic" % "1.0.13",
-    "com.lihaoyi" %% "scalatags" % "0.5.4",
+    "com.lihaoyi" %% "scalatags" % "0.6.5",
     "org.typelevel" %% "cats" % "0.9.0",
     "io.monix" %% "monix" % "2.2.2",
-    "com.vmunier" %% "scalajs-scripts" % "1.0.0",
+    "com.vmunier" %% "scalajs-scripts" % "1.1.0",
     "com.github.cb372" %% "scalacache-memcached" % "0.9.3",
     ws,
     filters,
-    "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0" % Test,
+    guice,
+    "org.scalatestplus.play" %% "scalatestplus-play" % "3.0.0" % Test,
     "org.scalatest" %% "scalatest" % "3.0.1" % Test,
-    "com.lihaoyi" %% "pprint" % "0.4.3" % Test,
+    "com.lihaoyi" %% "pprint" % "0.4.4" % Test,
     "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % Test
   ),
   libraryDependencies ++= Seq(
-    "org.webjars" %% "webjars-play" % "2.5.0",
+    "org.webjars" %% "webjars-play" % "2.6.0-M1",
     "org.webjars" % "font-awesome" % "4.5.0"
   ),
-  compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value,
-  deploy := {
-
-    val v = version.value
-    val dockerImage = (dockerTarget in Docker).value
-    val dokkuApp = "fulfilmed"
-
-    val pull = s"docker pull $dockerImage"
-    val tag = s"docker tag $dockerImage dokku/$dokkuApp:$v"
-    val deploy = s"dokku tags:deploy $dokkuApp $v"
-
-    val status = Process("ssh", Seq("root@fulfilmed.com", s"$pull && $tag && $deploy")) !
-
-    if (status != 0) throw new IllegalArgumentException("Deploy failed.")
-  }
+  compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value
+//  deploy := {
+//
+//    val v = version.value
+//    val dockerImage = (dockerTarget in Docker).value
+//    val dokkuApp = "fulfilmed"
+//
+//    val pull = s"docker pull $dockerImage"
+//    val tag = s"docker tag $dockerImage dokku/$dokkuApp:$v"
+//    val deploy = s"dokku tags:deploy $dokkuApp $v"
+//
+//    val status = Process("ssh", Seq("root@fulfilmed.com", s"$pull && $tag && $deploy")) !
+//
+//    if (status != 0) throw new IllegalArgumentException("Deploy failed.")
+//  }
 )
   .enablePlugins(PlayScala, GitVersioning)
   .disablePlugins(PlayLayoutPlugin)
@@ -87,10 +88,9 @@ lazy val server = project.settings(
 
 lazy val shared = crossProject.crossType(CrossType.Pure).settings(
   libraryDependencies ++= Seq(
-    "com.lihaoyi" %%% "upickle" % "0.4.3",
+    "com.lihaoyi" %%% "upickle" % "0.4.4",
     "com.lihaoyi" %%% "autowire" % "0.2.6",
-    "com.lihaoyi" %%% "scalatags" % "0.6.3",
-    "fr.hmil" %%% "roshttp" % "1.0.0"
+    "com.lihaoyi" %%% "scalatags" % "0.6.5"
   ),
   commonSettings
 ).jsConfigure(_ enablePlugins ScalaJSWeb)

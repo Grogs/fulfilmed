@@ -6,12 +6,12 @@ import me.gregd.cineworld.dao.ratings.Ratings
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.selenium.HtmlUnit
 import org.scalatest.{FunSuite, Matchers}
-import org.scalatestplus.play.OneServerPerSuite
+import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import stub.Stubs
 
-class SmokeBrowserTest extends FunSuite with Matchers with ScalaFutures with OneServerPerSuite with HtmlUnit {
+class SmokeBrowserTest extends FunSuite with Matchers with ScalaFutures with GuiceOneServerPerSuite with HtmlUnit {
 
   override lazy val app = new GuiceApplicationBuilder()
     .overrides(

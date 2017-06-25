@@ -2,17 +2,22 @@ package stub
 
 import akka.actor.ActorSystem
 import me.gregd.cineworld.config.values.{CineworldUrl, OmdbUrl, TmdbUrl, VueUrl}
-import play.api.BuiltInComponents
+import play.api.{BuiltInComponents, NoHttpFiltersComponents}
 import play.api.http.ContentTypes.JSON
-import play.api.mvc.Action
+import play.api.http.{DefaultFileMimeTypesProvider, FileMimeTypesConfiguration}
+import play.api.mvc.{Action, EssentialFilter}
 import play.api.mvc.Results.{NotFound, Ok}
 import play.api.routing.Router
 import play.api.routing.sird._
-import play.core.server.{NettyServerComponents, ServerConfig}
+import play.core.j.JavaHandlerComponents
+import play.core.server._
+import play.http.ActionCreator
 
 import scala.util.Try
 
 object Stubs {
+
+  private implicit val fileMimeTypes = new DefaultFileMimeTypesProvider(FileMimeTypesConfiguration()).get
 
   private val return404: Router.Routes = {
     case other => Action{
@@ -22,9 +27,9 @@ object Stubs {
   }
 
   private lazy val server =
-    new NettyServerComponents with BuiltInComponents {
+    new AkkaHttpServerComponents with BuiltInComponents with NoHttpFiltersComponents {
       override lazy val serverConfig = ServerConfig(port = Some(0))
-      override lazy val actorSystem: ActorSystem = ActorSystem("TmdbStub")
+      override lazy val actorSystem: ActorSystem = ActorSystem("stubbed-services")
       lazy val router = Router.from(
         tmdb.routes orElse cineworld.routes orElse vue.routes orElse omdb.routes orElse return404
       )

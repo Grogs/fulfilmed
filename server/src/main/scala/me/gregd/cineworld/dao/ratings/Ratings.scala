@@ -2,7 +2,7 @@ package me.gregd.cineworld.dao.ratings
 
 import javax.inject.Inject
 
-import com.typesafe.scalalogging.slf4j.LazyLogging
+import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.Cache
 import me.gregd.cineworld.config.values.{OmdbKey, OmdbUrl}
 import play.api.libs.json.{JsValue, Json}

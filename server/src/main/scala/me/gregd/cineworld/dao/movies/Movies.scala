@@ -2,8 +2,8 @@ package me.gregd.cineworld.dao.movies
 
 import javax.inject.{Inject, Singleton}
 
-import com.rockymadden.stringmetric.similarity.DiceSorensenMetric
-import com.typesafe.scalalogging.slf4j.LazyLogging
+import com.typesafe.scalalogging.LazyLogging
+import info.debatty.java.stringsimilarity.SorensenDice
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.model.TmdbMovie
 import me.gregd.cineworld.dao.ratings.{Ratings, RatingsResult}
@@ -98,7 +98,7 @@ class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with
   }
 
   val compareFunc: (String, String) => Double =
-    DiceSorensenMetric(1).compare(_: String, _: String).get
+    new SorensenDice(1).similarity(_: String, _: String)
 
   val minWeight = 0.8
 

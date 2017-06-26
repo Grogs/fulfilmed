@@ -8,7 +8,6 @@ import me.gregd.cineworld.config.values.{TmdbKey, TmdbRateLimit, TmdbUrl}
 import me.gregd.cineworld.dao.model.{NowShowingResponse, TmdbMovie}
 import me.gregd.cineworld.util.RateLimiter
 import monix.execution.Scheduler
-import org.json4s._
 import play.api.libs.json.Json
 import play.api.libs.ws.{WSClient, WSResponse}
 
@@ -20,18 +19,13 @@ import scalacache.memoization._
 @Singleton
 class TheMovieDB @Inject()(apiKey: TmdbKey, ws: WSClient, url: TmdbUrl, cache: Cache, scheduler: Scheduler, rateLimit: TmdbRateLimit) extends LazyLogging {
 
-  protected implicit val formats = DefaultFormats
-  lazy private implicit val _ = cache.scalaCache
+  private lazy implicit val _ = cache.scalaCache
 
   private def key = apiKey.key
 
-  lazy val limiter = RateLimiter(rateLimit.duration, rateLimit.amount)
+  private lazy val limiter = RateLimiter(rateLimit.duration, rateLimit.amount)
 
   private def baseUrl = url.value
-//  lazy val baseImageUrl = {
-//    val json = get("configuration")
-//    (json \ "images" \ "base_url").extract[String] + "w300"
-//  }
 
   val baseImageUrl: String = "http://image.tmdb.org/t/p/w300"
 

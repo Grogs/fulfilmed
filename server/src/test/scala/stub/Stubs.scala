@@ -1,8 +1,12 @@
 package stub
 
 import akka.actor.ActorSystem
+import akka.event.Logging
+import akka.http.scaladsl.model.ContentTypes.`application/json`
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.directives.DebuggingDirectives
 import akka.stream.ActorMaterializer
 import me.gregd.cineworld.config.values.{CineworldUrl, OmdbUrl, TmdbUrl, VueUrl}
 import play.api.http.ContentTypes.JSON
@@ -37,7 +41,9 @@ object Stubs {
 
     import akka.http.scaladsl.Http
 
-    val route: Route = tmdb.route
+    val notFound: Route = DebuggingDirectives.logRequest(("Not found", Logging.InfoLevel))(complete("Failed"))
+
+    val route: Route = tmdb.route ~ notFound
     Await.result(Http().bindAndHandle(route, "localhost", 0), 10.seconds)
   }
 
@@ -62,21 +68,36 @@ object Stubs {
 
   lazy val serverBase = s"http://127.0.0.1:${server.httpPort.get}"
 
+  private def jsonResp(json: String) = HttpEntity(`application/json`, json)
+
   object tmdb {
 
     val route: Route = {
-      (get & path("/3/movie/now_playing")) {
-        parameter('api_key, 'page) { (key, page) =>
-          getFromResource(s"tmdb/now_playing-$page.json")
-        }
-      } ~ (get & path("/3/movie/" / Segment / "/alternative_titles")) { id =>
-        complete(
-          Try{
-            Source.fromResource(s"tmdb/alternate-titles-$id.json").getLines().mkString
-          }.getOrElse(s"""{"id":$id,"titles":[]}"""): String
-        )
-      }
+      (get & pathPrefix("3" / "movie")) {
+        (path("now_playing") & parameter('api_key, 'page)) { (key, page) =>
+            complete(
+              HttpEntity(`application/json`,
+                Source.fromResource(s"tmdb/now_playing-$page.json").mkString
+              )
+            )
 
+        } ~ path(Segment / "alternative_titles") { id =>
+          complete(
+            HttpEntity(`application/json`,
+              Try {
+                Source.fromResource(s"tmdb/alternate-titles-$id.json").getLines().mkString
+              }.getOrElse(s"""{"id":$id,"titles":[]}""")
+            )
+          )
+        } ~ (path(LongNumber) & parameter('api_key)) { (id, apiKey) =>
+          complete(
+            HttpEntity(`application/json`,
+              """{"imdb_id":"tt7777777"}"""
+            )
+          )
+        }
+
+      }
     }
 
     def routes(implicit action: ActionBuilder[Request, AnyContent]): Router.Routes = {
@@ -96,7 +117,7 @@ object Stubs {
         }
     }
 
-    lazy val baseUrl = TmdbUrl(serverBase)
+    lazy val baseUrl = TmdbUrl(serverBase2)
   }
 
   object cineworld {

@@ -1,6 +1,9 @@
 package stub
 
 import akka.actor.ActorSystem
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
+import akka.stream.ActorMaterializer
 import me.gregd.cineworld.config.values.{CineworldUrl, OmdbUrl, TmdbUrl, VueUrl}
 import play.api.http.ContentTypes.JSON
 import play.api.http.{DefaultFileMimeTypesProvider, FileMimeTypesConfiguration}
@@ -11,11 +14,34 @@ import play.api.routing.sird._
 import play.api.{BuiltInComponents, NoHttpFiltersComponents}
 import play.core.server._
 
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.io.Source
 import scala.util.Try
 
 object Stubs {
 
   private implicit val fileMimeTypes = new DefaultFileMimeTypesProvider(FileMimeTypesConfiguration()).get
+
+  private def return404(implicit action: ActionBuilder[Request, AnyContent]): Router.Routes = {
+    case other => action {
+      println(s"Returning 404 for ${other.uri}")
+      NotFound
+    }
+  }
+
+  private lazy val server2 = {
+    implicit val system = ActorSystem("http-stubs")
+    implicit val materializer = ActorMaterializer()
+    implicit val executionContext = system.dispatcher
+
+    import akka.http.scaladsl.Http
+
+    val route: Route = tmdb.route
+    Await.result(Http().bindAndHandle(route, "localhost", 0), 10.seconds)
+  }
+
+  lazy val serverBase2 = s"http://127.0.0.1:${server2.localAddress.getPort}"
 
   private lazy val server =
     new AkkaHttpServerComponents with BuiltInComponents with NoHttpFiltersComponents {
@@ -37,6 +63,22 @@ object Stubs {
   lazy val serverBase = s"http://127.0.0.1:${server.httpPort.get}"
 
   object tmdb {
+
+    val route: Route = {
+      (get & path("/3/movie/now_playing")) {
+        parameter('api_key, 'page) { (key, page) =>
+          getFromResource(s"tmdb/now_playing-$page.json")
+        }
+      } ~ (get & path("/3/movie/" / Segment / "/alternative_titles")) { id =>
+        complete(
+          Try{
+            Source.fromResource(s"tmdb/alternate-titles-$id.json").getLines().mkString
+          }.getOrElse(s"""{"id":$id,"titles":[]}"""): String
+        )
+      }
+
+    }
+
     def routes(implicit action: ActionBuilder[Request, AnyContent]): Router.Routes = {
       case GET(p"/3/movie/now_playing" ? q"api_key=$key" & q"language=$_" & q"page=$page" & q"region=$_") =>
         action {

@@ -60,7 +60,8 @@ lazy val server = project.settings(
     "org.scalatestplus.play" %% "scalatestplus-play" % "3.0.0" % Test,
     "org.scalatest" %% "scalatest" % "3.0.1" % Test,
     "com.lihaoyi" %% "pprint" % "0.4.4" % Test,
-    "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % Test
+    "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % Test,
+    "com.typesafe.akka" %% "akka-http" % "10.0.8" % Test
   ),
   libraryDependencies ++= Seq(
     "org.webjars" %% "webjars-play" % "2.6.0-M1",

@@ -41,10 +41,10 @@ object FilmsStyle extends StyleSheet.Inline {
     paddingLeft(20.px)
   )
   val select = style(
-    margin(7.px, 7.px, 7.px, 1.px),
-    border(1.px, solid, Color("#7F1717")),
+    margin(0.5.em, 0.1.em, 0.5.em, 0.1.em),
+    border(0.01.em, solid, Color("#7F1717")),
     fontFamily :=! "Calibri, Verdana, Arial, sans-serif",
-    fontSize(16.px),
+    fontSize(1.em),
     height(1.8.em),
     color.white,
     minWidth(190.px),
@@ -82,13 +82,17 @@ object FilmsStyle extends StyleSheet.Inline {
   val filmTitle= style(
     fontFamily :=! "\"HelveticaNeue\", \"Helvetica Neue\", Helvetica, Arial, \"Lucida Grande\", sans-serif",
     fontWeight.bold,
-    fontSize(36.px),
+    fontSize(2.2.em),
     color(Color("#E5E5E5")),
-    lineHeight(44.px),
 //    textShadow(0.px, 1.px, 9.px, rgba(0,0,0,1)),
     textAlign.center,
-    marginTop(20.px)
+    marginTop(0.6.em)
   )
+
+  val longFilmTitle = filmTitle + style(
+    fontSize(1.7.em)
+  )
+
   val filmPosition = style(
     width(100.%%),
     height(100.%%),
@@ -111,12 +115,6 @@ object FilmsStyle extends StyleSheet.Inline {
   val filmBackground = filmPosition + style(
     filter := "blur(1.4px)",
     transform := "translate3d(0, 0, 0)"
-    //TODO
-    /* blur caused performance issues - found a source for higher-res images instead
-    -webkit-filter(blur(3.px)),
-    -webkit-transform(translate3d(0, 0, 0)),
-    */
-//    margin(0.px, -1.px, 0.px, 0.px) TODO verify if we want this
   )
   val ratings= style(
     marginTop(30.px),
@@ -125,11 +123,9 @@ object FilmsStyle extends StyleSheet.Inline {
   val rating = style(
     fontFamily :=! "\"HelveticaNeue\", \"Helvetica Neue\", Helvetica, Arial, \"Lucida Grande\", sans-serif",
     fontWeight.bold,
-    fontSize(26.px),
+    fontSize(1.6.em),
     color(Color("#FFFFFF")),
-    lineHeight(32.px),
-    /* imdb rating(*/
-    margin(10.px),
+    margin(0.3.em),
     display.inlineBlock,
     unsafeChild("a") (
       color.white
@@ -151,26 +147,24 @@ object FilmsStyle extends StyleSheet.Inline {
     paddingLeft(39.px)
   )
   val times = style(
-    margin(30.px, 20.px, 0.px, 20.px),
-    textAlign.center,
+    margin(1.em, 1.em, 0.em, 1.em),
+    textAlign.left,
     overflowY.hidden,
     whiteSpace.nowrap,
     webkitImageMask :=! "-webkit-gradient(linear, 80% 0%, 99% 0%, from(rgba(0,0,0,1)), to(rgba(0,0,0,0)))",
-    paddingRight(5.%%)
+    paddingRight(1.1.em)
   )
   val time = style(
     fontFamily :=! "\"HelveticaNeue\", \"Helvetica Neue\", Helvetica, Arial, \"Lucida Grande\", sans-serif",
     fontWeight.bold,
-    fontSize(20.px),
+    fontSize(1.3.em),
     color(Color("#E5E5E5")),
-    lineHeight(25.px),
-    padding(4.px),
-    borderRadius(10.px),
+    padding(0.1.em),
+    borderRadius(0.35.em),
     backgroundColor(Color("#2A353F")),
     border(2.px, solid, Color("#00ADFF")),
     display.inlineBlock,
-    marginRight(10.px),
-    marginBottom(8.px)
+    marginRight(0.5.em),
   )
 
 

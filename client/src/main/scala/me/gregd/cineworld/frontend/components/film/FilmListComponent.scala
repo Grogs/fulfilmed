@@ -10,11 +10,12 @@ import scala.language.implicitConversions
 import scalacss.ScalaCssReact.scalacssStyleaToTagMod
 
 object FilmListComponent {
-  val filmCard = (m: Movie, pl: Seq[Performance]) =>
+  val filmCard = (m: Movie, pl: Seq[Performance]) => {
+    val titleStyle = if (m.title.length > 20) FilmsStyle.longFilmTitle else FilmsStyle.filmTitle
     <.div(FilmsStyle.filmCard,
       <.div(FilmsStyle.filmInfo,
         <.div(^.classSet("threedee" -> m.format.contains("3D")),
-          <.div(FilmsStyle.filmTitle, m.title),
+          <.div(titleStyle, m.title),
           <.div(FilmsStyle.ratings, imdbLink(m), tmdbLink(m), rtLink(m)),
           <.div(FilmsStyle.times,
             Composite(for (p <- pl.toVector) yield
@@ -26,6 +27,7 @@ object FilmListComponent {
       ),
       <.img(FilmsStyle.filmBackground, ^.src := m.posterUrl.get)
     )
+  }
 
   def tmdbLink(m: Movie) = m.tmdbRating.whenDefined(<.div(FilmsStyle.tmdb, _))
 

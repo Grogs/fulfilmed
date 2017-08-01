@@ -45,9 +45,7 @@ class CinemaServiceTest extends FunSuite with ScalaFutures with Matchers {
 
     res.size shouldBe 11
 
-    val (movie, performances) = res.head
-
-    movie.title shouldBe "Guardians Of The Galaxy Vol. 2"
+    val Some((movie, performances)) = res.find(_._1.title == "Guardians Of The Galaxy Vol. 2")
 
     performances.size shouldBe 4
   }

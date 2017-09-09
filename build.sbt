@@ -67,22 +67,20 @@ lazy val server = project.settings(
     "org.webjars" %% "webjars-play" % "2.6.0-M1",
     "org.webjars" % "font-awesome" % "4.5.0"
   ),
-  compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value,
-
-  deploy := {
-
-    val v = version.value
-    val dockerImage = (dockerAlias in Docker).value.versioned
-    val dokkuApp = "fulfilmed"
-
-    val pull = s"docker pull $dockerImage"
-    val tag = s"docker tag $dockerImage dokku/$dokkuApp:$v"
-    val deploy = s"dokku tags:deploy $dokkuApp $v"
-
-    val status = Process("ssh", Seq("root@fulfilmed.com", s"$pull && $tag && $deploy")) !
-
-    if (status != 0) throw new IllegalArgumentException("Deploy failed.")
-  }
+  compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value
+//  deploy := {
+//
+//    val v = version.value
+//    val dockerImage = (dockerAlias in Docker).value.versioned
+//    val dokkuApp = "fulfilmed"
+//
+//    val pull = s"docker pull $dockerImage"
+//    val deploy = s"dokku tags:deploy $dokkuApp $v"
+//
+//    val status = Process("ssh", Seq("root@fulfilmed.com", s"$pull && $deploy")) !
+//
+//    if (status != 0) throw new IllegalArgumentException("Deploy failed.")
+//  }
 )
   .enablePlugins(PlayScala, GitVersioning)
   .disablePlugins(PlayLayoutPlugin)

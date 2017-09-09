@@ -1,0 +1,14 @@
+version: "3"
+services:
+  cache:
+    image: redis
+  web:
+    image: grogs/fulfilmed:1.6
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+    ports:
+      - "9000:9000"
+    depends_on: 
+      - cache

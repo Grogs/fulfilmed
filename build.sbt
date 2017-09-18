@@ -94,9 +94,11 @@ lazy val server = project.settings(
 
     val log = streams.value.log
 
-    log.info(s"Deploying with this cmd:\n$deployCmd")
+    log.success(s"Deploying with this cmd:\n$deployCmd")
 
     val status = Process("ssh", Seq("root@fulfilmed.com", deployCmd)).!
+
+    log.error(s"Deployment failed with status code $status")
 
     if (status != 0) throw new IllegalArgumentException("Deploy failed.")
   }

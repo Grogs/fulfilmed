@@ -67,20 +67,39 @@ lazy val server = project.settings(
     "org.webjars" %% "webjars-play" % "2.6.0-M1",
     "org.webjars" % "font-awesome" % "4.5.0"
   ),
-  compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value
-//  deploy := {
-//
-//    val v = version.value
-//    val dockerImage = (dockerAlias in Docker).value.versioned
-//    val dokkuApp = "fulfilmed"
-//
-//    val pull = s"docker pull $dockerImage"
-//    val deploy = s"dokku tags:deploy $dokkuApp $v"
-//
-//    val status = Process("ssh", Seq("root@fulfilmed.com", s"$pull && $deploy")) !
-//
-//    if (status != 0) throw new IllegalArgumentException("Deploy failed.")
-//  }
+  compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value,
+  deploy := {
+
+    val v = version.value
+    val image = (dockerAlias in Docker).value.versioned
+    val app = "fulfilmed"
+    val instances = (0 to 1).toList
+
+    val pull = s"docker pull $image"
+
+    def stop(instance: Int) = s"docker stop $app.$instance"
+
+    def remove(instance: Int) = s"docker rm $app.$instance"
+
+    def create(instance: Int) = {
+      val exposeTo = "900" + instance
+      s"docker run -d --name $app.$instance -p $exposeTo:9000 $image"
+    }
+
+    def deploy(i: Int) = List(stop(i), remove(i), create(i))
+
+    val deployInstances = instances.flatMap(deploy).mkString(" && ")
+
+    val deployCmd = s"$pull && $deployInstances"
+
+    val log = streams.value.log
+
+    log.info(s"Deploying with this cmd:\n$deployCmd")
+
+    val status = Process("ssh", Seq("root@fulfilmed.com", deployCmd)).!
+
+    if (status != 0) throw new IllegalArgumentException("Deploy failed.")
+  }
 )
   .enablePlugins(PlayScala, GitVersioning)
   .disablePlugins(PlayLayoutPlugin)

@@ -1,7 +1,7 @@
 lazy val commonSettings = Seq(
   organization := "me.gregd",
   version := "1.6",
-  scalaVersion := "2.12.2"
+  scalaVersion := "2.12.4"
 )
 
 lazy val deploy = taskKey[Unit]("Deploy docker image with dokku")

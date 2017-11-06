@@ -96,8 +96,6 @@ class FileCacheSpec extends FunSuite with Matchers with ScalaFutures with Eventu
 
     cache.get[Int]("someKey").futureValue shouldBe Some(42)
     cache.get[String]("someKey").failed.futureValue shouldBe a [Throwable]
-
-
   }
 
   test("close") {

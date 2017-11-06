@@ -69,6 +69,7 @@ lazy val server = project.settings(
   ),
   compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value,
   deploy := {
+    import scala.sys.process._
 
     val v = version.value
     val image = (dockerAlias in Docker).value.versioned
@@ -119,4 +120,4 @@ lazy val shared = crossProject.crossType(CrossType.Pure).settings(
 lazy val sharedJvm = shared.jvm
 lazy val sharedJs = shared.js
 
-onLoad in Global := (Command.process("project server", _: State)) compose (onLoad in Global).value
+onLoad in Global ~= (_ andThen ("project server" :: _))

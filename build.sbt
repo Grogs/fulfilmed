@@ -100,9 +100,13 @@ lazy val server = project.settings(
 
     val status = Process("ssh", Seq("root@fulfilmed.com", deployCmd)).!
 
-    log.error(s"Deployment failed with status code $status")
 
-    if (status != 0) throw new IllegalArgumentException("Deploy failed.")
+    if (status == 0) {
+      log.success(s"Deployed $image!")
+    } else {
+      log.error(s"Deployment failed with status code $status")
+      throw new IllegalArgumentException("Deploy failed.")
+    }
   }
 )
   .enablePlugins(PlayScala, GitVersioning)

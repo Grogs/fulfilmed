@@ -14,8 +14,7 @@ object Index {
       body(
         style := "margin: 0",
         div(id := "content"),
-        for (p <- scriptPaths) yield script(`type` := "text/javascript", src := p),
-        script("me.gregd.cineworld.frontend.Main().main()")
+        for (p <- scriptPaths) yield script(`type` := "text/javascript", src := p)
       )
     )
 

@@ -8,4 +8,3 @@ GET     /debug/allMovies                me.gregd.cineworld.DebugController.allMo
 GET     /debug/imdbid/*tmdbid           me.gregd.cineworld.DebugController.imdbId(tmdbid)
 
 GET     /assets/*file                   controllers.Assets.at(path="/public", file)
-GET     /webjars/*file                  controllers.WebJarAssets.at(file)

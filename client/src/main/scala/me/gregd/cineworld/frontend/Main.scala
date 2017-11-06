@@ -10,7 +10,7 @@ import org.scalajs.dom._
 import scala.scalajs.js.JSApp
 import scalacss.Defaults._
 
-object Main extends JSApp {
+object Main {
 
   def main(): Unit = {
 

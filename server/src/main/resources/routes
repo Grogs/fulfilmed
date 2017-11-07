@@ -6,5 +6,6 @@ POST    /api/*path                      me.gregd.cineworld.CinemaController.api(
 GET     /debug/tmdbNowPlaying           me.gregd.cineworld.DebugController.tmdbNowPlaying()
 GET     /debug/allMovies                me.gregd.cineworld.DebugController.allMovies()
 GET     /debug/imdbid/*tmdbid           me.gregd.cineworld.DebugController.imdbId(tmdbid)
+GET     /debug/ratings/*imdbid          me.gregd.cineworld.DebugController.ratings(imdbid)
 
 GET     /assets/*file                   controllers.Assets.at(path="/public", file)

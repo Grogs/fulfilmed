@@ -12,7 +12,7 @@ class RateLimiterTest extends FunSuite with Matchers {
 
     def task(i: Int) = Future.successful(println(i + ": " + (System.currentTimeMillis() - start)))
 
-    val rateLimit = new RateLimiter(100.millis, 5)
+    val rateLimit = RateLimiter(100.millis, 5)
 
     val results = for (i <- 1 to 24) yield rateLimit(task(i))
     results.foreach(Await.result(_, 5.seconds))

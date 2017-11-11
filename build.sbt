@@ -88,11 +88,11 @@ lazy val server = project.settings(
       s"docker run -d --name $app.$instance -p $exposeTo:9000 $image"
     }
 
-    def deploy(i: Int) = List(stop(i), remove(i), create(i))
+    def deploy(instance: Int) = List(stop(instance), remove(instance), create(instance)).mkString(" && ")
 
-    val deployInstances = instances.flatMap(deploy).mkString(" && ")
+    val deployAllInstances = instances.map(deploy).mkString(" && ")
 
-    val deployCmd = s"$pull && $deployInstances"
+    val deployCmd = s"$pull && $deployAllInstances"
 
     val log = streams.value.log
 
@@ -100,11 +100,10 @@ lazy val server = project.settings(
 
     val status = Process("ssh", Seq("root@fulfilmed.com", deployCmd)).!
 
-
     if (status == 0) {
-      log.success(s"Deployed $image!")
+      log.success(s"successfully deployed $image.")
     } else {
-      log.error(s"Deployment failed with status code $status")
+      log.error(s"Deployment failed with status code $status.")
       throw new IllegalArgumentException("Deploy failed.")
     }
   }

@@ -30,13 +30,12 @@ class TheMovieDB @Inject()(apiKey: TmdbKey, ws: WSClient, url: TmdbUrl, cache: C
   val baseImageUrl: String = "http://image.tmdb.org/t/p/w300"
 
   def fetchNowPlaying(): Future[Vector[TmdbMovie]] =
-    Future.traverse(1 to 6)(fetchPage).map(_.flatten.toVector)
+    Future.traverse(1 to 5)(fetchPage).map(_.flatten.toVector)
 
   def fetchImdbId(tmdbId: String): Future[Option[String]] = memoize(1.day){
     limiter{
       val url = s"$baseUrl/3/movie/$tmdbId?api_key=$key"
       def extractImdbId(res: WSResponse) = {
-//        logger.info(s"Response for $tmdbId: ${res.body}")
         (res.json \ "imdb_id").asOpt[String]
       }
       ws.url(url).get().map(extractImdbId)

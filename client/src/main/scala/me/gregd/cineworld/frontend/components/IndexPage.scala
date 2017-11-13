@@ -9,14 +9,15 @@ import japgolly.scalajs.react.vdom.html_<^._
 import me.gregd.cineworld.domain.{Cinema, CinemaApi}
 import me.gregd.cineworld.frontend.components.film.FilmPageComponent.Today
 import me.gregd.cineworld.frontend.{Client, Films, Page}
+import org.scalajs.dom.experimental.permissions._
 import org.scalajs.dom.raw.Position
-
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-import scalacss.ScalaCssReact.scalacssStyleaToTagMod
 import org.scalajs.dom.window.navigator
 
 import scala.concurrent.Promise
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.scalajs.js
+import scala.util.Try
+import scalacss.ScalaCssReact.scalacssStyleaToTagMod
 
 object IndexPage {
   import me.gregd.cineworld.frontend.components.{IndexStyle => styles}
@@ -37,10 +38,20 @@ object IndexPage {
     .builder[Props]("IndexPage")
     .initialState(State(Unloaded, Unloaded))
     .renderBackend[Backend]
-    .componentDidMount(_.backend.loadAllCinemas())
+    .componentDidMount(_.backend.initialise())
     .build
 
   class Backend($ : BackendScope[Props, State]) {
+
+    def initialise() = Try{
+      val permission = navigator.permissions.query(js.Dynamic.literal(name = "geolocation")).toFuture
+      val loadNearbyIfPermissioned = permission.map(s => if (s.state == `granted`) loadNearbyCinemas() else Callback.empty)
+      Callback.sequence(
+        Seq(
+          Callback.future(loadNearbyIfPermissioned),
+          loadAllCinemas()
+        ))
+    }.getOrElse(loadAllCinemas())
 
     def loadAllCinemas() = Callback.future {
       for {

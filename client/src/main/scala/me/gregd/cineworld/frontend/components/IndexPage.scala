@@ -27,7 +27,7 @@ object IndexPage {
   case object Loading extends Loadable[Nothing]
   case class Loaded[T](value: T) extends Loadable[T]
 
-  case class State(allCinemas: Map[String, Map[String, Seq[Cinema]]], nearbyCinemas: Loadable[Seq[Cinema]])
+  case class State(allCinemas: Loadable[Map[String, Map[String, Seq[Cinema]]]], nearbyCinemas: Loadable[Seq[Cinema]])
 
   type Props = RouterCtl[Page]
 
@@ -35,7 +35,7 @@ object IndexPage {
 
   val component = ScalaComponent
     .builder[Props]("IndexPage")
-    .initialState(State(Map.empty, Unloaded))
+    .initialState(State(Unloaded, Unloaded))
     .renderBackend[Backend]
     .componentDidMount(_.backend.loadAllCinemas())
     .build
@@ -45,10 +45,10 @@ object IndexPage {
     def loadAllCinemas() = Callback.future {
       for {
         cinemas <- Client[CinemaApi].getCinemas().call()
-      } yield $.modState(_.copy(allCinemas = cinemas.toMap))
+      } yield $.modState(_.copy(allCinemas = Loaded(cinemas)))
     }
 
-    def loadNearbyCinemas() = $.modState(_.copy(nearbyCinemas = Loading)) >> Callback.future{
+    def loadNearbyCinemas() = $.modState(_.copy(nearbyCinemas = Loading)) >> Callback.future {
       val location = Promise[Position]()
       navigator.geolocation.getCurrentPosition(p => location.success(p), err => location.failure(new Exception(err.message)))
       for {
@@ -67,21 +67,26 @@ object IndexPage {
 
     def render(state: State) = {
 
-      val cinemaDropdowns = Composite(
-        for {
-          (typ, cinemas) <- state.allCinemas.toVector
-        } yield
-          <.div(
-            <.select(
-              styles.selectWithOffset,
-              ^.id := "cinemas",
-              ^.`class` := ".flat",
-              ^.onChange ==> selectCinema,
-              <.option(^.value := "?", ^.selected := "selected", ^.disabled := true, typ),
-              Composite(for { (groupName, cinemas) <- cinemas.toVector.reverse } yield
-                <.optgroup(label := groupName, Composite(for (cinema <- cinemas.toVector) yield <.option(^.value := cinema.id, cinema.name))))
-            )
-          ))
+      val cinemaDropdowns = state.allCinemas match {
+        case Unloaded | Loading =>
+          <.div(styles.blurb, "Loading")
+        case Loaded(cinemas) =>
+          Composite(
+            for {
+              (typ, cinemas) <- cinemas.toVector
+            } yield
+              <.div(
+                <.select(
+                  styles.selectWithOffset,
+                  ^.id := "cinemas",
+                  ^.`class` := ".flat",
+                  ^.onChange ==> selectCinema,
+                  <.option(^.value := "?", ^.selected := "selected", ^.disabled := true, typ),
+                  Composite(for { (groupName, cinemas) <- cinemas.toVector.reverse } yield
+                    <.optgroup(label := groupName, Composite(for (cinema <- cinemas.toVector) yield <.option(^.value := cinema.id, cinema.name))))
+                )
+              ))
+      }
 
       val nearbyCinemas = <.div(
         state.nearbyCinemas match {
@@ -99,7 +104,7 @@ object IndexPage {
               ^.id := "nearby-cinemas",
               ^.`class` := ".flat",
               ^.onChange ==> selectCinema,
-              <.option(^.value := "?", ^.selected := "selected", ^.disabled := true, "Select from nearby cinemas..."),
+              <.option(^.value := "?", ^.selected := "selected", ^.disabled := true, "Select nearby cinema..."),
               Composite(for (c <- cinemas.toVector) yield <.option(^.value := c.id, c.name))
             )
 

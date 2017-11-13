@@ -104,6 +104,7 @@ object Stubs {
           name match {
             case "bury-the-rock" =>
               HttpEntity(`text/html(UTF-8)`, Source.fromResource("vue/bury-the-rock-whats-on.html").mkString)
+            case _ => HttpEntity(`text/html(UTF-8)`, "")
           }
         }
       }

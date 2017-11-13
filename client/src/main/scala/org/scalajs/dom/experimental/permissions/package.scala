@@ -1,40 +1,71 @@
 package org.scalajs.dom.experimental
 
-import language.implicitConversions
+import scala.language.implicitConversions
+
 import org.scalajs.dom
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.ScalaJSDefined
 
 /**
-TODO Remove once PR merged and released: https://github.com/scala-js/scala-js-dom/pull/299
+  * Implements the Permissions API.
+  *TODO Remove once PR merged and released: https://github.com/scala-js/scala-js-dom/pull/299
+  * [[https://www.w3.org/TR/permissions/ W3C Working Draft]]
   */
 package object permissions {
 
   @js.native
   trait PermissionState extends js.Any
 
-  final val `granted` = "granted".asInstanceOf[PermissionState]
-  final val `denied` = "denied".asInstanceOf[PermissionState]
-  final val `prompt` = "prompt".asInstanceOf[PermissionState]
+  object PermissionState {
+    final val granted = "granted".asInstanceOf[PermissionState]
+    final val denied = "denied".asInstanceOf[PermissionState]
+    final val prompt = "prompt".asInstanceOf[PermissionState]
+  }
 
-  @ScalaJSDefined
-  trait PermissionStatus extends dom.EventTarget {
+  trait PermissionStatus extends dom.raw.EventTarget {
     val state: PermissionState
     val onchange: js.Function1[PermissionState, _]
   }
 
-  @ScalaJSDefined
-  trait Permissions extends js.Any {
-    def query(permissionDescriptor: js.Object): js.Promise[PermissionStatus]
+  @js.native
+  trait PermissionName extends js.Any
+
+  object PermissionName {
+    val geolocation = "geolocation".asInstanceOf[PermissionName]
+    val midi = "midi".asInstanceOf[PermissionName]
+    val notifications = "notifications".asInstanceOf[PermissionName]
+    val push = "push".asInstanceOf[PermissionName]
+    val `persistent-storage` =
+      "persistent-storage".asInstanceOf[PermissionName]
   }
 
-  @ScalaJSDefined
-  trait PermissionsNavigator extends js.Any {
+  trait PermissionDescriptor extends js.Object {
+    val name: PermissionName
+  }
+
+  object PermissionDescriptor {
+    @inline
+    def apply(permissionName: PermissionName): PermissionDescriptor = {
+      js.Dynamic
+        .literal(
+          name = permissionName
+        )
+        .asInstanceOf[PermissionDescriptor]
+    }
+  }
+
+  trait Permissions extends js.Object {
+    def query(
+               permissionDescriptor: PermissionDescriptor): js.Promise[PermissionStatus]
+  }
+
+  trait PermissionsNavigator extends js.Object {
     val permissions: Permissions
   }
 
-  implicit def toPermissions(navigator: dom.raw.Navigator): PermissionsNavigator =
+  implicit def toPermissions(
+                              navigator: dom.raw.Navigator): PermissionsNavigator =
     navigator.asInstanceOf[PermissionsNavigator]
 
 }
+

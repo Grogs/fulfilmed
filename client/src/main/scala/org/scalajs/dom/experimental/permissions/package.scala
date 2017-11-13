@@ -8,13 +8,13 @@ import scala.scalajs.js
 
 /**
   * Implements the Permissions API.
-  *TODO Remove once PR merged and released: https://github.com/scala-js/scala-js-dom/pull/299
+  *
   * [[https://www.w3.org/TR/permissions/ W3C Working Draft]]
   */
 package object permissions {
 
   @js.native
-  trait PermissionState extends js.Any
+  sealed trait PermissionState extends js.Any
 
   object PermissionState {
     final val granted = "granted".asInstanceOf[PermissionState]
@@ -28,7 +28,7 @@ package object permissions {
   }
 
   @js.native
-  trait PermissionName extends js.Any
+  sealed trait PermissionName extends js.Any
 
   object PermissionName {
     val geolocation = "geolocation".asInstanceOf[PermissionName]
@@ -68,4 +68,3 @@ package object permissions {
     navigator.asInstanceOf[PermissionsNavigator]
 
 }
-

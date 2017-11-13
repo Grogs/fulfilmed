@@ -32,16 +32,15 @@ class Module(environment: Environment, configuration: Configuration) extends Abs
   val tmp = System.getProperty("java.io.tmpdir")
   private val cacheLocation = environment.mode match {
     case Dev =>
-      new File(s"$home/.fulmfilmed-cache")
+      val res = new File(s"$home/.fulmfilmed-cache")
+      res.mkdir()
+      res.toPath.toString
     case _ =>
-      val cacheDir = BuildInfo.gitHeadCommit.getOrElse(BuildInfo.builtAtMillis.toString)
-      new File(s"$tmp/fulfilmed-cache/$cacheDir")
+      Files.createTempDirectory("fulfilmed-cache").toString
 
   }
 
-  cacheLocation.mkdir()
-
-  val scalaCache = Cache(ScalaCache(new FileCache(cacheLocation.toPath.toString)))
+  val scalaCache = Cache(ScalaCache(new FileCache(cacheLocation)))
 
   val ratingsCache = new RatingsCache(collection.mutable.Map())
   override def configure(): Unit = {

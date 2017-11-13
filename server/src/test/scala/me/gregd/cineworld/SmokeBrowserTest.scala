@@ -21,7 +21,7 @@ class SmokeBrowserTest extends FunSuite with Matchers with ScalaFutures with Gui
     )
     .build
 
-  test("Index page should list West India Quay as one or the cinemas") {
+  ignore("Index page should list West India Quay as one or the cinemas") {
     go to s"http://localhost:$port/"
     pageTitle shouldBe "Fulfilmed"
 //    pageSource should include("West India Quay")

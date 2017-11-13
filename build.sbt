@@ -1,6 +1,6 @@
 lazy val commonSettings = Seq(
   organization := "me.gregd",
-  version := "1.6",
+  version := "1.7",
   scalaVersion := "2.12.4"
 )
 
@@ -37,6 +37,9 @@ lazy val server = project.settings(
   commonSettings,
   name := "fulfilmed",
   dockerRepository := Some("grogs"),
+  buildInfoKeys := Seq[BuildInfoKey](name, version, git.gitHeadCommit, git.gitHeadMessage),
+  buildInfoOptions += BuildInfoOption.BuildTime,
+  buildInfoPackage := "fulfilmed",
   scalaJSProjects := Seq(client),
   pipelineStages in Assets := Seq(scalaJSPipeline),
   WebKeys.packagePrefix in Assets := "public/",
@@ -108,7 +111,7 @@ lazy val server = project.settings(
     }
   }
 )
-  .enablePlugins(PlayScala, GitVersioning)
+  .enablePlugins(PlayScala, GitVersioning, BuildInfoPlugin)
   .disablePlugins(PlayLayoutPlugin)
   .dependsOn(sharedJvm)
 

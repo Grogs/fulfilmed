@@ -4,6 +4,7 @@ import javax.inject.Inject
 
 import com.google.inject.AbstractModule
 import com.typesafe.config.ConfigFactory
+import fulfilmed.BuildInfo
 import me.gregd.cineworld.Cache
 import me.gregd.cineworld.config.values._
 import me.gregd.cineworld.dao.movies.RatingsCache
@@ -27,16 +28,19 @@ class Module(environment: Environment, configuration: Configuration) extends Abs
 
   val tmdbRateLimit = TmdbRateLimit(config.getDuration("rate-limit.tmdb.duration").asScala, config.getInt("rate-limit.tmdb.count"))
 
+  val home = System.getProperty("user.home")
   private val cacheLocation = environment.mode match {
     case Dev =>
-      val home = System.getProperty("user.home")
-      val res = new File(s"$home/.fulmfilmed-cache")
-      res.mkdir()
-      res.toPath
+      new File(s"$home/.fulmfilmed-cache")
     case _ =>
-      Files.createTempDirectory("fulfilmed-cache")
+      val cacheDir = BuildInfo.gitHeadCommit.getOrElse(BuildInfo.builtAtMillis.toString)
+      new File(s"$home/./fulfilmed-cache/$cacheDir")
+
   }
-  val scalaCache = Cache(ScalaCache(new FileCache(cacheLocation.toString)))
+
+  cacheLocation.mkdir()
+
+  val scalaCache = Cache(ScalaCache(new FileCache(cacheLocation.toPath.toString)))
 
   val ratingsCache = new RatingsCache(collection.mutable.Map())
   override def configure(): Unit = {

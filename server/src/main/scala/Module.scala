@@ -29,12 +29,13 @@ class Module(environment: Environment, configuration: Configuration) extends Abs
   val tmdbRateLimit = TmdbRateLimit(config.getDuration("rate-limit.tmdb.duration").asScala, config.getInt("rate-limit.tmdb.count"))
 
   val home = System.getProperty("user.home")
+  val tmp = System.getProperty("java.io.tmpdir")
   private val cacheLocation = environment.mode match {
     case Dev =>
       new File(s"$home/.fulmfilmed-cache")
     case _ =>
       val cacheDir = BuildInfo.gitHeadCommit.getOrElse(BuildInfo.builtAtMillis.toString)
-      new File(s"$home/./fulfilmed-cache/$cacheDir")
+      new File(s"$tmp/fulfilmed-cache/$cacheDir")
 
   }
 

@@ -1,6 +1,6 @@
 language: scala
 scala:
-- 2.11.8
+- 2.12.4
 jdk:
 - oraclejdk8
 sudo: required
@@ -24,6 +24,7 @@ deploy:
 cache:
   directories:
   - $HOME/.sbt/0.13
+  - $HOME/.sbt/1.0
   - $HOME/.sbt/boot/scala*
   - $HOME/.sbt/cache
   - $HOME/.sbt/launchers

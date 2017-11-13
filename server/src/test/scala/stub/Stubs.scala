@@ -2,7 +2,7 @@ package stub
 
 import akka.actor.ActorSystem
 import akka.event.Logging
-import akka.http.scaladsl.model.ContentTypes.`application/json`
+import akka.http.scaladsl.model.ContentTypes.{`application/json`, `text/html(UTF-8)`}
 import akka.http.scaladsl.model.HttpEntity
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
@@ -99,6 +99,13 @@ object Stubs {
               HttpEntity(`application/json`,"""{"Response":"False","Error":"Error getting data."}""")
           }
         )
+      } ~(get & path("cinema" / Segment / "whats-on")) { name =>
+        complete {
+          name match {
+            case "bury-the-rock" =>
+              HttpEntity(`text/html(UTF-8)`, Source.fromResource("vue/bury-the-rock-whats-on.html").mkString)
+          }
+        }
       }
 
     lazy val baseUrl = VueUrl(serverBase)

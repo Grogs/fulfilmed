@@ -4,12 +4,12 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import me.gregd.cineworld.dao.cinema.cineworld.raw.model._
-import me.gregd.cineworld.domain.{Cinema, Film, Performance}
+import me.gregd.cineworld.domain._
 
 object CineworldRepositoryTransformer {
 
   def toCinema(cinemaResp: CinemaResp): Cinema =
-    Cinema(cinemaResp.id.toString, cinemaResp.n)
+    Cinema(cinemaResp.id.toString, "Cineworld", cinemaResp.n, Option(Coordinates(cinemaResp.lat, cinemaResp.long)))
 
   def toMovie(cinemaId: String, movieResp: MovieResp): Map[Film, Map[LocalDate, Seq[Performance]]] =
     movieResp.TYPD.map { typ =>

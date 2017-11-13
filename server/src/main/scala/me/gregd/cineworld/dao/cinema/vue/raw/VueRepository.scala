@@ -22,11 +22,23 @@ class VueRepository @Inject()(ws: WSClient, cache: Cache, baseUrl: VueUrl) {
   private implicit val formats = DefaultFormats
 
   private val base = baseUrl.value
+  private val latLong = "http://maps.apple.com/\\?q=([-0-9.]+),([-0-9.]+)".r
 
   def retrieveCinemas(): Future[Seq[VueCinema]] = {
     curlCinemas().map(resp =>
       parse(resp).extract[VueCinemasResp].venues.flatMap(_.cinemas)
     )
+  }
+
+  def retrieveLocation(vueCinema: VueCinema): Future[Option[(Double, Double)]] = {
+    val name = vueCinema.name.toLowerCase.replace(' ', '-')
+    curlLocation(name).map { html =>
+      latLong.findFirstMatchIn(html).map { res =>
+        val lat = res.group(1).toDouble
+        val long = res.group(2).toDouble
+        lat -> long
+      }
+    }
   }
 
   def retrieveListings(cinemaId: String): Future[VueListingsResp] = {
@@ -39,6 +51,12 @@ class VueRepository @Inject()(ws: WSClient, cache: Cache, baseUrl: VueUrl) {
   def curlCinemas(): Future[String] = memoize(7.days) {
     ws.url(s"$base/data/locations/")
       .withHttpHeaders(X_REQUESTED_WITH -> "XMLHttpRequest")
+      .get()
+      .map(_.body)
+  }
+
+  def curlLocation(name: String): Future[String] = memoize(7.days) {
+    ws.url(s"$base/cinema/$name/whats-on")
       .get()
       .map(_.body)
   }

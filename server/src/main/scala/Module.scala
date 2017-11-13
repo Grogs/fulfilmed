@@ -1,4 +1,6 @@
-import java.nio.file.Files
+import java.io.File
+import java.nio.file.{Files, Path, Paths}
+import javax.inject.Inject
 
 import com.google.inject.AbstractModule
 import com.typesafe.config.ConfigFactory
@@ -7,11 +9,12 @@ import me.gregd.cineworld.config.values._
 import me.gregd.cineworld.dao.movies.RatingsCache
 import me.gregd.cineworld.util.{Clock, FileCache, RealClock}
 import monix.execution.Scheduler
-import play.api.Configuration
+import play.api.Mode.Dev
+import play.api.{Configuration, Environment}
 
 import scalacache.ScalaCache
 
-class Module extends AbstractModule {
+class Module(environment: Environment, configuration: Configuration) extends AbstractModule {
 
   val config = ConfigFactory.load
   val prop = {
@@ -24,7 +27,16 @@ class Module extends AbstractModule {
 
   val tmdbRateLimit = TmdbRateLimit(config.getDuration("rate-limit.tmdb.duration").asScala, config.getInt("rate-limit.tmdb.count"))
 
-  val scalaCache = Cache(ScalaCache(new FileCache(Files.createTempDirectory("fulfilmed-cache").toString)))
+  private val cacheLocation = environment.mode match {
+    case Dev =>
+      val home = System.getProperty("user.home")
+      val res = new File(s"$home/.fulmfilmed-cache")
+      res.mkdir()
+      res.toPath
+    case _ =>
+      Files.createTempDirectory("fulfilmed-cache")
+  }
+  val scalaCache = Cache(ScalaCache(new FileCache(cacheLocation.toString)))
 
   val ratingsCache = new RatingsCache(collection.mutable.Map())
   override def configure(): Unit = {
@@ -41,4 +53,3 @@ class Module extends AbstractModule {
     bind(classOf[Cache]).toInstance(scalaCache)
   }
 }
-

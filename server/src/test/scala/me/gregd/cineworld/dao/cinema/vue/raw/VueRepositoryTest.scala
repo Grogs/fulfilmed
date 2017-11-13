@@ -3,6 +3,7 @@ package me.gregd.cineworld.dao.cinema.vue.raw
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import fakes.NoOpCache
+import me.gregd.cineworld.dao.cinema.vue.raw.model.cinemas.VueCinema
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSuite, Matchers}
 import play.api.libs.ws.ahc.AhcWSClient
@@ -31,6 +32,11 @@ class VueRepositoryTest extends FunSuite with ScalaFutures with IntegrationPatie
   test("retrieveListings") {
     val vueListings = vue.retrieveListings("10032").futureValue
     vueListings.films should not be empty
+  }
+
+  test("retrieveLocation") {
+    val location = vue.retrieveLocation(VueCinema("Bury The Rock", "", "", "", "", "", false)).futureValue
+    location shouldBe Option((53.594033d,-2.296314d))
   }
 
 }

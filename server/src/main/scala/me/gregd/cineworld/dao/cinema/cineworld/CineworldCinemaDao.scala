@@ -8,13 +8,11 @@ import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.cinema.CinemaDao
 import me.gregd.cineworld.dao.cinema.cineworld.raw.{CineworldRepository, CineworldRepositoryTransformer}
 import me.gregd.cineworld.dao.movies.MovieDao
-import me.gregd.cineworld.domain.{Cinema, Film, Movie, Performance}
-import me.gregd.cineworld.util.Clock
+import me.gregd.cineworld.domain._
 import org.json4s._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.Try
 
 @Singleton
 class CineworldCinemaDao @Inject()(
@@ -36,7 +34,8 @@ class CineworldCinemaDao @Inject()(
   override def retrieveMoviesAndPerformances(cinemaId: String, dateRaw: String): Future[Map[Movie, List[Performance]]] = {
 
     def sequence[K, V](m: Map[Future[K], V]): Future[Map[K, V]] = {
-      import cats.Traverse, cats.instances.all._
+      import cats.Traverse
+      import cats.instances.all._
       Traverse[({type M[A] = Map[V, A] })#M].sequence(m.map(_.swap)).map(_.map(_.swap))
     }
 

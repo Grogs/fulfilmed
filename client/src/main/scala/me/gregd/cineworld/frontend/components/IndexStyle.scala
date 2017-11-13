@@ -38,6 +38,18 @@ object IndexStyle extends StyleSheet.Inline {
     textAlign.center,
     paddingBottom(150.px)
   )
+  val btn = style(
+    fontSize(24.px),
+    height(1.8.em),
+    border(2.px, solid, white),
+    borderRadius(0.2.em),
+    color(Color("#690B0B")),
+    width(490.px),
+    backgroundColor(white),
+    &.active(
+      border(1.px, solid, white)
+    )
+  )
   val select = style(
     fontSize(24.px),
     height(1.8.em),

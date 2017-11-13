@@ -9,14 +9,25 @@ import japgolly.scalajs.react.vdom.html_<^._
 import me.gregd.cineworld.domain.{Cinema, CinemaApi}
 import me.gregd.cineworld.frontend.components.film.FilmPageComponent.Today
 import me.gregd.cineworld.frontend.{Client, Films, Page}
+import org.scalajs.dom.raw.Position
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scalacss.ScalaCssReact.scalacssStyleaToTagMod
+import org.scalajs.dom.window.navigator
+
+import scala.concurrent.Promise
+import scala.scalajs.js
 
 object IndexPage {
+  import me.gregd.cineworld.frontend.components.{IndexStyle => styles}
   val label = "label".reactAttr
 
-  case class State(cinemas: Map[String, Map[String, Seq[Cinema]]])
+  sealed trait Loadable[+T]
+  case object Unloaded extends Loadable[Nothing]
+  case object Loading extends Loadable[Nothing]
+  case class Loaded[T](value: T) extends Loadable[T]
+
+  case class State(allCinemas: Map[String, Map[String, Seq[Cinema]]], nearbyCinemas: Loadable[Seq[Cinema]])
 
   type Props = RouterCtl[Page]
 
@@ -24,17 +35,26 @@ object IndexPage {
 
   val component = ScalaComponent
     .builder[Props]("IndexPage")
-    .initialState(State(Map.empty))
+    .initialState(State(Map.empty, Unloaded))
     .renderBackend[Backend]
-    .componentDidMount(_.backend.loadCinemas())
+    .componentDidMount(_.backend.loadAllCinemas())
     .build
 
   class Backend($ : BackendScope[Props, State]) {
 
-    def loadCinemas() = Callback.future {
+    def loadAllCinemas() = Callback.future {
       for {
         cinemas <- Client[CinemaApi].getCinemas().call()
-      } yield $.setState(State(cinemas.toMap))
+      } yield $.modState(_.copy(allCinemas = cinemas.toMap))
+    }
+
+    def loadNearbyCinemas() = $.modState(_.copy(nearbyCinemas = Loading)) >> Callback.future{
+      val location = Promise[Position]()
+      navigator.geolocation.getCurrentPosition(p => location.success(p), err => location.failure(new Exception(err.message)))
+      for {
+        loc <- location.future
+        nearbyCinemas <- Client[CinemaApi].getNearbyCinemas(loc.coords.latitude, loc.coords.longitude).call()
+      } yield $.modState(_.copy(nearbyCinemas = Loaded(nearbyCinemas)))
     }
 
     def selectCinema(e: ReactEventFromInput) = {
@@ -49,11 +69,11 @@ object IndexPage {
 
       val cinemaDropdowns = Composite(
         for {
-          (typ, cinemas) <- state.cinemas.toVector
+          (typ, cinemas) <- state.allCinemas.toVector
         } yield
           <.div(
             <.select(
-              IndexStyle.selectWithOffset,
+              styles.selectWithOffset,
               ^.id := "cinemas",
               ^.`class` := ".flat",
               ^.onChange ==> selectCinema,
@@ -63,20 +83,41 @@ object IndexPage {
             )
           ))
 
+      val nearbyCinemas = <.div(
+        state.nearbyCinemas match {
+          case Unloaded =>
+            <.button(
+              styles.btn,
+              ^.onClick --> loadNearbyCinemas,
+              "Load Nearby Cinemas"
+            )
+          case Loading =>
+            <.div(^.color.white, ^.textAlign.center, <.i(^.`class` := s"fa fa-refresh fa-spin fa-5x"))
+          case Loaded(cinemas) =>
+            <.select(
+              styles.selectWithOffset,
+              ^.id := "nearby-cinemas",
+              ^.`class` := ".flat",
+              ^.onChange ==> selectCinema,
+              <.option(^.value := "?", ^.selected := "selected", ^.disabled := true, "Select from nearby cinemas..."),
+              Composite(for (c <- cinemas.toVector) yield <.option(^.value := c.id, c.name))
+            )
+
+        }
+      )
+
       <.div(
         ^.id := "indexPage",
-        <.div(IndexStyle.top, <.div(IndexStyle.title, "Fulfilmed"), <.div(IndexStyle.blurb, "A better way to find the best films at your local UK cinema"), cinemaDropdowns),
         <.div(
-          IndexStyle.description,
-          ^.id := "description",
-          <.h3("What?"),
-          <.p(
-            "Fulfilmed lets you view the movies airing at your local cinema. It adds some features over your Cinema's standard website; inline movie ratings, sorting/filtering by rating, mark films as watched."),
-          <.h3("Why?"),
-          <.p(
-            "I want to easily, at a glance, figure out which film to go see at the cinema. I can't do that with my cinema's website - I have to google/research each film individually. "),
-          <.h3("What's next?"),
-          <.p("Currently only Cineworld and Odeon cinemas are supported; I may add more. Beyond that, I want to receive notifications about upcoming high rated films.")
+          styles.top,
+          <.div(styles.title, "Fulfilmed"),
+          <.div(styles.blurb, "See films showing at your local cinema, with inline movie ratings and the ability to sort by rating."),
+          nearbyCinemas,
+          cinemaDropdowns
+        ),
+        <.div(
+          styles.description,
+          ^.id := "description"
         )
       )
     }

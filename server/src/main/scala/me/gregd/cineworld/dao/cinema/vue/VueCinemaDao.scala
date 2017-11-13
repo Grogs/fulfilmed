@@ -1,33 +1,41 @@
 package me.gregd.cineworld.dao.cinema.vue
 
-import java.text.SimpleDateFormat
 import java.time.format.DateTimeFormatter
-import java.time.{LocalDate, LocalTime, ZoneId}
+import java.time.{LocalDate, LocalTime}
 import javax.inject.Inject
 
 import me.gregd.cineworld.dao.cinema.CinemaDao
 import me.gregd.cineworld.dao.cinema.vue.raw.VueRepository
 import me.gregd.cineworld.dao.cinema.vue.raw.model.listings.Showings
 import me.gregd.cineworld.dao.movies.MovieDao
-import me.gregd.cineworld.domain.{Cinema, Film, Movie, Performance}
+import me.gregd.cineworld.domain._
 import me.gregd.cineworld.util.Clock
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class VueCinemaDao @Inject() (vueRepository: VueRepository, imdb: MovieDao, clock: Clock) extends CinemaDao {
+class VueCinemaDao @Inject()(vueRepository: VueRepository, imdb: MovieDao, clock: Clock) extends CinemaDao {
 
   private val timeFormat = DateTimeFormatter ofPattern "h:m a"
 
   def retrieveCinemas(): Future[Seq[Cinema]] = {
-    vueRepository.retrieveCinemas().map( raw =>
-      for { c <- raw } yield Cinema(c.id, c.search_term)
-    )
+    val res = vueRepository
+      .retrieveCinemas()
+      .map(raw =>
+        for { c <- raw } yield {
+          vueRepository
+            .retrieveLocation(c)
+            .map(loc => {
+              val coordinatesOpt = loc.map { case (lat, long) => Coordinates(lat, long) }
+              Cinema(c.id, "Vue", c.search_term, coordinatesOpt)
+            })
+      })
+
+    res.map(Future.sequence(_)).flatten
   }
 
   def retrieveMoviesAndPerformances(cinemaId: String, dateRaw: String): Future[Map[Movie, List[Performance]]] = {
     vueRepository.retrieveListings(cinemaId).flatMap { raw =>
-
       val date = LocalDate.parse(dateRaw)
 
       val converted = for {
@@ -55,8 +63,7 @@ class VueCinemaDao @Inject() (vueRepository: VueRepository, imdb: MovieDao, cloc
       t <- s.times
       time = LocalTime.parse(t.time, timeFormat)
       if !isStale(time)
-    } yield
-      Performance(t.time, available = true, t.screen_type, urlBuilder(t.session_id), Option(s.date_time))
+    } yield Performance(t.time, available = true, t.screen_type, urlBuilder(t.session_id), Option(s.date_time))
 
   }
 }

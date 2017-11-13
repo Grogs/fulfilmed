@@ -39,7 +39,7 @@ class CinemaServiceTest extends FunSuite with ScalaFutures with Matchers {
   val cinemaService = new CinemaService(movieDao, cineworldDao, vueDao, clock)
 
 
-  test("testGetMoviesAndPerformances") {
+  test("getMoviesAndPerformances") {
 
     val res = cinemaService.getMoviesAndPerformances("1010882", "today").futureValue.toSeq
 
@@ -50,4 +50,24 @@ class CinemaServiceTest extends FunSuite with ScalaFutures with Matchers {
     performances.size shouldBe 4
   }
 
+  test("getCinemas") {
+
+    val res = cinemaService.getCinemas().futureValue.toMap
+
+    res.keys.toList shouldBe List("Cineworld", "Vue")
+
+    val cineworld = res("Cineworld")
+    val vue = res("Vue")
+
+    cineworld.size shouldBe 2
+    vue.size shouldBe 2
+  }
+
+  test("getNearbyCinemas") {
+
+    val res = cinemaService.getNearbyCinemas(50,0).futureValue
+    val nearbyCinemaNames = res.map(_.name)
+
+    nearbyCinemaNames shouldBe Seq("Cineworld - Brighton (90.7 km)", "Cineworld - Eastbourne (91.3 km)", "Cineworld - Chichester (107.8 km)", "Cineworld - Isle Of Wight (120.1 km)", "Cineworld - Crawley (125.3 km)", "Cineworld - Whiteley (132.4 km)", "Cineworld - Southampton (140.3 km)", "Cineworld - Ashford (143.1 km)", "Cineworld - Aldershot (149.2 km)", "Cineworld - Bromley (156.5 km)")
+  }
 }

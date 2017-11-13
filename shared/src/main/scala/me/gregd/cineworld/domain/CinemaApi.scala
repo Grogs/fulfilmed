@@ -7,7 +7,9 @@ trait CinemaApi {
   type Chain = String
   type Grouping = String
 
-  def getCinemas(): Future[Seq[(Chain, Map[Grouping, Seq[Cinema]])]]
+  def getCinemas(): Future[Map[Chain, Map[Grouping, Seq[Cinema]]]]
+
+  def getNearbyCinemas(lat: Double, long: Double): Future[Seq[Cinema]]
 
   def getMoviesAndPerformances(cinemaId: String, date: String): Future[Map[Movie, List[Performance]]]
 

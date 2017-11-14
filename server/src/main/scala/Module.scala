@@ -5,9 +5,10 @@ import javax.inject.Inject
 import com.google.inject.AbstractModule
 import com.typesafe.config.ConfigFactory
 import fulfilmed.BuildInfo
-import me.gregd.cineworld.Cache
+import me.gregd.cineworld.{Cache, CinemaService}
 import me.gregd.cineworld.config.values._
 import me.gregd.cineworld.dao.movies.RatingsCache
+import me.gregd.cineworld.domain.CinemaApi
 import me.gregd.cineworld.util.{Clock, FileCache, RealClock}
 import monix.execution.Scheduler
 import play.api.Mode.Dev
@@ -44,6 +45,7 @@ class Module(environment: Environment, configuration: Configuration) extends Abs
 
   val ratingsCache = new RatingsCache(collection.mutable.Map())
   override def configure(): Unit = {
+    bind(classOf[CinemaApi]).to(classOf[CinemaService])
     bind(classOf[OmdbKey]).toInstance(OmdbKey(prop("api-keys.omdb")))
     bind(classOf[TmdbKey]).toInstance(TmdbKey(prop("api-keys.tmdb")))
     bind(classOf[CineworldUrl]).toInstance(CineworldUrl(prop("base-urls.cineworld")))

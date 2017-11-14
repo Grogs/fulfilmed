@@ -6,7 +6,7 @@ import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.movies.Movies
 import me.gregd.cineworld.dao.ratings.Ratings
-import me.gregd.cineworld.domain.{CinemaApi, Movie}
+import me.gregd.cineworld.domain.{Cinema, CinemaApi, Coordinates, Movie}
 import play.api.libs.json.Json
 import play.api.mvc.InjectedController
 
@@ -16,6 +16,8 @@ import scala.concurrent.Future
 class DebugController @Inject()(tmdb: TheMovieDB, movies: Movies, ratingService: Ratings, cinemaApi: CinemaApi) extends InjectedController with LazyLogging {
 
   implicit val movieFormat = Json.format[Movie]
+  implicit val coordinatesFormat = Json.format[Coordinates]
+  implicit val cinemaFormat = Json.format[Cinema]
 
   def tmdbNowPlaying() = Action.async(
     tmdb.fetchNowPlaying().map( nowPlaying =>

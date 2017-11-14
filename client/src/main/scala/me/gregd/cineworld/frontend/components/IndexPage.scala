@@ -64,11 +64,9 @@ object IndexPage {
     }
 
     def loadNearbyCinemas() = $.modState(_.copy(nearbyCinemas = Loading)) >> Callback.future {
-      val location = Promise[Position]()
-      navigator.geolocation.getCurrentPosition(p => location.success(p), err => location.failure(new Exception(err.message)))
       for {
-        loc <- location.future
-        nearbyCinemas <- Client[CinemaApi].getNearbyCinemas(loc.coords.latitude, loc.coords.longitude).call()
+        userLocation <- Geolocation.getCurrentPosition()
+        nearbyCinemas <- Client[CinemaApi].getNearbyCinemas(userLocation).call()
       } yield $.modState(_.copy(nearbyCinemas = Loaded(nearbyCinemas)))
     }
 

@@ -36,8 +36,8 @@ class CinemaService @Inject()(movieDao: MovieDao, cineworld: CineworldCinemaDao,
     case other => other
   }
 
-  override def getNearbyCinemas(lat: Double, long: Double) = {
-    def distance(c: Cinema): Double = c.coordinates.map(c => haversine(lat, long, c.lat, c.long)).getOrElse(Double.MaxValue)
+  override def getNearbyCinemas(coordinates: Coordinates) = {
+    def distance(c: Cinema): Double = c.coordinates.map(c => haversine(coordinates, c)).getOrElse(Double.MaxValue)
     val allCinemas = Future.sequence(List(cineworld.retrieveCinemas(), vue.retrieveCinemas()))
     allCinemas.map(allCinemas =>
       for {
@@ -51,11 +51,11 @@ class CinemaService @Inject()(movieDao: MovieDao, cineworld: CineworldCinemaDao,
 
   val R = 6372.8  //radius in km
 
-  def haversine(lat1:Double, lon1:Double, lat2:Double, lon2:Double)={
-    val dLat=(lat2 - lat1).toRadians
-    val dLon=(lon2 - lon1).toRadians
+  def haversine(pos1: Coordinates, pos2: Coordinates)={
+    val dLat=(pos2.lat - pos1.lat).toRadians
+    val dLon=(pos2.long - pos1.long).toRadians
 
-    val a = pow(sin(dLat/2),2) + pow(sin(dLon/2),2) * cos(lat1.toRadians) * cos(lat2.toRadians)
+    val a = pow(sin(dLat/2),2) + pow(sin(dLon/2),2) * cos(pos1.lat.toRadians) * cos(pos2.lat.toRadians)
     val c = 2 * asin(sqrt(a))
     R * c
   }

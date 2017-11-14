@@ -12,6 +12,7 @@ import me.gregd.cineworld.dao.cinema.cineworld.raw.CineworldRepository
 import me.gregd.cineworld.dao.cinema.vue.VueCinemaDao
 import me.gregd.cineworld.dao.cinema.vue.raw.VueRepository
 import me.gregd.cineworld.dao.movies.Movies
+import me.gregd.cineworld.domain.Coordinates
 import me.gregd.cineworld.util.FixedClock
 import monix.execution.Scheduler
 import org.scalatest.concurrent.ScalaFutures
@@ -65,7 +66,7 @@ class CinemaServiceTest extends FunSuite with ScalaFutures with Matchers {
 
   test("getNearbyCinemas") {
 
-    val res = cinemaService.getNearbyCinemas(50,0).futureValue
+    val res = cinemaService.getNearbyCinemas(Coordinates(50,0)).futureValue
     val nearbyCinemaNames = res.map(_.name)
 
     nearbyCinemaNames shouldBe Seq("Cineworld - Brighton (90.7 km)", "Cineworld - Eastbourne (91.3 km)", "Cineworld - Chichester (107.8 km)", "Cineworld - Isle Of Wight (120.1 km)", "Cineworld - Crawley (125.3 km)", "Cineworld - Whiteley (132.4 km)", "Cineworld - Southampton (140.3 km)", "Cineworld - Ashford (143.1 km)", "Cineworld - Aldershot (149.2 km)", "Cineworld - Bromley (156.5 km)")

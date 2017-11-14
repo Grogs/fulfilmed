@@ -6,13 +6,14 @@ import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.movies.Movies
 import me.gregd.cineworld.dao.ratings.Ratings
-import me.gregd.cineworld.domain.Movie
+import me.gregd.cineworld.domain.{CinemaApi, Movie}
 import play.api.libs.json.Json
 import play.api.mvc.InjectedController
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-class DebugController @Inject()(tmdb: TheMovieDB, movies: Movies, ratingService: Ratings) extends InjectedController with LazyLogging {
+class DebugController @Inject()(tmdb: TheMovieDB, movies: Movies, ratingService: Ratings, cinemaApi: CinemaApi) extends InjectedController with LazyLogging {
 
   implicit val movieFormat = Json.format[Movie]
 
@@ -38,5 +39,18 @@ class DebugController @Inject()(tmdb: TheMovieDB, movies: Movies, ratingService:
     ratingService.fetchRatings(imdbId).map( r =>
       Ok(Json.toJson(r))
     )
+  )
+
+  def cinemas() = Action.async(
+    cinemaApi.getCinemas().map( cinemas =>
+      Ok(Json.toJson(cinemas))
+    )
+  )
+
+  def warmup() = Action.async(
+    Future.sequence(Seq(
+      movies.allMoviesCached(),
+      cinemaApi.getCinemas()
+    )).map(_ => Ok("Movies and cinema caches are populated."))
   )
 }

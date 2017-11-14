@@ -1,6 +1,6 @@
 package me.gregd.cineworld.dao.cinema.vue.raw
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
 import me.gregd.cineworld.Cache
 import me.gregd.cineworld.config.values.VueUrl
@@ -16,6 +16,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import scalacache.memoization._
 
+@Singleton
 class VueRepository @Inject()(ws: WSClient, cache: Cache, baseUrl: VueUrl) {
 
   private implicit val _ = cache.scalaCache

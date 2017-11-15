@@ -2,11 +2,15 @@ package me.gregd.cineworld.frontend.components.film
 
 import scalacss.Defaults._
 import scalacss.internal.Attr
+import scalacss.internal.Pseudo.Custom
 import scalacss.internal.ValueT.TypedAttrBase
 
 object FilmsStyle extends StyleSheet.Inline {
 
   import dsl._
+
+  val scrollBarBackground = Custom("::-webkit-scrollbar", PseudoType.Element)
+  val scrollBarThumb = Custom("::-webkit-scrollbar-thumb", PseudoType.Element)
 
   private object webkitImageMask extends TypedAttrBase {
     override val attr = Attr.real("-webkit-mask-image")
@@ -15,7 +19,7 @@ object FilmsStyle extends StyleSheet.Inline {
   //  def textShadow[X, Y, Blur](offsetX: Length[X], offsetY: Length[Y], blurRadius: Length[Blur], color: Color) =
 //    Attrs.textShadow := List[ {def value: scalacss.Value}](offsetX, offsetY, blurRadius, color).map(_.value).mkString(" ")
 
-  val filmListContainer= style(
+  val filmListContainer = style(
     textAlign.center,
     margin(8.px)
   )
@@ -23,7 +27,7 @@ object FilmsStyle extends StyleSheet.Inline {
     backgroundColor(Color("#111")),
     margin(0.px)
   )
-  val attribution= style(
+  val attribution = style(
     color(Color("#999")),
     fontFamily :=! "HelveticaNeue, Verdana, Arial, sans-serif",
     textAlign.center,
@@ -51,7 +55,6 @@ object FilmsStyle extends StyleSheet.Inline {
     backgroundColor(Color("#640F0F"))
   )
 
-
   /*-----  FILM CARD CSS ------*/
   //TODO Do we need this?
   val label = style(
@@ -63,7 +66,6 @@ object FilmsStyle extends StyleSheet.Inline {
   )
 
   /* Film card styling */
-
 
 //  a { color(white) } TODO
 //  val `.film-container:hover`= style( TODO
@@ -79,7 +81,7 @@ object FilmsStyle extends StyleSheet.Inline {
     display.inlineBlock,
     transition := "all ease 0.2s"
   )
-  val filmTitle= style(
+  val filmTitle = style(
     fontFamily :=! "\"HelveticaNeue\", \"Helvetica Neue\", Helvetica, Arial, \"Lucida Grande\", sans-serif",
     fontWeight.bold,
     fontSize(2.2.em),
@@ -101,14 +103,14 @@ object FilmsStyle extends StyleSheet.Inline {
     left(0.px)
   )
   val filmInfo = filmPosition + style(
-    backgroundColor(rgba(0,0,0,0.5)),
+    backgroundColor(rgba(0, 0, 0, 0.5)),
     zIndex(1)
   )
 //  val `.film`= style(
   //    backgroundColor(rgba(0,0,0,0.5)),
   //    zIndex(-9)
   //  )
-  val `.threedee.film`= style(
+  val `.threedee.film` = style(
     background := "url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADYAAAA2CAYAAACMRWrdAAAFOUlEQVRoBd2YX0xbdRTHvzR1oxIQJgwLwrBDZBpA2QxqNiLzyZh4iWHZgjXRB9k0i+CLBBP2UJOZYQyMB4M8LdqZmDXL8MEYF7dk7AEisFCiNEyYLAGyMkCB0NYx6v3d3nv7621/7e2fu/75JfT379zzOx/Ouefce7O+A97JAn4EoOf/Mqbp3vN6L3uB4zzRdsZQ8SA6ApOJcAJYJsJleb18IFLt+6yskPdcIS+TS8nFM9SZu1DMNSKneBc8s2O439sJlz0ejcAdxeVBYGRfM7haM8qtX6OsZq/CDDeWL3Rh5oM+xbr6qRJMDkVaBeueu88LbdCC0Y6fOYzCICiiJBtF7/fihYsd0WpkyocEI9KawA2dwkRzP1y8/s3hH2A/eRJ/XhjGA9G8/FYLjGZxEmcXMhRpnZqFJXWIznIDr3YfEVY8o/0Ye6Wd2lU3VBWKtKp4PJdjsaiq+ju2W/CIh+5+vgG7aANiHDNDkdYXE1zHEGq7u3Fo+pKvWMoKzahcWECFpUle0b1VhcfkWWIGEUORPkZ9WNai4t4kSsXk5xnuwVhjp6DKOO2CqTpbGLsco1hdfBx7j9bIYLQsETJ0tMHVNyjIh/uJOhRpZao91/QxCuWMvoGFQR8U0bV0/Ctsig9vhuoGlFJQwDxmT/tlcy7aUd/7LWqGumgzVI1VhSKtSRVcnvisxl+4s3gd96yUBvsZzFinxIVtuBadeOjewJbjGux1FVgTCzWBerG1RpDLe/ts1HBRg5GTIsLd+VdO4brcp4MSiGdmWQTTY9N6AiOGPNw68AY2QkCJgogWLiawiHD2Tjhn3T6bcutRGVB4OZSffk2yF7tNdfKYDGhPBWzwk2jgYgYjh4bznOPDQaEQE7mC1l4c+tsO028jeGn9CkpLfMmD7LmmJ0kntFBQ/9h6MDfqlERUw0WVFWXtigErWxZ3XcLrZ1vkjKe4DFgbxu97GvEfvxEKav2nzzHFfSlcZhxfham+QFax9MVRzJ25Ls+VWTEhYEQ7C66QO4eXv/kIT5YEvht4HL/gjwNvCl6NBCVZX/aXC+X7RW+7JzBhOChHhWZgYeH4zQJzBwoO1/GJZB2bN69gw+r7b6uFEuCazqP+2icwiKQr/c1wtA8JM03ByAlMz/F7gT6LHH6CxQE/HKr4e7RIVLRu+xRTx3yvOkqwuJJHwJniJFxCoV95ovJUqIP4NcNz1Ywdfx1lCsSyEQnOMDAuF19J/5rNnyiktaCea0Y+5fbN8ZtBItJCwj0mKQ4H5zzVi6VF+qOYG1vTI9KljL4W5efNVIbdxtYk+3uCZmDEOjacFZOlLRRcNkq7f4XpHMeAAopuXEXZPv+nz535n3G3L0lg4eGGFHB6GD+zoXKgTQHHocy+iqoj8lM1v7+GuXYOOwpJepqwOkYrDTVmZ0sOdQs2GEv83niwOItVxzx0RfuQX7OfCj+ieRtLPS2Y6/SleeksZVZ8ZGDEgGjgJIMDezcPdSIIisgkFYwYwIZrQtWIFaaGEiIW1B46J3C77SBWAh0lyyUdjFjChgOe4D+mGt/lkP/sU9Drt+G5exsrlwew3McgEtFSAiwSHFWqRLMjd0owTdN9OHPYpSDOj7LioUkDI+drCZdUMC3hkg6mFVxKgGkBlzJgiYZLKbBEwqUcWKLgUhIsEXApCxYvXEqDxQOX8mCxwqUFWCxwj/RFkxgYb2O98ij1po3HJMNZD87SvtSnHRgxXA1cWoKpgUtbsEhwaQ0WDi7twVhwGQEWCi7t6hiBCNekOpdxYASawP0PmNyMBd3c8EIAAAAASUVORK5CYII=') no-repeat 100% 0,  rgba(0,0,0,0.5)",
     right(0.px)
   )
@@ -116,7 +118,7 @@ object FilmsStyle extends StyleSheet.Inline {
     filter := "blur(1.4px)",
     transform := "translate3d(0, 0, 0)"
   )
-  val ratings= style(
+  val ratings = style(
     marginTop(30.px),
     textAlign.center
   )
@@ -127,7 +129,7 @@ object FilmsStyle extends StyleSheet.Inline {
     color(Color("#FFFFFF")),
     margin(0.3.em),
     display.inlineBlock,
-    unsafeChild("a") (
+    unsafeChild("a")(
       color.white
     )
   )
@@ -148,11 +150,23 @@ object FilmsStyle extends StyleSheet.Inline {
   )
   val times = style(
     margin(1.em, 1.em, 0.em, 1.em),
+    height(3.em),
     textAlign.left,
     overflowY.hidden,
     whiteSpace.nowrap,
     webkitImageMask :=! "-webkit-gradient(linear, 80% 0%, 99% 0%, from(rgba(0,0,0,1)), to(rgba(0,0,0,0)))",
-    paddingRight(1.1.em)
+    paddingRight(1.1.em),
+    &.&(scrollBarBackground)(
+      style(
+        backgroundColor.rgba(1, 1, 1, 0.5),
+        borderRadius(10.px),
+        height(8.px)
+      )),
+    &.&(scrollBarThumb)(
+      style(
+        backgroundColor.rgba(255, 255, 255, 0.7),
+        borderRadius(10.px)
+      ))
   )
   val time = style(
     fontFamily :=! "\"HelveticaNeue\", \"Helvetica Neue\", Helvetica, Arial, \"Lucida Grande\", sans-serif",
@@ -166,7 +180,5 @@ object FilmsStyle extends StyleSheet.Inline {
     display.inlineBlock,
     marginRight(0.5.em),
   )
-
-
 
 }

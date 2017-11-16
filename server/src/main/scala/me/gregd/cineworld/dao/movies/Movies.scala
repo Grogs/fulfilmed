@@ -64,6 +64,7 @@ class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with
     collapse(
       for {
         nowPlaying <- tmdb.fetchNowPlaying()
+        _ = logger.info("Fetched now playing")
       } yield
         for {
           tmdbMovie <- nowPlaying.distinct
@@ -71,8 +72,11 @@ class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with
         } yield
           for {
             alternateTitles <- tmdb.alternateTitles(tmdbId)
+            _ = logger.info(s"Fetched alternate titles for $tmdbId")
             imdbId <- tmdb.fetchImdbId(tmdbId)
+            _ = logger.info(s"Fetched IMDb ID for $tmdbId")
             ratingsResult <- imdbId.map(ratings.fetchRatings).getOrElse(Future.successful(RatingsResult(None, None, None, None)))
+            _ = logger.info(s"Fetched ratings for $tmdbId")
           } yield
             for {
               altTitle <- (tmdbMovie.title :: alternateTitles).distinct

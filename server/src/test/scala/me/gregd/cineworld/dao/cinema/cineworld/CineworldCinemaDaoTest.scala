@@ -19,7 +19,7 @@ import scala.concurrent.duration._
 
 class CineworldCinemaDaoTest extends FunSuite with ScalaFutures with Matchers with Eventually {
 
-  implicit val defaultPatienceConfig = PatienceConfig(Span(2000, Millis))
+  implicit val defaultPatienceConfig = PatienceConfig(Span(3000, Millis))
 
   val wsClient = AhcWSClient()(ActorMaterializer()(ActorSystem()))
   val tmdb = new TheMovieDB(TmdbKey(""), wsClient, Stubs.tmdb.baseUrl, NoOpCache.cache, Scheduler.global, TmdbRateLimit(1.second, 1000))

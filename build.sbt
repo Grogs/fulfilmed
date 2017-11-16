@@ -92,7 +92,7 @@ lazy val server = project.settings(
       s"docker run -d --name $app.$instance -p $exposeTo:9000 $image"
     }
 
-    def sleep(i:Int) = "echo 'Sleeping for 10 seconds for app startup' && sleep 5"
+    def sleep(i:Int) = "echo 'Sleeping before app startup' && sleep 15"
 
     def warmup(instance: Int) = List(
       s"echo 'Warming up instance $instance'",

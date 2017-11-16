@@ -1,0 +1,140 @@
+{
+  "adult": false,
+  "backdrop_path": "/2Qwb7EayKsD2cuB3I2u2k2VU3Lb.jpg",
+  "belongs_to_collection": {
+    "id": 295,
+    "name": "Pirates of the Caribbean Collection",
+    "poster_path": "/zT5UKFhq9nk97VGlBbAxlAK8UFN.jpg",
+    "backdrop_path": "/cnKAGbX1rDkAquF2V1wVkptHDJO.jpg"
+  },
+  "budget": 230000000,
+  "genres": [
+    {
+      "id": 12,
+      "name": "Adventure"
+    },
+    {
+      "id": 28,
+      "name": "Action"
+    },
+    {
+      "id": 14,
+      "name": "Fantasy"
+    },
+    {
+      "id": 35,
+      "name": "Comedy"
+    }
+  ],
+  "homepage": "http://pirates.disney.com/pirates-of-the-caribbean-dead-men-tell-no-tales",
+  "id": 166426,
+  "imdb_id": "tt1790809",
+  "original_language": "en",
+  "original_title": "Pirates of the Caribbean: Dead Men Tell No Tales",
+  "overview": "Thrust into an all-new adventure, a down-on-his-luck Capt. Jack Sparrow feels the winds of ill-fortune blowing even more strongly when deadly ghost sailors led by his old nemesis, the evil Capt. Salazar, escape from the Devil's Triangle. Jack's only hope of survival lies in seeking out the legendary Trident of Poseidon, but to find it, he must forge an uneasy alliance with a brilliant and beautiful astronomer and a headstrong young man in the British navy.",
+  "popularity": 145.620671,
+  "poster_path": "/xbpSDU3p7YUGlu9Mr6Egg2Vweto.jpg",
+  "production_companies": [
+    {
+      "name": "Walt Disney Pictures",
+      "id": 2
+    },
+    {
+      "name": "Jerry Bruckheimer Films",
+      "id": 130
+    },
+    {
+      "name": "Infinitum Nihil",
+      "id": 2691
+    },
+    {
+      "name": "Moving Picture Company (MPC)",
+      "id": 20478
+    }
+  ],
+  "production_countries": [
+    {
+      "iso_3166_1": "US",
+      "name": "United States of America"
+    }
+  ],
+  "release_date": "2017-05-23",
+  "revenue": 794191988,
+  "runtime": 129,
+  "spoken_languages": [
+    {
+      "iso_639_1": "en",
+      "name": "English"
+    }
+  ],
+  "status": "Released",
+  "tagline": "",
+  "title": "Pirates of the Caribbean: Dead Men Tell No Tales",
+  "video": false,
+  "vote_average": 6.6,
+  "vote_count": 3213,
+  "alternative_titles": {
+    "titles": [
+      {
+        "iso_3166_1": "GB",
+        "title": "Pirates of the Caribbean: Salazar's Revenge"
+      },
+      {
+        "iso_3166_1": "BG",
+        "title": "Карибски пирати: Мъртвите не говорят"
+      },
+      {
+        "iso_3166_1": "US",
+        "title": "Pirates of the Caribbean 5"
+      },
+      {
+        "iso_3166_1": "ES",
+        "title": "Piratas del Caribe La venganza de Salazar"
+      },
+      {
+        "iso_3166_1": "LT",
+        "title": "Karibų piratai. Salazaro kerštas"
+      },
+      {
+        "iso_3166_1": "NL",
+        "title": "Pirates of the Caribbean deel 5"
+      },
+      {
+        "iso_3166_1": "DE",
+        "title": "Fluch der Karibik 5 - Salazars Rache"
+      },
+      {
+        "iso_3166_1": "US",
+        "title": "Pirates of the Caribbean 5 - Dead Men Tell No Tales"
+      },
+      {
+        "iso_3166_1": "UA",
+        "title": "Пірати Карибського моря 5: Мерці не розповідають казки"
+      },
+      {
+        "iso_3166_1": "US",
+        "title": "Pirates of the Caribbean 5 - Dead Men Tell No Tales (2017)"
+      },
+      {
+        "iso_3166_1": "VN",
+        "title": "Cướp Biển Vùng Caribê 5: Salazar Báo Thù"
+      },
+      {
+        "iso_3166_1": "VN",
+        "title": "Cướp Biển Vùng Caribê 5: Salazar Báo Thù 2017"
+      },
+      {
+        "iso_3166_1": "DE",
+        "title": "Pirates of the Caribbean - Salazars Rache"
+      },
+      {
+        "iso_3166_1": "BR",
+        "title": "Piratas do Caribe 5 - A Vingança de Salazar"
+      },
+      {
+        "iso_3166_1": "BE",
+        "title": "Pirates des Caraïbes 5 - La Vengeance de Salazar"
+      }
+    ]
+  }
+}

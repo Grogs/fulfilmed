@@ -94,7 +94,7 @@ object FilmPageComponent {
       val attribution = <.div(FilmsStyle.attribution,
         "Powered by: ",
         <.a(^.href := "http://www.omdbapi.com/", "The OMDb API"), ", ",
-        <.a(^.href := "http://www.themoviedb.org/", "TheMovieDB"))
+        <.a(^.href := "http://www.themoviedb.org/", "TMDb"))
 
       <.div(^.id := "films", FilmsStyle.container,
         menu,

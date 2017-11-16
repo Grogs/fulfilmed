@@ -18,6 +18,7 @@ class TheMhovieDBTest extends FunSuite with Matchers with ScalaFutures with Inte
 
   test("fetch imdb id") {
     tmdb.fetchImdbId("419430").futureValue shouldBe Some("tt7777777")
+    tmdb.fetchImdbId("166426").futureValue shouldBe Some("tt1790809")
 //    tmdb.fetchImdbId("9999999999").futureValue shouldBe None
     //TODO Smoke test
   }
@@ -31,7 +32,7 @@ class TheMhovieDBTest extends FunSuite with Matchers with ScalaFutures with Inte
   test("Fetch alternate titles") {
     val altTitles = tmdb.alternateTitles("166426").futureValue
 
-      altTitles.size shouldBe 6
+      altTitles.size shouldBe 14 + 1
   }
 
   test("baseImageUrl") {

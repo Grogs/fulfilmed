@@ -16,8 +16,11 @@ object Main {
 
     val baseUrl = BaseUrl.fromWindowOrigin + "/"
 
+    var t0 = window.performance.now()
     IndexStyle.addToDocument()
     FilmsStyle.addToDocument()
+    var t1 = window.performance.now()
+    console.log(s"CSS rendering duration: ${t1 - t0}ms")
 
     val routerConfig = RouterConfigDsl[Page].buildConfig{ dsl =>
       import dsl._

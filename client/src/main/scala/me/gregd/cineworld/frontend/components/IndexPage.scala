@@ -4,6 +4,7 @@ import autowire._
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.component.Scala.Unmounted
 import japgolly.scalajs.react.extra.router.RouterCtl
+import japgolly.scalajs.react.vdom.PackageBase.VdomAttr
 import japgolly.scalajs.react.vdom.TagMod.Composite
 import japgolly.scalajs.react.vdom.html_<^._
 import me.gregd.cineworld.domain.{Cinema, CinemaApi}
@@ -25,7 +26,7 @@ import scalacss.ScalaCssReact.scalacssStyleaToTagMod
 
 object IndexPage {
   import me.gregd.cineworld.frontend.components.{IndexStyle => styles}
-  val label = "label".reactAttr
+  val label = VdomAttr("label")
 
   sealed trait Loadable[+T]
   case object Unloaded extends Loadable[Nothing]

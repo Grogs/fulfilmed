@@ -41,18 +41,14 @@ object Stubs {
             Source.fromResource(s"tmdb/now_playing-$page.json").mkString
           )
         )
-      } ~ (get & path("3" / "movie" / Segment / "alternative_titles")) { id =>
+      } ~ (get & path("3" / "movie" / LongNumber) & parameter('api_key) & parameter('append_to_response)) { (id, _, _) =>
         complete(
           HttpEntity(`application/json`,
             Try {
-              Source.fromResource(s"tmdb/alternate-titles-$id.json").mkString
-            }.getOrElse(s"""{"id":$id,"titles":[]}""")
-          )
-        )
-      } ~ (get & path("3" / "movie" / LongNumber) & parameter('api_key)) { (_, _) =>
-        complete(
-          HttpEntity(`application/json`,
-            """{"imdb_id":"tt7777777"}"""
+              Source.fromResource(s"tmdb/movie-$id.json").mkString
+            }.getOrElse{
+              """{"imdb_id":"tt7777777", "alternative_titles":{"titles":[]}}"""
+            }
           )
         )
       }

@@ -5,7 +5,7 @@ import javax.inject.{Inject, Singleton}
 import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.Cache
 import me.gregd.cineworld.config.values.{TmdbKey, TmdbRateLimit, TmdbUrl}
-import me.gregd.cineworld.dao.model.{NowShowingResponse, TmdbMovie}
+import me.gregd.cineworld.dao.model.{ImdbIdAndAltTitles, NowShowingResponse, TmdbMovie}
 import me.gregd.cineworld.util.RateLimiter
 import monix.execution.Scheduler
 import play.api.libs.json.{JsValue, Json}
@@ -18,8 +18,6 @@ import scalacache.memoization._
 
 @Singleton
 class TheMovieDB @Inject()(apiKey: TmdbKey, ws: WSClient, url: TmdbUrl, cache: Cache, scheduler: Scheduler, rateLimit: TmdbRateLimit) extends LazyLogging {
-
-  case class ImdbIdAndAltTitles(imdbId: Option[String], alternateTitles: List[String])
 
   private lazy implicit val _ = cache.scalaCache
 
@@ -72,6 +70,8 @@ class TheMovieDB @Inject()(apiKey: TmdbKey, ws: WSClient, url: TmdbUrl, cache: C
 }
 
 package model {
+
+  case class ImdbIdAndAltTitles(imdbId: Option[String], alternateTitles: List[String])
 
   import play.api.libs.json.OFormat
 

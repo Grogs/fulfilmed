@@ -92,12 +92,14 @@ lazy val server = project.settings(
       s"docker run -d --name $app.$instance -p $exposeTo:9000 $image"
     }
 
+    def sleep(i:Int) = "echo 'Sleeping for 10 seconds for app startup' && sleep 5"
+
     def warmup(instance: Int) = List(
       s"echo 'Warming up instance $instance'",
       s"curl --silent --fail --output /dev/null http://localhost:900$instance"
     ).mkString(" && ")
 
-    def deploy(instance: Int) = List(stop(_), remove(_), create(_), warmup(_)).map(step => step(instance)).mkString(" && ")
+    def deploy(instance: Int) = List(stop(_), remove(_), create(_), sleep(_), warmup(_)).map(step => step(instance)).mkString(" && ")
 
     val deployAllInstances = instances.map(deploy).mkString(" && ")
 

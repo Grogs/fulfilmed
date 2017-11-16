@@ -99,7 +99,7 @@ lazy val server = project.settings(
       s"curl --silent --fail --output /dev/null http://localhost:900$instance"
     ).mkString(" && ")
 
-    def deploy(instance: Int) = List(stop(_), remove(_), create(_), sleep(_), warmup(_)).map(step => step(instance)).mkString(" && ")
+    def deploy(instance: Int) = List(stop(_), remove(_), create(_)).map(step => step(instance)).mkString(" && ")
 
     val deployAllInstances = instances.map(deploy).mkString(" && ")
 

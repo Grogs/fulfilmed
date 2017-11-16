@@ -34,11 +34,11 @@ class TheMovieDB @Inject()(apiKey: TmdbKey, ws: WSClient, url: TmdbUrl, cache: C
   def fetchNowPlaying(): Future[Vector[TmdbMovie]] =
     Future.traverse(1 to 5)(fetchPage).map(_.flatten.toVector)
 
-  def fetchImdbId(tmdbId: String): Future[Option[String]] = memoize(1.day) {
+  def fetchImdbId(tmdbId: String): Future[Option[String]] = {
     fetchImdbIdAndAlternateTitles(tmdbId).map(_.imdbId)
   }
 
-  def alternateTitles(tmdbId: String): Future[List[String]] = memoize(1.day) {
+  def alternateTitles(tmdbId: String): Future[List[String]] = {
     fetchImdbIdAndAlternateTitles(tmdbId).map(_.alternateTitles)
   }
 

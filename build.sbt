@@ -57,6 +57,7 @@ lazy val server = project.settings(
     "io.monix" %% "monix" % "2.3.0",
     "com.vmunier" %% "scalajs-scripts" % "1.1.1",
     "com.github.cb372" %% "scalacache-memcached" % "0.10.0",
+    "com.github.davidmoten" % "rtree" % "0.8.0.2",
     ws,
     filters,
     guice,

@@ -41,13 +41,13 @@ object DeployPlugin extends AutoPlugin {
           s"curl --fail --output /dev/null http://localhost:900$instance/debug/warmup"
         ).mkString(" && ")
 
-      def deploy(instance: Int) = List(stop(_), remove(_), create(_)).map(step => step(instance)).mkString(" && ")
+      def deploy(instance: Int) = List(stop(_), remove(_), create(_), (_:Int)=>sleep, warmup(_)).map(step => step(instance)).mkString(" && ")
 
       val deployAll = instances.map(deploy).mkString(" && ")
 
       val warmupAll = instances.map(warmup).mkString(" && ")
 
-      val deployCmd = s"$pull && $deployAll && $sleep && $warmupAll"
+      val deployCmd = s"$pull && $deployAll && $warmupAll"
 
       val log = streams.value.log
 

@@ -35,7 +35,7 @@ object Stubs {
   object tmdb {
 
     val route: Route =
-      (get & path("3" / "movie" / "now_playing") & parameter('api_key, 'page)) { (_, page) =>
+      (get & path("3" / "movie" / ("now_playing" | "upcoming")) & parameter('api_key, 'page)) { (_, page) =>
         complete(
           HttpEntity(`application/json`,
             Source.fromResource(s"tmdb/now_playing-$page.json").mkString

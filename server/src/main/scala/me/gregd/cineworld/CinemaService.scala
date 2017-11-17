@@ -16,24 +16,25 @@ class CinemaService @Inject()(movieDao: MovieDao, cineworld: CineworldCinemaDao,
 
   override def getMoviesAndPerformances(cinemaId: String, dateRaw: String): Future[Map[Movie, List[Performance]]] = {
     //Relying on IDs not conflicting
-    for {
-      c <- cineworld.retrieveMoviesAndPerformances(cinemaId, parse(dateRaw))
-      v <- vue.retrieveMoviesAndPerformances(cinemaId, parse(dateRaw))
-    } yield c ++ v
+    Future
+      .sequence(
+        Seq(
+          cineworld.retrieveMoviesAndPerformances(cinemaId, parse(dateRaw)),
+          vue.retrieveMoviesAndPerformances(cinemaId, parse(dateRaw))
+        ))
+      .map(_.flatten.toMap)
   }
 
   override def getCinemas(): Future[Map[Chain, Map[Grouping, Seq[Cinema]]]] = {
     def isLondon(s: Cinema) = if (s.name startsWith "London - ") "London cinemas" else "All other cinemas"
     val allCinemas = Future.sequence(List(cineworld.retrieveCinemas(), vue.retrieveCinemas()))
-    allCinemas.map(all =>
-      all.flatten.groupBy(_.chain).mapValues(_.groupBy(isLondon))
-    )
+    allCinemas.map(all => all.flatten.groupBy(_.chain).mapValues(_.groupBy(isLondon)))
   }
 
   private def parse(s: String) = s match {
-    case "today" => clock.today().toString
+    case "today"    => clock.today().toString
     case "tomorrow" => (clock.today() plusDays 1).toString
-    case other => other
+    case other      => other
   }
 
   override def getNearbyCinemas(coordinates: Coordinates) = {
@@ -45,20 +46,18 @@ class CinemaService @Inject()(movieDao: MovieDao, cineworld: CineworldCinemaDao,
         name = cinema.name
         chain = cinema.chain
         dist = "%.1f".format(distance(cinema))
-      } yield cinema.copy(name = s"$chain - $name ($dist km)")
-    )
+      } yield cinema.copy(name = s"$chain - $name ($dist km)"))
   }
 
-  val R = 6372.8  //radius in km
+  val R = 6372.8 //radius in km
 
-  def haversine(pos1: Coordinates, pos2: Coordinates)={
-    val dLat=(pos2.lat - pos1.lat).toRadians
-    val dLon=(pos2.long - pos1.long).toRadians
+  def haversine(pos1: Coordinates, pos2: Coordinates) = {
+    val dLat = (pos2.lat - pos1.lat).toRadians
+    val dLon = (pos2.long - pos1.long).toRadians
 
-    val a = pow(sin(dLat/2),2) + pow(sin(dLon/2),2) * cos(pos1.lat.toRadians) * cos(pos2.lat.toRadians)
+    val a = pow(sin(dLat / 2), 2) + pow(sin(dLon / 2), 2) * cos(pos1.lat.toRadians) * cos(pos2.lat.toRadians)
     val c = 2 * asin(sqrt(a))
     R * c
   }
 
 }
-

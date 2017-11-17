@@ -20,7 +20,7 @@ class DebugController @Inject()(tmdb: TheMovieDB, movies: Movies, ratingService:
   implicit val cinemaFormat = Json.format[Cinema]
 
   def tmdbNowPlaying() = Action.async(
-    tmdb.fetchNowPlaying().map( nowPlaying =>
+    tmdb.fetchMovies().map(nowPlaying =>
       Ok(Json.toJson(nowPlaying))
     )
   )

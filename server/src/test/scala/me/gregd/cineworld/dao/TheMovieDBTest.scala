@@ -11,7 +11,7 @@ import play.api.libs.ws.ahc.AhcWSClient
 import stub.Stubs
 import scala.concurrent.duration._
 
-class TheMhovieDBTest extends FunSuite with Matchers with ScalaFutures with IntegrationPatience {
+class TheMovieDBTest extends FunSuite with Matchers with ScalaFutures with IntegrationPatience {
 
   val wsClient = AhcWSClient()(ActorMaterializer()(ActorSystem()))
   val tmdb = new TheMovieDB(TmdbKey(""), wsClient, Stubs.tmdb.baseUrl, NoOpCache.cache, Scheduler.global, TmdbRateLimit(1.second, 1000))
@@ -32,7 +32,7 @@ class TheMhovieDBTest extends FunSuite with Matchers with ScalaFutures with Inte
   test("Fetch alternate titles") {
     val altTitles = tmdb.alternateTitles("166426").futureValue
 
-      altTitles.size shouldBe 14 + 1
+    altTitles.size shouldBe 4
   }
 
   test("baseImageUrl") {
@@ -40,7 +40,7 @@ class TheMhovieDBTest extends FunSuite with Matchers with ScalaFutures with Inte
   }
 
   test("Fetch now playing") {
-    val actual = tmdb.fetchNowPlaying().futureValue
+    val actual = tmdb.fetchMovies().futureValue
     actual.size should be > 10
   }
 

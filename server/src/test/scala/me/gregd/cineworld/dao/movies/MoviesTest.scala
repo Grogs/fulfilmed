@@ -18,7 +18,7 @@ class MoviesTest extends FunSuite with ScalaFutures with Matchers with MockFacto
   val tmdb = stub[TheMovieDB]
   val ratings = stub[Ratings]
 
-  (tmdb.fetchNowPlaying _).when().returns(Future.successful(Vector(someTmdbMovie)))
+  (tmdb.fetchMovies _).when().returns(Future.successful(Vector(someTmdbMovie)))
   (tmdb.fetchImdbId _).when(*).onCall{(id: String) => id match {
     case "263115" => Future.successful(Some("tt3315342"))
     case _ => Future.successful(None)

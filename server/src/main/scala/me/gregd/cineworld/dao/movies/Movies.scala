@@ -63,7 +63,7 @@ class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with
   private def allMovies(): Future[Seq[Movie]] = {
     collapse(
       for {
-        nowPlaying <- tmdb.fetchNowPlaying()
+        nowPlaying <- tmdb.fetchMovies()
         _ = logger.info("Fetched now playing")
       } yield
         for {
@@ -72,14 +72,11 @@ class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with
         } yield
           for {
             alternateTitles <- tmdb.alternateTitles(tmdbId)
-            _ = logger.info(s"Fetched alternate titles for $tmdbId")
             imdbId <- tmdb.fetchImdbId(tmdbId)
-            _ = logger.info(s"Fetched IMDb ID for $tmdbId")
             ratingsResult <- imdbId.map(ratings.fetchRatings).getOrElse(Future.successful(RatingsResult(None, None, None, None)))
-            _ = logger.info(s"Fetched ratings for $tmdbId")
           } yield
             for {
-              altTitle <- (tmdbMovie.title :: alternateTitles).distinct
+              altTitle <- (tmdbMovie.title :: tmdbMovie.original_title :: alternateTitles).distinct
             } yield toMovie(tmdbMovie.copy(title = altTitle), imdbId, ratingsResult)
     )
   }
@@ -110,8 +107,14 @@ class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with
     if (allMovies.nonEmpty) {
       val matc = allMovies.maxBy(m => compareFunc(title, m.title))
       val weight = compareFunc(title, matc.title)
-      logger.debug(s"Best match for $title was  ${matc.title} ($weight) - ${if (weight > minWeight) "ACCEPTED" else "REJECTED"}")
-      if (weight > minWeight) Option(matc) else None
+      val accept = weight > minWeight
+      logger.debug(s"Best match for $title was  ${matc.title} ($weight) - ${if (accept) "ACCEPTED" else "REJECTED"}")
+      if (accept) {
+        Option(matc)
+      } else {
+        logger.info(s"No found found for '$title', nearest match scored $weight'")
+        None
+      }
     } else
       None
   }

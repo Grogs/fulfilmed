@@ -1,7 +1,7 @@
 lazy val commonSettings = Seq(
   organization := "me.gregd",
   version := "1.7",
-  scalaVersion := "2.12.4"
+  scalaVersion := "2.12.4",
 )
 
 resolvers += Resolver.sonatypeRepo("releases")
@@ -20,14 +20,14 @@ lazy val client = project.enablePlugins(ScalaJSPlugin, ScalaJSWeb).settings(
     "com.github.japgolly.scalajs-react" %%% "core" % "1.1.1",
     "com.github.japgolly.scalajs-react" %%% "extra" % "1.1.1",
     "com.github.japgolly.scalacss" %%% "core" % "0.5.3",
-    "com.github.japgolly.scalacss" %%% "ext-react" % "0.5.3"
+    "com.github.japgolly.scalacss" %%% "ext-react" % "0.5.3",
   ),
   jsDependencies ++= Seq(
     "org.webjars.bower" % "react" % "15.6.1" / "react-with-addons.js" minified "react-with-addons.min.js" commonJSName "React",
     "org.webjars.bower" % "react" % "15.6.1" / "react-dom.js" minified "react-dom.min.js" dependsOn "react-with-addons.js" commonJSName "ReactDOM",
-    "org.webjars.bower" % "react" % "15.6.1" / "react-dom-server.js" minified "react-dom-server.min.js" dependsOn "react-with-addons.js" commonJSName "ReactDOMServer"
+    "org.webjars.bower" % "react" % "15.6.1" / "react-dom-server.js" minified "react-dom-server.min.js" dependsOn "react-with-addons.js" commonJSName "ReactDOMServer",
   ),
-  (emitSourceMaps in fullOptJS) := true
+  (emitSourceMaps in fullOptJS) := true,
 ).dependsOn(sharedJs)
 
 
@@ -65,11 +65,11 @@ lazy val server = project.settings(
     "org.scalatest" %% "scalatest" % "3.0.4" % Test,
     "com.lihaoyi" %% "pprint" % "0.5.3" % Test,
     "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % Test,
-    "com.typesafe.akka" %% "akka-http" % "10.0.10" % Test
+    "com.typesafe.akka" %% "akka-http" % "10.0.10" % Test,
   ),
   libraryDependencies ++= Seq(
     "org.webjars" %% "webjars-play" % "2.6.2",
-    "org.webjars" % "font-awesome" % "4.7.0"
+    "org.webjars" % "font-awesome" % "4.7.0",
   ),
   compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value)
   .enablePlugins(PlayScala, GitVersioning, BuildInfoPlugin, DeployPlugin)
@@ -80,9 +80,9 @@ lazy val shared = crossProject.crossType(CrossType.Pure).settings(
   libraryDependencies ++= Seq(
     "com.lihaoyi" %%% "upickle" % "0.4.4",
     "com.lihaoyi" %%% "autowire" % "0.2.6",
-    "com.lihaoyi" %%% "scalatags" % "0.6.7"
+    "com.lihaoyi" %%% "scalatags" % "0.6.7",
   ),
-  commonSettings
+  commonSettings,
 ).jsConfigure(_ enablePlugins ScalaJSWeb)
 
 lazy val sharedJvm = shared.jvm

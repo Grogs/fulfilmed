@@ -1,10 +1,10 @@
 package me.gregd.cineworld.dao.ratings
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
 import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.Cache
-import me.gregd.cineworld.config.values.{OmdbKey, OmdbUrl}
+import me.gregd.cineworld.config.OmdbConfig
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
 
@@ -14,7 +14,8 @@ import scala.concurrent.duration._
 import scala.util.Try
 import scalacache.memoization._
 
-class Ratings @Inject()(ws: WSClient, cache: Cache, baseUrl: OmdbUrl, apiKey: OmdbKey) extends LazyLogging {
+@Singleton
+class Ratings @Inject()(ws: WSClient, cache: Cache, config: OmdbConfig) extends LazyLogging {
 
   lazy implicit val _ = cache.scalaCache
   implicit val formats = Json.reads[OmdbRatings]
@@ -36,7 +37,7 @@ class Ratings @Inject()(ws: WSClient, cache: Cache, baseUrl: OmdbUrl, apiKey: Om
   }
 
   private def curlFromRemote(id: String): Future[String] = memoize(1.day) {
-    ws.url(s"${baseUrl.value}/?i=$id&apikey=${apiKey.key}")
+    ws.url(s"${config.baseUrl}/?i=$id&apikey=${config.apiKey}")
       .get()
       .map(_.body)
   }

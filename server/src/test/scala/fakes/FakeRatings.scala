@@ -1,11 +1,11 @@
 package fakes
 
-import me.gregd.cineworld.config.values.{OmdbKey, OmdbUrl}
+import me.gregd.cineworld.config.OmdbConfig
 import me.gregd.cineworld.dao.ratings.{Ratings, RatingsResult}
 
 import scala.concurrent.Future
 
-object FakeRatings extends Ratings(null, NoOpCache.cache, OmdbUrl(""), OmdbKey("")) {
+object FakeRatings extends Ratings(null, NoOpCache.cache, OmdbConfig("","")) {
 
   val someRatingAndVotes = RatingsResult(Some(6.9), Some(1337), None, None)
 

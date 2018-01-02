@@ -12,7 +12,7 @@ import stub.Stubs._
 class CineworldRepositoryTest extends FunSuite with ScalaFutures with IntegrationPatience with Matchers {
 
   val wsClient = AhcWSClient()(ActorMaterializer()(ActorSystem()))
-  val cineworld = new CineworldRepository(wsClient, NoOpCache.cache, Stubs.cineworld.baseUrl)
+  val cineworld = new CineworldRepository(wsClient, NoOpCache.cache, Stubs.cineworld.config)
 
   test("retrieveCinemas") {
     val cinemas = cineworld.retrieveCinemas().futureValue

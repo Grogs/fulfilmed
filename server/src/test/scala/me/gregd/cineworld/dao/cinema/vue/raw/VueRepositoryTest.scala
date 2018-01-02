@@ -12,7 +12,7 @@ import stub.Stubs
 class VueRepositoryTest extends FunSuite with ScalaFutures with IntegrationPatience with Matchers with JsonMatchers {
 
   val wsClient = AhcWSClient()(ActorMaterializer()(ActorSystem()))
-  val vue = new VueRepository(wsClient, NoOpCache.cache, Stubs.vue.baseUrl)
+  val vue = new VueRepository(wsClient, NoOpCache.cache, Stubs.vue.config)
 
   test("curlCinemas") {
     val response = vue.curlCinemas().futureValue

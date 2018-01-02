@@ -5,7 +5,6 @@ import java.time.LocalDate
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import fakes.{FakeRatings, NoOpCache}
-import me.gregd.cineworld.config.values.{TmdbKey, TmdbRateLimit}
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.cinema.cineworld.CineworldCinemaDao
 import me.gregd.cineworld.dao.cinema.cineworld.raw.CineworldRepository
@@ -21,18 +20,16 @@ import org.scalatest.{FunSuite, Matchers}
 import play.api.libs.ws.ahc.AhcWSClient
 import stub.Stubs
 
-import scala.concurrent.duration._
-
 class CinemaServiceTest extends FunSuite with ScalaFutures with Matchers {
 
   implicit val defaultPatienceConfig = PatienceConfig(Span(3000, Millis))
 
   val wsClient = AhcWSClient()(ActorMaterializer()(ActorSystem()))
-  val tmdb = new TheMovieDB(TmdbKey(""), wsClient, Stubs.tmdb.baseUrl, NoOpCache.cache, Scheduler.global, TmdbRateLimit(1.second, 1000))
-  val repo = new VueRepository(wsClient, NoOpCache.cache, Stubs.vue.baseUrl)
+  val tmdb = new TheMovieDB(wsClient, NoOpCache.cache, Scheduler.global, Stubs.tmdb.config)
+  val repo = new VueRepository(wsClient, NoOpCache.cache, Stubs.vue.config)
 
   val movieDao = new Movies(tmdb, FakeRatings)
-  val cineworldRaw = new CineworldRepository(wsClient, NoOpCache.cache, Stubs.cineworld.baseUrl)
+  val cineworldRaw = new CineworldRepository(wsClient, NoOpCache.cache, Stubs.cineworld.config)
   val cineworldDao = new CineworldCinemaDao(movieDao, tmdb, cineworldRaw)
   val clock = FixedClock(LocalDate.parse("2017-05-23"))
   val vueDao = new VueCinemaDao(repo, movieDao, clock)

@@ -1,14 +1,14 @@
 package me.gregd.cineworld.dao
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Inject,Singleton}
 
 import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.Cache
-import me.gregd.cineworld.config.values.{TmdbKey, TmdbRateLimit, TmdbUrl}
+import me.gregd.cineworld.config.TmdbConfig
 import me.gregd.cineworld.dao.model.{ImdbIdAndAltTitles, NowShowingResponse, TmdbMovie, TmdbTitle}
 import me.gregd.cineworld.util.RateLimiter
 import monix.execution.Scheduler
-import play.api.libs.json.{JsValue, Json, Reads}
+import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.{WSClient, WSResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -17,15 +17,15 @@ import scala.concurrent.duration._
 import scalacache.memoization._
 
 @Singleton
-class TheMovieDB @Inject()(apiKey: TmdbKey, ws: WSClient, url: TmdbUrl, cache: Cache, scheduler: Scheduler, rateLimit: TmdbRateLimit) extends LazyLogging {
+class TheMovieDB @Inject()(ws: WSClient, cache: Cache, scheduler: Scheduler, config: TmdbConfig) extends LazyLogging {
 
   private lazy implicit val _ = cache.scalaCache
 
-  private def key = apiKey.key
+  private def key = config.apiKey
 
-  private lazy val limiter = RateLimiter(rateLimit.duration, rateLimit.amount)
+  private lazy val limiter = RateLimiter(config.rateLimit.duration, config.rateLimit.count.value)
 
-  private def baseUrl = url.value
+  private def baseUrl = config.baseUrl
 
   val baseImageUrl: String = "http://image.tmdb.org/t/p/w300"
 

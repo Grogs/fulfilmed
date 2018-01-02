@@ -1,13 +1,13 @@
 package me.gregd.cineworld.dao.cinema.vue.raw
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Inject,Singleton}
 
 import me.gregd.cineworld.Cache
-import me.gregd.cineworld.config.values.VueUrl
+import me.gregd.cineworld.config.VueConfig
 import me.gregd.cineworld.dao.cinema.vue.raw.model.cinemas.{VueCinema, VueCinemasResp}
 import me.gregd.cineworld.dao.cinema.vue.raw.model.listings.VueListingsResp
-import org.json4s.{DefaultFormats, _}
 import org.json4s.native.JsonMethods._
+import org.json4s.{DefaultFormats, _}
 import play.api.http.HeaderNames.X_REQUESTED_WITH
 import play.api.libs.ws.WSClient
 
@@ -17,12 +17,12 @@ import scala.concurrent.duration._
 import scalacache.memoization._
 
 @Singleton
-class VueRepository @Inject()(ws: WSClient, cache: Cache, baseUrl: VueUrl) {
+class VueRepository @Inject()(ws: WSClient, cache: Cache, config: VueConfig) {
 
   private implicit val _ = cache.scalaCache
   private implicit val formats = DefaultFormats
 
-  private val base = baseUrl.value
+  private val base = config.baseUrl
   private val latLong = "http://maps.apple.com/\\?q=([-0-9.]+),([-0-9.]+)".r
 
   def retrieveCinemas(): Future[Seq[VueCinema]] = {

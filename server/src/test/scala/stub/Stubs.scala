@@ -3,17 +3,24 @@ package stub
 import akka.actor.ActorSystem
 import akka.event.Logging
 import akka.http.scaladsl.model.ContentTypes.{`application/json`, `text/html(UTF-8)`}
-import akka.http.scaladsl.model.HttpEntity
+import akka.http.scaladsl.model.{HttpEntity, HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.{ExceptionHandler, Route}
 import akka.http.scaladsl.server.directives.DebuggingDirectives
 import akka.stream.ActorMaterializer
-import me.gregd.cineworld.config.values.{CineworldUrl, OmdbUrl, TmdbUrl, VueUrl}
+import eu.timepit.refined.api.Refined
+import me.gregd.cineworld.config._
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import scala.io.Source
+import scala.io.{Codec, Source}
 import scala.util.Try
+import eu.timepit.refined.auto._
+import eu.timepit.refined.numeric._
+import eu.timepit.refined._
+import eu.timepit.refined.string.Url
+
+import scala.io.Codec.UTF8
 
 object Stubs {
 
@@ -24,13 +31,25 @@ object Stubs {
 
     import akka.http.scaladsl.Http
 
+    val exceptionHandler = ExceptionHandler{
+      case e =>
+        extractUri{ uri =>
+          println(s"Request to stubs failed. Url: $uri. Exception:")
+          e.printStackTrace()
+          complete(HttpResponse(StatusCodes.InternalServerError, entity = s"request failed to $uri"))
+        }
+    }
+
     val notFound: Route = DebuggingDirectives.logRequest(("Not found", Logging.ErrorLevel))(complete("Failed"))
 
-    val route: Route = tmdb.route ~ cineworld.route ~ vue.route ~ omdb.route ~ notFound
+    val route: Route = handleExceptions(exceptionHandler) {
+      tmdb.route ~ cineworld.route ~ vue.route ~ omdb.route ~ notFound
+    }
+
     Await.result(Http().bindAndHandle(route, "localhost", 0), 10.seconds)
   }
 
-  private lazy val serverBase = s"http://127.0.0.1:${server.localAddress.getPort}"
+  private lazy val serverBase = refineV[Url](s"http://127.0.0.1:${server.localAddress.getPort}").right.get
 
   object tmdb {
 
@@ -38,14 +57,14 @@ object Stubs {
       (get & path("3" / "movie" / ("now_playing" | "upcoming")) & parameter('api_key, 'page)) { (_, page) =>
         complete(
           HttpEntity(`application/json`,
-            Source.fromResource(s"tmdb/now_playing-$page.json").mkString
+            Source.fromResource(s"tmdb/now_playing-$page.json")(UTF8).mkString
           )
         )
       } ~ (get & path("3" / "movie" / LongNumber) & parameter('api_key) & parameter('append_to_response)) { (id, _, _) =>
         complete(
           HttpEntity(`application/json`,
             Try {
-              Source.fromResource(s"tmdb/movie-$id.json").mkString
+              Source.fromResource(s"tmdb/movie-$id.json")(UTF8).mkString
             }.getOrElse{
               """{"imdb_id":"tt7777777", "alternative_titles":{"titles":[]}}"""
             }
@@ -53,7 +72,7 @@ object Stubs {
         )
       }
 
-    lazy val baseUrl = TmdbUrl(serverBase)
+    lazy val config = TmdbConfig(serverBase, "", TmdbRateLimit(1.second, 1000))
   }
 
   object cineworld {
@@ -62,18 +81,18 @@ object Stubs {
       (get & path("getSites") & parameter('json, 'max)) { (_, max) =>
         complete(
           HttpEntity(`application/json`,
-            Source.fromResource("cineworld/cinemas.json").mkString
+            Source.fromResource("cineworld/cinemas.json")(UTF8).mkString
           )
         )
       } ~ (get & path("pgm-site") & parameter('si, 'max)) { (cinemaId, _) =>
         complete(
           HttpEntity(`application/json`,
-            Source.fromResource(s"cineworld/listings-$cinemaId.json").mkString
+            Source.fromResource(s"cineworld/listings-$cinemaId.json")(UTF8).mkString
           )
         )
       }
 
-    lazy val baseUrl = CineworldUrl(serverBase)
+    lazy val config = CineworldConfig(serverBase)
   }
 
   object vue {
@@ -82,14 +101,14 @@ object Stubs {
       (get & path("data" / "locations"/)) {
         complete(
           HttpEntity(`application/json`,
-            Source.fromResource("vue/locations.json").mkString
+            Source.fromResource("vue/locations.json")(UTF8).mkString
           )
         )
       } ~ (get & path("data" / "filmswithshowings" / LongNumber)) { id =>
         complete(
           id match {
             case 10032 => HttpEntity(`application/json`,
-              Source.fromResource("vue/filmswithshowings-10032.json").mkString
+              Source.fromResource("vue/filmswithshowings-10032.json")(UTF8).mkString
             )
             case 1010882 =>
               HttpEntity(`application/json`,"""{"Response":"False","Error":"Error getting data."}""")
@@ -99,13 +118,13 @@ object Stubs {
         complete {
           name match {
             case "bury-the-rock" =>
-              HttpEntity(`text/html(UTF-8)`, Source.fromResource("vue/bury-the-rock-whats-on.html").mkString)
+              HttpEntity(`text/html(UTF-8)`, Source.fromResource("vue/bury-the-rock-whats-on.html")(UTF8).mkString)
             case _ => HttpEntity(`text/html(UTF-8)`, "")
           }
         }
       }
 
-    lazy val baseUrl = VueUrl(serverBase)
+    lazy val config = VueConfig(serverBase)
   }
 
   object omdb {
@@ -113,13 +132,13 @@ object Stubs {
       (get & parameter('i, 'apikey)) { (imdbId, _) =>
         complete {
           HttpEntity(`application/json`,
-            Source.fromResource(s"omdb/$imdbId.json").mkString
+            Source.fromResource(s"omdb/$imdbId.json")(UTF8).mkString
           )
         }
       }
     }
 
-    lazy val baseUrl = OmdbUrl(serverBase)
+    lazy val config = OmdbConfig(serverBase, "")
   }
 
 }

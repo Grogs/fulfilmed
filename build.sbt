@@ -16,7 +16,7 @@ lazy val client = project.enablePlugins(ScalaJSPlugin, ScalaJSWeb).settings(
   scalaJSUseMainModuleInitializer in Test := false,
   scalaJSStage in Test := FastOptStage,
   libraryDependencies ++= Seq(
-    "org.scala-js" %%% "scalajs-dom" % "0.9.1",
+    "org.scala-js" %%% "scalajs-dom" % "0.9.4",
     "com.github.japgolly.scalajs-react" %%% "core" % "1.1.1",
     "com.github.japgolly.scalajs-react" %%% "extra" % "1.1.1",
     "com.github.japgolly.scalacss" %%% "core" % "0.5.3",

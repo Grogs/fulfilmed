@@ -11,7 +11,7 @@ addons:
 script:
 - sbt test
 before_deploy:
-- docker login -e $DOCKER_EMAIL -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+- docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 - chmod 600 deploy-key
 - mv deploy-key ~/.ssh/id_rsa
 deploy:

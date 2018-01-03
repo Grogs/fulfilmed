@@ -19,8 +19,6 @@ import scala.util.{Failure, Success}
 @Singleton
 class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with LazyLogging {
 
-  implicit val formats = DefaultFormats
-
   def toMovie(film: Film): Future[Movie] = {
     logger.debug(s"Creating movie from $film")
 

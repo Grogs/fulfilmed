@@ -17,8 +17,8 @@ import scalacache.memoization._
 @Singleton
 class Ratings @Inject()(ws: WSClient, cache: Cache, config: OmdbConfig) extends LazyLogging {
 
-  lazy implicit val _ = cache.scalaCache
-  implicit val formats = Json.reads[OmdbRatings]
+  private lazy implicit val _ = cache.scalaCache
+  private implicit val formats = Json.reads[OmdbRatings]
 
   def fetchRatings(imdbId: String): Future[RatingsResult] = {
     for {

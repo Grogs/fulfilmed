@@ -5,7 +5,9 @@ import me.gregd.cineworld.dao.ratings.{Ratings, RatingsResult}
 
 import scala.concurrent.Future
 
-object FakeRatings extends Ratings(null, NoOpCache.cache, OmdbConfig("","")) {
+import eu.timepit.refined.auto._
+
+object FakeRatings extends Ratings(null, NoOpCache.cache, OmdbConfig("http://dummy","")) {
 
   val someRatingAndVotes = RatingsResult(Some(6.9), Some(1337), None, None)
 

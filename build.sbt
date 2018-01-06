@@ -61,6 +61,7 @@ lazy val server = project.settings(
     "com.github.pureconfig" %% "pureconfig" % "0.8.0",
     "eu.timepit" %% "refined" % "0.8.6",
     "eu.timepit" %% "refined-pureconfig" % "0.8.6",
+    "com.beachape" %% "enumeratum" % "1.5.12",
     ws,
     filters,
     guice,

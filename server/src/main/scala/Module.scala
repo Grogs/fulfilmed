@@ -1,16 +1,18 @@
 import java.io.File
 import java.nio.file.Files
+import java.util.logging.LogManager
 
 import com.google.inject.AbstractModule
 import me.gregd.cineworld.config._
 import me.gregd.cineworld.domain.CinemaApi
-import me.gregd.cineworld.util.{Clock, FileCache, RealClock}
+import me.gregd.cineworld.util._
 import me.gregd.cineworld.{Cache, CinemaService}
 import monix.execution.Scheduler
 import play.api.Mode.Dev
 import play.api.{Configuration, Environment}
-
 import eu.timepit.refined.pureconfig.refTypeConfigConvert
+import org.slf4j.LoggerFactory
+import ch.qos.logback.classic.{Logger, LoggerContext}
 
 import scalacache.ScalaCache
 
@@ -34,6 +36,14 @@ class Module(environment: Environment, configuration: Configuration) extends Abs
 
   val scalaCache = Cache(ScalaCache(new FileCache(cacheLocation)))
 
+  val inMemoryLog = new InMemoryLog()
+
+  val inMemoryAppender = new InMemoryLogbackAppender(inMemoryLog)
+  inMemoryAppender.setContext(LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext])
+  inMemoryAppender.start()
+
+  LoggerFactory.getLogger("ROOT").asInstanceOf[Logger].addAppender(inMemoryAppender)
+
   val config = pureconfig.loadConfig[Config] match {
     case Left(failures) =>
       System.err.println(failures.toList.mkString("Failed to read config, errors:\n\t", "\n\t", ""))
@@ -42,6 +52,7 @@ class Module(environment: Environment, configuration: Configuration) extends Abs
   }
 
   override def configure(): Unit = {
+    bind(classOf[InMemoryLog]).toInstance(inMemoryLog)
     bind(classOf[OmdbConfig]).toInstance(config.omdb)
     bind(classOf[TmdbConfig]).toInstance(config.tmdb)
     bind(classOf[CineworldConfig]).toInstance(config.cineworld)

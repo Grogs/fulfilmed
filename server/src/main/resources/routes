@@ -9,5 +9,6 @@ GET         /debug/imdbid/*tmdbid         me.gregd.cineworld.DebugController.imd
 GET         /debug/ratings/*imdbid        me.gregd.cineworld.DebugController.ratings(imdbid)
 GET         /debug/cinemas                me.gregd.cineworld.DebugController.cinemas()
 GET         /debug/warmup                 me.gregd.cineworld.DebugController.warmup()
+GET         /debug/log                    me.gregd.cineworld.DebugController.log()
 
 GET         /assets/*file                 controllers.Assets.at(path="/public", file)

@@ -2,7 +2,7 @@ import java.io.File
 import java.nio.file.Files
 import java.util.logging.LogManager
 
-import com.google.inject.AbstractModule
+import com.google.inject.{AbstractModule, Provides}
 import me.gregd.cineworld.config._
 import me.gregd.cineworld.domain.CinemaApi
 import me.gregd.cineworld.util._
@@ -51,12 +51,13 @@ class Module(environment: Environment, configuration: Configuration) extends Abs
     case Right(conf) => conf
   }
 
+  @Provides def omdbConfig = config.omdb
+  @Provides def tmdbConfig = config.tmdb
+  @Provides def cineworldConfig = config.cineworld
+  @Provides def vueConfig = config.vue
+
   override def configure(): Unit = {
     bind(classOf[InMemoryLog]).toInstance(inMemoryLog)
-    bind(classOf[OmdbConfig]).toInstance(config.omdb)
-    bind(classOf[TmdbConfig]).toInstance(config.tmdb)
-    bind(classOf[CineworldConfig]).toInstance(config.cineworld)
-    bind(classOf[VueConfig]).toInstance(config.vue)
     bind(classOf[CinemaApi]).to(classOf[CinemaService])
     bind(classOf[Scheduler]).toInstance(monix.execution.Scheduler.global)
     bind(classOf[Clock]).toInstance(RealClock)

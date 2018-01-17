@@ -62,6 +62,7 @@ lazy val server = project.settings(
     "eu.timepit" %% "refined" % "0.8.6",
     "eu.timepit" %% "refined-pureconfig" % "0.8.6",
     "com.beachape" %% "enumeratum" % "1.5.12",
+    "com.softwaremill.macwire" %% "macros" % "2.3.0",
     ws,
     filters,
     guice,

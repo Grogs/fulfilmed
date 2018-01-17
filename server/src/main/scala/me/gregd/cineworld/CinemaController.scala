@@ -9,14 +9,14 @@ import me.gregd.cineworld.pages.Index
 import play.api.Environment
 import play.api.Mode._
 import play.api.libs.json.Json
-import play.api.mvc.InjectedController
+import play.api.mvc.{AbstractController, ControllerComponents}
 import upickle.Js
 import upickle.Js.Obj
 import upickle.default.{Reader, Writer}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class CinemaController @Inject() (env: Environment, cinemaService: CinemaService) extends InjectedController with LazyLogging {
+class CinemaController @Inject() (env: Environment, cinemaService: CinemaService, cc: ControllerComponents) extends AbstractController(cc) with LazyLogging {
 
   implicit val coordinatesFormat = Json.format[Coordinates]
   implicit val performanceFormat = Json.format[Performance]

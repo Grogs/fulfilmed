@@ -1,23 +1,20 @@
 package me.gregd.cineworld
 
-import java.security.MessageDigest
 import javax.inject.Inject
 
-import com.google.common.hash.Hashing
 import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.movies.Movies
 import me.gregd.cineworld.dao.ratings.Ratings
 import me.gregd.cineworld.domain.{Cinema, CinemaApi, Coordinates, Movie}
-import me.gregd.cineworld.util.{InMemoryLog, InMemoryLogbackAppender}
+import me.gregd.cineworld.util.InMemoryLog
 import play.api.libs.json.Json
-import play.api.mvc.{Action, InjectedController}
+import play.api.mvc.{AbstractController, Action, ControllerComponents}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class DebugController @Inject()(tmdb: TheMovieDB, movies: Movies, ratingService: Ratings, cinemaApi: CinemaApi, inMemoryLog: InMemoryLog)
-    extends InjectedController
+class DebugController @Inject()(tmdb: TheMovieDB, movies: Movies, ratingService: Ratings, cinemaApi: CinemaApi, inMemoryLog: InMemoryLog, cc: ControllerComponents) extends AbstractController(cc)
     with LazyLogging {
 
   implicit val movieFormat = Json.format[Movie]

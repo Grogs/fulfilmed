@@ -86,6 +86,7 @@ lazy val shared = crossProject.crossType(CrossType.Pure).settings(
     "com.lihaoyi" %%% "upickle" % "0.4.4",
     "com.lihaoyi" %%% "autowire" % "0.2.6",
     "com.lihaoyi" %%% "scalatags" % "0.6.7",
+    "com.github.japgolly.scalacss" %%% "core" % "0.5.3",
   ),
   commonSettings,
 ).jsConfigure(_ enablePlugins ScalaJSWeb)

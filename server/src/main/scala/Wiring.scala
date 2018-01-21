@@ -2,29 +2,27 @@ import java.io.File
 import java.nio.file.Files
 
 import ch.qos.logback.classic.{Logger, LoggerContext}
+import com.softwaremill.macwire._
 import me.gregd.cineworld.config._
+import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.cinema.cineworld.CineworldCinemaDao
+import me.gregd.cineworld.dao.cinema.cineworld.raw.CineworldRepository
 import me.gregd.cineworld.dao.cinema.vue.VueCinemaDao
+import me.gregd.cineworld.dao.cinema.vue.raw.VueRepository
 import me.gregd.cineworld.dao.movies.{MovieDao, Movies}
+import me.gregd.cineworld.dao.ratings.Ratings
 import me.gregd.cineworld.util._
 import me.gregd.cineworld.{Cache, CinemaController, CinemaService, DebugController}
 import monix.execution.Scheduler
 import org.slf4j.LoggerFactory
 import play.api.ApplicationLoader.Context
 import play.api.Mode.Dev
-import play.api.routing.Router
-import router.Routes
-import com.softwaremill.macwire._
-import me.gregd.cineworld.dao.TheMovieDB
-import me.gregd.cineworld.dao.cinema.cineworld.raw.CineworldRepository
-import me.gregd.cineworld.dao.cinema.vue.raw.VueRepository
 import play.api.libs.ws.ahc.AhcWSComponents
-import eu.timepit.refined.pureconfig.refTypeConfigConvert
-import me.gregd.cineworld.dao.ratings.Ratings
 import play.api.mvc.EssentialFilter
+import play.api.routing.Router
 import play.api.{Application, ApplicationLoader, BuiltInComponentsFromContext}
-import play.filters.headers.SecurityHeadersComponents
 import play.filters.hosts.AllowedHostsComponents
+import router.Routes
 
 import scalacache.ScalaCache
 
@@ -36,10 +34,9 @@ class Wiring(context: Context)
     extends BuiltInComponentsFromContext(context)
     with AhcWSComponents
     with controllers.AssetsComponents
-    with SecurityHeadersComponents
     with AllowedHostsComponents {
 
-  def httpFilters: Seq[EssentialFilter] = Seq(securityHeadersFilter, allowedHostsFilter)
+  def httpFilters: Seq[EssentialFilter] = Seq(allowedHostsFilter)
 
   implicit class asFiniteDuration(d: java.time.Duration) {
     def asScala = scala.concurrent.duration.Duration.fromNanos(d.toNanos)

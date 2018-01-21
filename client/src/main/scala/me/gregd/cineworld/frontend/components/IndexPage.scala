@@ -60,7 +60,7 @@ object IndexPage {
 
     def loadAllCinemas() = Callback.future {
       for {
-        cinemas <- Client[CinemaApi].getCinemas().call()
+        cinemas <- Client[CinemaApi].getCinemasGrouped().call()
       } yield $.modState(_.copy(allCinemas = Loaded(cinemas)))
     }
 

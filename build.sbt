@@ -71,6 +71,9 @@ lazy val server = project.settings(
     "com.lihaoyi" %% "pprint" % "0.5.3" % Test,
     "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % Test,
     "com.typesafe.akka" %% "akka-http" % "10.0.11" % Test,
+    //gcp deps
+    "com.google.cloud" % "google-cloud-nio" % "0.33.0-alpha",
+    "com.github.pathikrit" %% "better-files" % "3.2.0",
   ),
   libraryDependencies ++= Seq(
     "org.webjars" %% "webjars-play" % "2.6.3",

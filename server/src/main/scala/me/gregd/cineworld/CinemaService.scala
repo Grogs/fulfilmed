@@ -15,7 +15,7 @@ import scala.math._
 class CinemaService @Inject()(movieDao: MovieDao, cineworld: CineworldCinemaDao, vue: VueCinemaDao, clock: Clock) extends CinemaApi {
 
   private lazy val tree: Future[RTree[Cinema]] =
-    getCinemasFlat().map { cinemas =>
+    getCinemas().map { cinemas =>
       val coordsAndCinemas = for {
         cinema <- cinemas
         coordinates <- cinema.coordinates
@@ -51,13 +51,13 @@ class CinemaService @Inject()(movieDao: MovieDao, cineworld: CineworldCinemaDao,
       .map(_.flatten.toMap)
   }
 
-  override def getCinemas(): Future[Map[Chain, Map[Grouping, Seq[Cinema]]]] = {
+  override def getCinemasGrouped() = {
     def isLondon(s: Cinema) = if (s.name startsWith "London - ") "London cinemas" else "All other cinemas"
-    val allCinemas = getCinemasFlat()
+    val allCinemas = getCinemas()
     allCinemas.map(all => all.groupBy(_.chain).mapValues(_.groupBy(isLondon)))
   }
 
-  private def getCinemasFlat() =
+  override def getCinemas() =
     Future.sequence(List(cineworld.retrieveCinemas(), vue.retrieveCinemas())).map(_.flatten)
 
   private def parse(s: String) = s match {

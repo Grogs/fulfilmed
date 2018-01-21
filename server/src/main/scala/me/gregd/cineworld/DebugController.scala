@@ -1,6 +1,5 @@
 package me.gregd.cineworld
 
-import javax.inject.Inject
 
 import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.dao.TheMovieDB
@@ -14,7 +13,7 @@ import play.api.mvc.{AbstractController, Action, ControllerComponents}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class DebugController @Inject()(tmdb: TheMovieDB, movies: Movies, ratingService: Ratings, cinemaApi: CinemaApi, inMemoryLog: InMemoryLog, cc: ControllerComponents) extends AbstractController(cc)
+class DebugController(tmdb: TheMovieDB, movies: Movies, ratingService: Ratings, cinemaApi: CinemaApi, inMemoryLog: InMemoryLog, cc: ControllerComponents) extends AbstractController(cc)
     with LazyLogging {
 
   implicit val movieFormat = Json.format[Movie]

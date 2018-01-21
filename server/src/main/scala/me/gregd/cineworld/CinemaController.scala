@@ -1,7 +1,5 @@
 package me.gregd.cineworld
 
-import javax.inject.Inject
-
 import autowire.Core.Request
 import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.domain._
@@ -16,7 +14,7 @@ import upickle.default.{Reader, Writer}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class CinemaController @Inject() (env: Environment, cinemaService: CinemaService, cc: ControllerComponents) extends AbstractController(cc) with LazyLogging {
+class CinemaController(env: Environment, cinemaService: CinemaService, cc: ControllerComponents) extends AbstractController(cc) with LazyLogging {
 
   implicit val coordinatesFormat = Json.format[Coordinates]
   implicit val performanceFormat = Json.format[Performance]

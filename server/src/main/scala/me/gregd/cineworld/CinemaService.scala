@@ -1,6 +1,5 @@
 package me.gregd.cineworld
 
-import javax.inject.Inject
 
 import me.gregd.cineworld.dao.cinema.cineworld.CineworldCinemaDao
 import me.gregd.cineworld.dao.cinema.vue.VueCinemaDao
@@ -12,7 +11,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.math._
 
-class CinemaService @Inject()(movieDao: MovieDao, cineworld: CineworldCinemaDao, vue: VueCinemaDao, clock: Clock) extends CinemaApi {
+class CinemaService(movieDao: MovieDao, cineworld: CineworldCinemaDao, vue: VueCinemaDao, clock: Clock) extends CinemaApi {
 
   private lazy val tree: Future[RTree[Cinema]] =
     getCinemasFlat().map { cinemas =>

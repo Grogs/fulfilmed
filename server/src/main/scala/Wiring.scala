@@ -6,6 +6,7 @@ import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.mvc.EssentialFilter
 import play.api.routing.Router
 import play.api.{Application, ApplicationLoader, BuiltInComponentsFromContext}
+import play.filters.gzip.GzipFilterComponents
 import play.filters.hosts.AllowedHostsComponents
 import router.Routes
 
@@ -18,9 +19,12 @@ class Wiring(context: Context)
     with AppWiring
     with AhcWSComponents
     with controllers.AssetsComponents
-    with AllowedHostsComponents {
+    with AllowedHostsComponents
+    with GzipFilterComponents {
 
-  def httpFilters: Seq[EssentialFilter] = Seq(allowedHostsFilter)
+  lazy val loggingFilter: LoggingFilter = wire[LoggingFilter]
+
+  def httpFilters: Seq[EssentialFilter] = Seq(allowedHostsFilter, gzipFilter, loggingFilter)
 
   lazy val cinemaController: CinemaController = wire[CinemaController]
   lazy val debugController: DebugController = wire[DebugController]

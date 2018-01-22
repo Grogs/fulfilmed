@@ -1,6 +1,5 @@
 package me.gregd.cineworld.dao.movies
 
-import javax.inject.{Inject, Singleton}
 
 import com.typesafe.scalalogging.LazyLogging
 import info.debatty.java.stringsimilarity.SorensenDice
@@ -16,8 +15,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
-@Singleton
-class Movies @Inject()(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with LazyLogging {
+class Movies(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with LazyLogging {
 
   def toMovie(film: Film): Future[Movie] = {
     logger.debug(s"Creating movie from $film")

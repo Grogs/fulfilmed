@@ -1,6 +1,5 @@
 package me.gregd.cineworld.dao.ratings
 
-import javax.inject.{Inject, Singleton}
 
 import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.Cache
@@ -14,8 +13,7 @@ import scala.concurrent.duration._
 import scala.util.Try
 import scalacache.memoization._
 
-@Singleton
-class Ratings @Inject()(ws: WSClient, cache: Cache, config: OmdbConfig) extends LazyLogging {
+class Ratings(ws: WSClient, cache: Cache, config: OmdbConfig) extends LazyLogging {
 
   private lazy implicit val _ = cache.scalaCache
   private implicit val formats = Json.reads[OmdbRatings]

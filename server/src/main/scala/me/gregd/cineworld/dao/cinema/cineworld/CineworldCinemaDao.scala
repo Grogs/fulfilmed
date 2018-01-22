@@ -1,7 +1,6 @@
 package me.gregd.cineworld.dao.cinema.cineworld
 
 import java.time.LocalDate
-import javax.inject.{Inject, Singleton}
 
 import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.dao.TheMovieDB
@@ -14,8 +13,7 @@ import org.json4s._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-@Singleton
-class CineworldCinemaDao @Inject()(
+class CineworldCinemaDao(
     imdb: MovieDao,
     tmdb: TheMovieDB,
     dao: CineworldRepository

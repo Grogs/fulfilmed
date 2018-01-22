@@ -1,6 +1,5 @@
 package me.gregd.cineworld.dao
 
-import javax.inject.{Inject,Singleton}
 
 import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.Cache
@@ -16,8 +15,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import scalacache.memoization._
 
-@Singleton
-class TheMovieDB @Inject()(ws: WSClient, cache: Cache, scheduler: Scheduler, config: TmdbConfig) extends LazyLogging {
+class TheMovieDB(ws: WSClient, cache: Cache, scheduler: Scheduler, config: TmdbConfig) extends LazyLogging {
 
   private lazy implicit val _ = cache.scalaCache
 

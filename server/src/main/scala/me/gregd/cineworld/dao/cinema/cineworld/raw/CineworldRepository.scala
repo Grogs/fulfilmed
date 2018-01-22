@@ -1,6 +1,5 @@
 package me.gregd.cineworld.dao.cinema.cineworld.raw
 
-import javax.inject.{Inject,Singleton}
 
 import me.gregd.cineworld.Cache
 import me.gregd.cineworld.config.CineworldConfig
@@ -13,8 +12,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import scalacache.memoization._
 
-@Singleton
-class CineworldRepository @Inject()(ws: WSClient, cache: Cache, config: CineworldConfig) {
+class CineworldRepository(ws: WSClient, cache: Cache, config: CineworldConfig) {
 
   implicit val _ = cache.scalaCache
 

@@ -2,7 +2,6 @@ package me.gregd.cineworld.dao.cinema.vue
 
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalTime}
-import javax.inject.Inject
 
 import me.gregd.cineworld.dao.cinema.CinemaDao
 import me.gregd.cineworld.dao.cinema.vue.raw.VueRepository
@@ -14,7 +13,7 @@ import me.gregd.cineworld.util.Clock
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class VueCinemaDao @Inject()(vueRepository: VueRepository, imdb: MovieDao, clock: Clock) extends CinemaDao {
+class VueCinemaDao(vueRepository: VueRepository, imdb: MovieDao, clock: Clock) extends CinemaDao {
 
   private val timeFormat = DateTimeFormatter ofPattern "h:m a"
 

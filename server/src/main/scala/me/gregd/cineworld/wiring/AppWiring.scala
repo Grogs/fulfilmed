@@ -1,10 +1,7 @@
 package me.gregd.cineworld.wiring
 
-import java.io.File
-import java.nio.file.Files
-
 import ch.qos.logback.classic.{Logger, LoggerContext}
-import com.softwaremill.macwire.{Module, wire}
+import com.softwaremill.macwire.wire
 import me.gregd.cineworld.config.Config
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.cinema.cineworld.CineworldCinemaDao
@@ -17,18 +14,14 @@ import me.gregd.cineworld.util._
 import me.gregd.cineworld.{Cache, CinemaService}
 import monix.execution.Scheduler
 import org.slf4j.LoggerFactory
-import play.api.Environment
-import play.api.Mode.Dev
 import play.api.libs.ws.WSClient
-import eu.timepit.refined.pureconfig.refTypeConfigConvert
 import me.gregd.cineworld.domain.CinemaApi
 
-import scalacache.ScalaCache
+trait AppWiring extends ConfigWiring {
 
-trait AppWiring {
-
-  def environment: Environment
   def wsClient: WSClient
+  def cache: Cache
+  def clock: Clock
 
   implicit class asFiniteDuration(d: java.time.Duration) {
     def asScala = scala.concurrent.duration.Duration.fromNanos(d.toNanos)
@@ -41,36 +34,6 @@ trait AppWiring {
   inMemoryAppender.start()
 
   LoggerFactory.getLogger("ROOT").asInstanceOf[Logger].addAppender(inMemoryAppender)
-
-  lazy val appConfig = pureconfig.loadConfig[Config] match {
-    case Left(failures) =>
-      System.err.println(failures.toList.mkString("Failed to read config, errors:\n\t", "\n\t", ""))
-      throw new IllegalArgumentException("Invalid config")
-    case Right(conf) => conf
-  }
-
-  lazy val omdbConfig = appConfig.omdb
-  lazy val tmdbConfig = appConfig.tmdb
-  lazy val cineworldConfig = appConfig.cineworld
-  lazy val vueConfig = appConfig.vue
-
-  lazy val cache: Cache = {
-    val home = System.getProperty("user.home")
-    val tmp = System.getProperty("java.io.tmpdir")
-    val cacheLocation = environment.mode match {
-      case Dev =>
-        val res = new File(s"$home/.fulmfilmed-cache")
-        res.mkdir()
-        res.toPath.toString
-      case _ =>
-        Files.createTempDirectory("fulfilmed-cache").toString
-
-    }
-
-    Cache(ScalaCache(new FileCache(cacheLocation)))
-  }
-
-  lazy val _clock: Clock = RealClock
 
   lazy val scheduler: Scheduler = monix.execution.Scheduler.global
 

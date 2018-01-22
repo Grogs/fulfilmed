@@ -1,5 +1,6 @@
 import com.softwaremill.macwire._
-import me.gregd.cineworld.wiring.AppWiring
+import me.gregd.cineworld.util.RealClock
+import me.gregd.cineworld.wiring.{AppWiring, FileCacheWiring, ProductionConfigWiring}
 import me.gregd.cineworld.{CinemaController, DebugController}
 import play.api.ApplicationLoader.Context
 import play.api.libs.ws.ahc.AhcWSComponents
@@ -10,17 +11,21 @@ import play.filters.gzip.GzipFilterComponents
 import play.filters.hosts.AllowedHostsComponents
 import router.Routes
 
-class AppLoader extends ApplicationLoader {
-  def load(context: ApplicationLoader.Context): Application = new Wiring(context).application
+class PlayAppLoader extends ApplicationLoader {
+  def load(context: ApplicationLoader.Context): Application = new PlayWiring(context).application
 }
 
-class Wiring(context: Context)
+class PlayWiring(context: Context)
     extends BuiltInComponentsFromContext(context)
     with AppWiring
+    with FileCacheWiring
+    with ProductionConfigWiring
     with AhcWSComponents
     with controllers.AssetsComponents
     with AllowedHostsComponents
     with GzipFilterComponents {
+
+  val clock = RealClock
 
   lazy val loggingFilter: LoggingFilter = wire[LoggingFilter]
 

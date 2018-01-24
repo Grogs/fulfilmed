@@ -1,7 +1,5 @@
 package me.gregd.cineworld.dao.cinema.vue.raw
 
-
-import me.gregd.cineworld.Cache
 import me.gregd.cineworld.config.VueConfig
 import me.gregd.cineworld.dao.cinema.vue.raw.model.cinemas.{VueCinema, VueCinemasResp}
 import me.gregd.cineworld.dao.cinema.vue.raw.model.listings.VueListingsResp
@@ -13,11 +11,11 @@ import play.api.libs.ws.WSClient
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
+import scalacache.ScalaCache
 import scalacache.memoization._
 
-class VueRepository(ws: WSClient, cache: Cache, config: VueConfig) {
+class VueRepository(ws: WSClient, implicit val cache: ScalaCache[Array[Byte]], config: VueConfig) {
 
-  private implicit val _ = cache.scalaCache
   private implicit val formats = DefaultFormats
 
   private val base = config.baseUrl

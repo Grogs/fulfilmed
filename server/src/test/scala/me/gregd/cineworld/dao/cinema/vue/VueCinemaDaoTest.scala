@@ -4,11 +4,11 @@ import java.time.LocalDate
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import fakes.{FakeRatings, NoOpCache}
+import fakes.FakeRatings
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.cinema.vue.raw.VueRepository
 import me.gregd.cineworld.dao.movies.Movies
-import me.gregd.cineworld.util.FixedClock
+import me.gregd.cineworld.util.{FixedClock, NoOpCache}
 import monix.execution.Scheduler
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSuite, Matchers}

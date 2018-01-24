@@ -2,7 +2,6 @@ package me.gregd.cineworld.wiring
 
 import ch.qos.logback.classic.{Logger, LoggerContext}
 import com.softwaremill.macwire.wire
-import me.gregd.cineworld.config.Config
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.cinema.cineworld.CineworldCinemaDao
 import me.gregd.cineworld.dao.cinema.cineworld.raw.CineworldRepository
@@ -11,16 +10,18 @@ import me.gregd.cineworld.dao.cinema.vue.raw.VueRepository
 import me.gregd.cineworld.dao.movies.{MovieDao, Movies}
 import me.gregd.cineworld.dao.ratings.Ratings
 import me.gregd.cineworld.util._
-import me.gregd.cineworld.{Cache, CinemaService}
+import me.gregd.cineworld.CinemaService
 import monix.execution.Scheduler
 import org.slf4j.LoggerFactory
 import play.api.libs.ws.WSClient
 import me.gregd.cineworld.domain.CinemaApi
 
+import scalacache.ScalaCache
+
 trait AppWiring extends ConfigWiring {
 
   def wsClient: WSClient
-  def cache: Cache
+  def cache: ScalaCache[Array[Byte]]
   def clock: Clock
 
   implicit class asFiniteDuration(d: java.time.Duration) {

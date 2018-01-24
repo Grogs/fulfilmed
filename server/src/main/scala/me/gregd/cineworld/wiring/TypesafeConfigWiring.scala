@@ -3,7 +3,7 @@ package me.gregd.cineworld.wiring
 import me.gregd.cineworld.config.Config
 import eu.timepit.refined.pureconfig.refTypeConfigConvert
 
-trait ProductionConfigWiring {
+trait TypesafeConfigWiring {
   val appConfig = pureconfig.loadConfig[Config] match {
     case Left(failures) =>
       System.err.println(failures.toList.mkString("Failed to read config, errors:\n\t", "\n\t", ""))

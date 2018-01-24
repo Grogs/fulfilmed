@@ -4,8 +4,8 @@ import me.gregd.cineworld.config.OmdbConfig
 import me.gregd.cineworld.dao.ratings.{Ratings, RatingsResult}
 
 import scala.concurrent.Future
-
 import eu.timepit.refined.auto._
+import me.gregd.cineworld.util.NoOpCache
 
 object FakeRatings extends Ratings(null, NoOpCache.cache, OmdbConfig("http://dummy","")) {
 

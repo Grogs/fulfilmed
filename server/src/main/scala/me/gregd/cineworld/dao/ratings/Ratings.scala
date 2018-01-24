@@ -2,7 +2,6 @@ package me.gregd.cineworld.dao.ratings
 
 
 import com.typesafe.scalalogging.LazyLogging
-import me.gregd.cineworld.Cache
 import me.gregd.cineworld.config.OmdbConfig
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
@@ -11,11 +10,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.Try
+import scalacache.ScalaCache
 import scalacache.memoization._
 
-class Ratings(ws: WSClient, cache: Cache, config: OmdbConfig) extends LazyLogging {
+class Ratings(ws: WSClient, implicit val cache: ScalaCache[Array[Byte]], config: OmdbConfig) extends LazyLogging {
 
-  private lazy implicit val _ = cache.scalaCache
   private implicit val formats = Json.reads[OmdbRatings]
 
   def fetchRatings(imdbId: String): Future[RatingsResult] = {

@@ -2,7 +2,6 @@ package me.gregd.cineworld.dao
 
 
 import com.typesafe.scalalogging.LazyLogging
-import me.gregd.cineworld.Cache
 import me.gregd.cineworld.config.TmdbConfig
 import me.gregd.cineworld.dao.model.{ImdbIdAndAltTitles, NowShowingResponse, TmdbMovie, TmdbTitle}
 import me.gregd.cineworld.util.RateLimiter
@@ -13,11 +12,10 @@ import play.api.libs.ws.{WSClient, WSResponse}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
+import scalacache.ScalaCache
 import scalacache.memoization._
 
-class TheMovieDB(ws: WSClient, cache: Cache, scheduler: Scheduler, config: TmdbConfig) extends LazyLogging {
-
-  private lazy implicit val _ = cache.scalaCache
+class TheMovieDB(ws: WSClient, implicit val cache: ScalaCache[Array[Byte]], scheduler: Scheduler, config: TmdbConfig) extends LazyLogging {
 
   private def key = config.apiKey
 

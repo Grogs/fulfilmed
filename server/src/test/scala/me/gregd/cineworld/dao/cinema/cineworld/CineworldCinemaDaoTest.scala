@@ -2,11 +2,12 @@ package me.gregd.cineworld.dao.cinema.cineworld
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import fakes.{FakeRatings, NoOpCache}
+import fakes.FakeRatings
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.cinema.cineworld.raw.CineworldRepository
 import me.gregd.cineworld.dao.movies.Movies
 import me.gregd.cineworld.domain._
+import me.gregd.cineworld.util.NoOpCache
 import monix.execution.Scheduler
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.time.{Millis, Span}

@@ -108,7 +108,7 @@ class Movies(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with LazyLoggi
       if (accept) {
         Option(matc)
       } else {
-        logger.info(s"No found found for '$title', nearest match scored $weight'")
+        logger.info(s"No match found for '$title', nearest match was ${matc.title} which scored $weight'")
         None
       }
     } else

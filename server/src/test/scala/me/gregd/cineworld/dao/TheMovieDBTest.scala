@@ -2,7 +2,7 @@ package me.gregd.cineworld.dao
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import fakes.NoOpCache
+import me.gregd.cineworld.util.NoOpCache
 import monix.execution.Scheduler
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSuite, Matchers}

@@ -28,9 +28,9 @@ class CinemaServiceTest extends FunSuite with ScalaFutures with Matchers {
     performances.size shouldBe 4
   }
 
-  test("getCinemas") {
+  test("getCinemasGrouped") {
 
-    val res = cinemaService.getCinemas().futureValue.toMap
+    val res = cinemaService.getCinemasGrouped().futureValue.toMap
 
     res.keys.toList shouldBe List("Cineworld", "Vue")
 

@@ -1,7 +1,5 @@
 package me.gregd.cineworld.dao.cinema.cineworld.raw
 
-
-import me.gregd.cineworld.Cache
 import me.gregd.cineworld.config.CineworldConfig
 import me.gregd.cineworld.dao.cinema.cineworld.raw.model._
 import play.api.libs.json.Json
@@ -10,11 +8,10 @@ import play.api.libs.ws._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
+import scalacache.ScalaCache
 import scalacache.memoization._
 
-class CineworldRepository(ws: WSClient, cache: Cache, config: CineworldConfig) {
-
-  implicit val _ = cache.scalaCache
+class CineworldRepository(ws: WSClient, implicit val cache: ScalaCache[Array[Byte]], config: CineworldConfig) {
 
   implicit val d = Json.format[Showing]
   implicit val c = Json.format[Day]

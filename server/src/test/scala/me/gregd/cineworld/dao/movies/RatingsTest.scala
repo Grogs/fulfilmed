@@ -2,8 +2,8 @@ package me.gregd.cineworld.dao.movies
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import fakes.NoOpCache
 import me.gregd.cineworld.dao.ratings.{Ratings, RatingsResult}
+import me.gregd.cineworld.util.NoOpCache
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSuite, Matchers}
 import play.api.libs.ws.ahc.AhcWSClient

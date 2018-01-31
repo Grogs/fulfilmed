@@ -33,9 +33,8 @@ class VueCinemaDao(vueRepository: VueRepository, imdb: MovieDao, clock: Clock) e
     res.map(Future.sequence(_)).flatten
   }
 
-  def retrieveMoviesAndPerformances(cinemaId: String, dateRaw: String): Future[Map[Movie, List[Performance]]] = {
+  def retrieveMoviesAndPerformances(cinemaId: String, date: LocalDate): Future[Map[Movie, List[Performance]]] = {
     vueRepository.retrieveListings(cinemaId).flatMap { raw =>
-      val date = LocalDate.parse(dateRaw)
 
       val converted = for {
         f <- raw.films

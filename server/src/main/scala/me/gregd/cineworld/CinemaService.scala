@@ -1,6 +1,8 @@
 package me.gregd.cineworld
 
 
+import java.time.LocalDate
+
 import me.gregd.cineworld.dao.cinema.cineworld.CineworldCinemaDao
 import me.gregd.cineworld.dao.cinema.vue.VueCinemaDao
 import me.gregd.cineworld.dao.movies.MovieDao
@@ -60,9 +62,9 @@ class CinemaService(movieDao: MovieDao, cineworld: CineworldCinemaDao, vue: VueC
     Future.sequence(List(cineworld.retrieveCinemas(), vue.retrieveCinemas())).map(_.flatten)
 
   private def parse(s: String) = s match {
-    case "today"    => clock.today().toString
-    case "tomorrow" => (clock.today() plusDays 1).toString
-    case other      => other
+    case "today"    => clock.today()
+    case "tomorrow" => clock.today() plusDays 1
+    case other      => LocalDate.parse(other)
   }
 
   def haversine(pos1: Coordinates, pos2: Coordinates) = {

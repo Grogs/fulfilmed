@@ -17,7 +17,8 @@ import stub.Stubs
 
 class VueCinemaDaoTest extends FunSuite with ScalaFutures with IntegrationPatience with Matchers {
 
-  val clock = FixedClock(LocalDate.parse("2017-05-23"))
+  val date: LocalDate = LocalDate.parse("2017-05-23")
+  val clock = FixedClock(date)
   val wsClient = AhcWSClient()(ActorMaterializer()(ActorSystem()))
   val tmdb = new TheMovieDB(wsClient, NoOpCache.cache, Scheduler.global, Stubs.tmdb.config)
   val repo = new VueRepository(wsClient, NoOpCache.cache, Stubs.vue.config)
@@ -29,7 +30,7 @@ class VueCinemaDaoTest extends FunSuite with ScalaFutures with IntegrationPatien
   }
 
   test("retrieveMoviesAndPerformances for 1010882") {
-    val listings = dao.retrieveMoviesAndPerformances("10032", "2017-05-23").futureValue
+    val listings = dao.retrieveMoviesAndPerformances("10032", clock.today()).futureValue
     val Some((movie, performances)) = listings.find(_._1.tmdbId.isDefined)
 
     movie.title should not be empty

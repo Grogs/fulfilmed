@@ -1,5 +1,7 @@
 package me.gregd.cineworld.dao.cinema.cineworld
 
+import java.time.LocalDate
+
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import fakes.FakeRatings
@@ -31,7 +33,8 @@ class CineworldCinemaDaoTest extends FunSuite with ScalaFutures with Matchers wi
   }
 
   test("retrieveMoviesAndPerformances") {
-    val showings = cineworld.retrieveMoviesAndPerformances("1010882", "2017-05-23").futureValue
+    val date = LocalDate.parse("2017-05-23")
+    val showings = cineworld.retrieveMoviesAndPerformances("1010882", date).futureValue
     showings should contain allElementsOf expectedShowings
   }
 

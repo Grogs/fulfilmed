@@ -29,7 +29,7 @@ class CineworldCinemaDao(
         _.map(CineworldRepositoryTransformer.toCinema)
       )
 
-  override def retrieveMoviesAndPerformances(cinemaId: String, dateRaw: String): Future[Map[Movie, List[Performance]]] = {
+  override def retrieveMoviesAndPerformances(cinemaId: String, date: LocalDate): Future[Map[Movie, List[Performance]]] = {
 
     def sequence[K, V](m: Map[Future[K], V]): Future[Map[K, V]] = {
       import cats.Traverse
@@ -37,10 +37,8 @@ class CineworldCinemaDao(
       Traverse[({type M[A] = Map[V, A] })#M].sequence(m.map(_.swap)).map(_.map(_.swap))
     }
 
-    val date = LocalDate.parse(dateRaw)
-
     dao.retrieve7DayListings(cinemaId).flatMap { rawMovies =>
-      logger.debug(s"Retrieving listings for $cinemaId:$dateRaw")
+      logger.debug(s"Retrieving listings for $cinemaId:$date")
       val res = for {
         movieResp <- rawMovies
         (film, allPerformances) <- CineworldRepositoryTransformer.toMovie(cinemaId, movieResp)

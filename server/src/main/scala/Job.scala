@@ -1,51 +1,82 @@
+import java.net.URI
+
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import better.files._
-import me.gregd.cineworld.domain.{Cinema, Movie, Performance}
+import me.gregd.cineworld.CinemaService
+import me.gregd.cineworld.domain.{Cinema, Coordinates, Movie, Performance}
 import me.gregd.cineworld.util.RateLimiter
 import me.gregd.cineworld.wiring.ProdAppWiring
+import play.api.libs.json.Json
 import play.api.libs.ws.ahc.AhcWSClient
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.duration.Duration.Inf
+import scala.concurrent.{Await, Future, blocking}
 import scala.concurrent.duration._
 
 object Job extends App {
-  val wsClient = AhcWSClient()(ActorMaterializer()(ActorSystem()))
+
+  private val actorSystem = ActorSystem()
+
+  val wsClient = AhcWSClient()(ActorMaterializer()(actorSystem))
   val wiring = new ProdAppWiring(wsClient)
 
   val cinemaService = wiring.cinemaService
-
-  val bucket = File("gs://fulfilmed-listings")
-
-  val rateLimiter = RateLimiter(2.seconds, 10)
+  //  TODO make sure movies cache is warm first
+  val listings = new Listings(cinemaService)
 
   val start = System.currentTimeMillis()
 
-//  TODO make sure movies cache is warm first
+  val store = new Store()
 
-  val allListings: Future[List[(Cinema, Map[Movie, List[Performance]])]] =
-    cinemaService.getCinemas().flatMap(Future.traverse(_)(c =>
-      rateLimiter{
-        cinemaService.getMoviesAndPerformances(c.id, "today").map(c -> _)
-      }
-    ))
+  val res = listings
+    .retrieve("tomorrow")
+    .flatMap(eventualListings =>
+      Future.traverse(eventualListings) {
+        case (cinema, performances) =>
+          store.publish(cinema, "tomorrow")(performances)
+    })
 
-  allListings.map { all =>
-    val end = System.currentTimeMillis()
-    val duration = (end - start).millis.toSeconds
-    println("=======")
-    println(all)
-    println("=======")
-    val res = for {
-        (cinema, listings) <- all
-    } yield bucket / s"listings-$cinema-"
-//TODO write to bucket :D
-    println(res)
-    println("=======")
-    println(s"Took $duration seconds")
+  Await.result(res, Inf)
 
+
+  val end = System.currentTimeMillis()
+
+  val jobDurationSeconds = (end - start).millis.toSeconds
+
+  println(s"Job executed in $jobDurationSeconds seconds")
+  actorSystem.terminate()
+}
+
+class Listings(cinemaService: CinemaService) {
+  val rateLimiter = RateLimiter(2.seconds, 10)
+
+  def retrieve(date: String): Future[List[(Cinema, Map[Movie, List[Performance]])]] = {
+    cinemaService
+      .getCinemas()
+      .flatMap(cinemas =>
+        Future.traverse(cinemas)(c =>
+          rateLimiter {
+            cinemaService.getMoviesAndPerformances(c.id, date).map(c -> _)
+        }))
   }
+}
 
-//  def render
+class Store() {
+  val bucket = File(URI.create("gs://fulfilmed-listings"))
+
+  implicit val coordinatesFormat = Json.format[Coordinates]
+  implicit val performanceFormat = Json.format[Performance]
+  implicit val movieFormat = Json.format[Movie]
+
+  def publish(cinema: Cinema, date: String)(listings: Map[Movie, List[Performance]]) = {
+    val path = bucket / s"listings-${cinema.id}-$date.json"
+    Future {
+      val json = Json.toBytes(Json.toJson(listings))
+      blocking {
+        path.writeByteArray(json)
+      }
+    }
+  }
 }

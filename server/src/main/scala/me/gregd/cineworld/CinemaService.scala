@@ -13,7 +13,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.math._
 
-class CinemaService(movieDao: MovieDao, cineworld: CineworldCinemaDao, vue: VueCinemaDao, clock: Clock) extends CinemaApi {
+class CinemaService(movieDao: MovieDao, cineworld: CineworldCinemaDao, vue: VueCinemaDao, clock: Clock) extends TypesafeCinemaApi {
 
   private lazy val tree: Future[RTree[Cinema]] =
     getCinemas().map { cinemas =>
@@ -41,13 +41,16 @@ class CinemaService(movieDao: MovieDao, cineworld: CineworldCinemaDao, vue: VueC
     }
   }
 
-  override def getMoviesAndPerformances(cinemaId: String, dateRaw: String): Future[Map[Movie, List[Performance]]] = {
+  override def getMoviesAndPerformancesFor(cinemaId: String, dateRaw: String): Future[Map[Movie, List[Performance]]] =
+    getMoviesAndPerformances(cinemaId, parse(dateRaw))
+
+  override def getMoviesAndPerformances(cinemaId: String, date: LocalDate): Future[Map[Movie, List[Performance]]] = {
     //Relying on IDs not conflicting
     Future
       .sequence(
         Seq(
-          cineworld.retrieveMoviesAndPerformances(cinemaId, parse(dateRaw)),
-          vue.retrieveMoviesAndPerformances(cinemaId, parse(dateRaw))
+          cineworld.retrieveMoviesAndPerformances(cinemaId, date),
+          vue.retrieveMoviesAndPerformances(cinemaId, date)
         ))
       .map(_.flatten.toMap)
   }

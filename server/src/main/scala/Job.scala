@@ -1,4 +1,5 @@
 import java.net.URI
+import java.time.LocalDate
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
@@ -30,12 +31,14 @@ object Job extends App {
 
   val store = new Store()
 
+  val date = LocalDate.now plusDays 1
+
   val res = listings
-    .retrieve("tomorrow")
+    .retrieve(date)
     .flatMap(eventualListings =>
       Future.traverse(eventualListings) {
         case (cinema, performances) =>
-          store.publish(cinema, "tomorrow")(performances)
+          store.publish(cinema, date)(performances)
     })
 
   Await.result(res, Inf)
@@ -47,12 +50,13 @@ object Job extends App {
 
   println(s"Job executed in $jobDurationSeconds seconds")
   actorSystem.terminate()
+  wsClient.close()
 }
 
 class Listings(cinemaService: CinemaService) {
   val rateLimiter = RateLimiter(2.seconds, 10)
 
-  def retrieve(date: String): Future[List[(Cinema, Map[Movie, List[Performance]])]] = {
+  def retrieve(date: LocalDate): Future[List[(Cinema, Map[Movie, List[Performance]])]] = {
     cinemaService
       .getCinemas()
       .flatMap(cinemas =>
@@ -70,7 +74,7 @@ class Store() {
   implicit val performanceFormat = Json.format[Performance]
   implicit val movieFormat = Json.format[Movie]
 
-  def publish(cinema: Cinema, date: String)(listings: Map[Movie, List[Performance]]) = {
+  def publish(cinema: Cinema, date: LocalDate)(listings: Map[Movie, List[Performance]]) = {
     val path = bucket / s"listings-${cinema.id}-$date.json"
     Future {
       val json = Json.toBytes(Json.toJson(listings))

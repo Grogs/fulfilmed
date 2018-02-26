@@ -1,5 +1,7 @@
 package me.gregd.cineworld.domain
 
+import java.time.LocalDate
+
 import scala.concurrent.Future
 
 trait CinemaApi {
@@ -12,6 +14,9 @@ trait CinemaApi {
 
   def getNearbyCinemas(coordinates: Coordinates): Future[Seq[Cinema]]
 
-  def getMoviesAndPerformances(cinemaId: String, date: String): Future[Map[Movie, List[Performance]]]
+  def getMoviesAndPerformancesFor(cinemaId: String, date: String): Future[Map[Movie, List[Performance]]]
+}
 
+trait TypesafeCinemaApi extends CinemaApi {
+  def getMoviesAndPerformances(cinemaId: String, date: LocalDate): Future[Map[Movie, List[Performance]]]
 }

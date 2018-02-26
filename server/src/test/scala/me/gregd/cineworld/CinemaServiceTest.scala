@@ -13,13 +13,15 @@ class CinemaServiceTest extends FunSuite with ScalaFutures with Matchers {
 
   implicit val defaultPatienceConfig = PatienceConfig(Span(3000, Millis))
 
-  val fakeClock = FixedClock(LocalDate.parse("2017-05-23"))
+  val date = LocalDate.parse("2017-05-23")
+
+  val fakeClock = FixedClock(date)
 
   val cinemaService = new TestAppWiring(fakeClock).cinemaService
 
   test("getMoviesAndPerformances") {
 
-    val res = cinemaService.getMoviesAndPerformances("1010882", "today").futureValue.toSeq
+    val res = cinemaService.getMoviesAndPerformances("1010882", date).futureValue.toSeq
 
     res.size shouldBe 11
 

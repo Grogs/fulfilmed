@@ -22,19 +22,7 @@ object Main {
     var t1 = window.performance.now()
     console.log(s"CSS rendering duration: ${t1 - t0}ms")
 
-    val routerConfig = RouterConfigDsl[Page].buildConfig{ dsl =>
-      import dsl._
-      def date = string("(today|tomorrow)").xmap[Date]{
-        case "tomorrow" => Tomorrow
-        case "today" | _ => Today
-      }(_.key)
-      (removeTrailingSlashes
-      |staticRoute(root, Home) ~> renderR( rtr => IndexPage(rtr) )
-      |dynamicRouteCT(("#!/films" / string("[0-9]+") / date).caseClass[Films]) ~> dynRenderR((p,r) => FilmPageComponent(Props(r,p)))
-      ).notFound(redirectToPage(Home)(Redirect.Replace))
-    }
-
-    val router = Router(baseUrl, routerConfig)
+    val router = new Wiring(baseUrl).router
 
     router().renderIntoDOM(document.getElementById("content"))
   }

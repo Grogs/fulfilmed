@@ -5,39 +5,39 @@ import japgolly.scalajs.react.vdom.TagMod.Composite
 import japgolly.scalajs.react.vdom.html_<^._
 import me.gregd.cineworld.domain.{Movie, Performance}
 import me.gregd.cineworld.frontend.components.film.Sort.Sort
+import me.gregd.cineworld.frontend.styles.FilmsStyle
 
 import scala.language.implicitConversions
-import scalacss.ScalaCssReact.scalacssStyleaToTagMod
 
 object FilmListComponent {
   val filmCard = (m: Movie, pl: Seq[Performance]) => {
-    val titleStyle = if (m.title.length > 20) FilmsStyle.longFilmTitle else FilmsStyle.filmTitle
-    <.div(FilmsStyle.filmCard,
-      <.div(FilmsStyle.filmInfo,
-        <.div(^.classSet("threedee" -> m.format.contains("3D")),
+    val titleStyle = if (m.title.length > 20) ^.`class` := FilmsStyle.longFilmTitle else ^.`class` := FilmsStyle.filmTitle
+    <.div(^.`class` := FilmsStyle.filmCard,
+      <.div(^.`class` := FilmsStyle.filmInfo,
+        <.div(^.classSet(FilmsStyle.threedee -> m.format.contains("3D")),
           <.div(titleStyle, m.title),
-          <.div(FilmsStyle.ratings, imdbLink(m), tmdbLink(m), rtLink(m)),
-          <.div(FilmsStyle.times,
+          <.div(^.`class` := FilmsStyle.ratings, imdbLink(m), tmdbLink(m), rtLink(m)),
+          <.div(^.`class` := FilmsStyle.times,
             Composite(for (p <- pl.toVector) yield
               <.a(^.href := p.booking_url,
-                <.div(FilmsStyle.time, p.time)
+                <.div(^.`class` := FilmsStyle.time, p.time)
               )
             ))
         )
       ),
-      <.img(FilmsStyle.filmBackground, ^.src := m.posterUrl.get)
+      <.img(^.`class` := FilmsStyle.filmBackground, ^.src := m.posterUrl.get)
     )
   }
 
-  def tmdbLink(m: Movie) = m.tmdbRating.whenDefined(<.div(FilmsStyle.tmdb, _))
+  def tmdbLink(m: Movie) = m.tmdbRating.whenDefined(<.div(^.`class` := FilmsStyle.tmdb, _))
 
-  def rtLink(m: Movie) = m.rottenTomatoes.whenDefined(<.div(FilmsStyle.rtAudience, _))
+  def rtLink(m: Movie) = m.rottenTomatoes.whenDefined(<.div(^.`class` := FilmsStyle.rtAudience, _))
 
   def imdbLink(m: Movie) = {
     for {
       rating <- m.rating
       id <- m.imdbId
-    } yield <.div(FilmsStyle.imdb, <.a(^.href := s"http://www.imdb.com/title/$id", rating))
+    } yield <.div(^.`class` := FilmsStyle.imdb, <.a(^.href := s"http://www.imdb.com/title/$id", rating))
   }.whenDefined
 
   val FilmsList =
@@ -46,7 +46,7 @@ object FilmListComponent {
         def icon(faClasses: String, message: String) = {
           <.div(^.margin := "50px 0 50px 0", ^.color.white, ^.textAlign.center,
             <.i(^.`class` := s"fa $faClasses fa-5x"),
-            <.div(FilmsStyle.label, message)
+            <.div(^.`class` := FilmsStyle.label, message)
           )
         }
 
@@ -59,7 +59,7 @@ object FilmListComponent {
           if (loading) spinner else frown
         else
           <.div(
-            FilmsStyle.filmListContainer,
+            ^.`class` := FilmsStyle.filmListContainer,
             Composite(for (m <- movies) yield filmCard.tupled(m))
           )
     }.build

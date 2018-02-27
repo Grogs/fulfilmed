@@ -19,8 +19,6 @@ lazy val client = project.enablePlugins(ScalaJSPlugin, ScalaJSWeb).settings(
     "org.scala-js" %%% "scalajs-dom" % "0.9.4",
     "com.github.japgolly.scalajs-react" %%% "core" % "1.1.1",
     "com.github.japgolly.scalajs-react" %%% "extra" % "1.1.1",
-    "com.github.japgolly.scalacss" %%% "core" % "0.5.3",
-    "com.github.japgolly.scalacss" %%% "ext-react" % "0.5.3",
   ),
   jsDependencies ++= Seq(
     "org.webjars.bower" % "react" % "15.6.1" / "react-with-addons.js" minified "react-with-addons.min.js" commonJSName "React",
@@ -89,7 +87,6 @@ lazy val shared = crossProject.crossType(CrossType.Pure).settings(
     "com.lihaoyi" %%% "upickle" % "0.4.4",
     "com.lihaoyi" %%% "autowire" % "0.2.6",
     "com.lihaoyi" %%% "scalatags" % "0.6.7",
-    "com.github.japgolly.scalacss" %%% "core" % "0.5.3",
   ),
   commonSettings,
 ).jsConfigure(_ enablePlugins ScalaJSWeb)

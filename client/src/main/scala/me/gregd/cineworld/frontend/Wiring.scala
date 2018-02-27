@@ -3,8 +3,8 @@ package me.gregd.cineworld.frontend
 import japgolly.scalajs.react.extra.router._
 import japgolly.scalajs.react.vdom.html_<^._
 import me.gregd.cineworld.frontend.components.film.FilmPageComponent.{Date, Props, Today, Tomorrow}
-import me.gregd.cineworld.frontend.components.film.{FilmPageComponent, FilmsStyle}
-import me.gregd.cineworld.frontend.components.{IndexPage, IndexStyle}
+import me.gregd.cineworld.frontend.components.film.FilmPageComponent
+import me.gregd.cineworld.frontend.components.IndexPage
 
 class Wiring(baseUrl: BaseUrl) {
   val routerConfig = RouterConfigDsl[Page].buildConfig{ dsl =>

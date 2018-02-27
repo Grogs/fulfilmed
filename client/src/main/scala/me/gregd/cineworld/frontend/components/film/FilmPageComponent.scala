@@ -9,11 +9,11 @@ import me.gregd.cineworld.domain.{CinemaApi, Movie, Performance}
 import me.gregd.cineworld.frontend._
 import me.gregd.cineworld.frontend.components.film
 import me.gregd.cineworld.frontend.components.film.Sort.{NextShowing, Sort}
+import me.gregd.cineworld.frontend.styles.FilmsStyle
 import org.scalajs.dom.document
 
 import scala.language.implicitConversions
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-import scalacss.ScalaCssReact.scalacssStyleaToTagMod
 
 object FilmPageComponent {
   type Entry = (Movie, Seq[Performance])
@@ -81,11 +81,11 @@ object FilmPageComponent {
     def render(state: State) = {
 
       val sortSelection = <.div(
-        FilmsStyle.menuGroup,
+        ^.`class` := FilmsStyle.menuGroup,
         <.i(^.`class` := "fa fa-sort-alpha-asc fa-lg", ^.color.white),
         <.select(
           ^.id := "ordering",
-          FilmsStyle.select,
+          ^.`class` := FilmsStyle.select,
           ^.value := state.selectedSort.key,
           ^.onChange ==> updateSort,
           Composite(
@@ -95,21 +95,21 @@ object FilmPageComponent {
       )
 
       val dateSelection = <.div(
-        FilmsStyle.menuGroup,
+        ^.`class` := FilmsStyle.menuGroup,
         <.i(^.`class` := "fa fa-calendar fa-lg", ^.color.white),
         <.select(^.id := "date",
-                 FilmsStyle.select,
+                 ^.`class` := FilmsStyle.select,
                  ^.value := state.selectedDate.key,
                  ^.onChange ==> updateDate,
                  Composite(for (d <- dates) yield <.option(^.value := d.key, d.text)))
       )
 
-      val menu = <.header(<.div(FilmsStyle.header, dateSelection, sortSelection))
+      val menu = <.header(<.div(^.`class` := FilmsStyle.header, dateSelection, sortSelection))
 
       val attribution =
-        <.div(FilmsStyle.attribution, "Powered by: ", <.a(^.href := "http://www.omdbapi.com/", "The OMDb API"), ", ", <.a(^.href := "http://www.themoviedb.org/", "TMDb"))
+        <.div(^.`class` := FilmsStyle.attribution, "Powered by: ", <.a(^.href := "http://www.omdbapi.com/", "The OMDb API"), ", ", <.a(^.href := "http://www.themoviedb.org/", "TMDb"))
 
-      <.div(^.id := "films", FilmsStyle.container, menu, film.FilmListComponent.FilmsList((state.isLoading, state.selectedSort, state.films)), attribution)
+      <.div(^.id := "films", ^.`class` := FilmsStyle.container, menu, film.FilmListComponent.FilmsList((state.isLoading, state.selectedSort, state.films)), attribution)
     }
   }
 

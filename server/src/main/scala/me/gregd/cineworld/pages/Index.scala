@@ -1,15 +1,15 @@
 package me.gregd.cineworld.pages
 
 import scalatags.Text.all._
-import scalatags.Text.tags2.{title => titleElem, style=>styleElem}
-import scalacss.DevDefaults._
+import scalatags.Text.tags2.{title => titleElem}
 object Index {
   def apply(scriptPaths: List[String]) =
     html(
       head(
         titleElem("Fulfilmed"),
         link(rel:="stylesheet", href:="/assets/lib/font-awesome/css/font-awesome.min.css"),
-        styleElem(me.gregd.cineworld.styles.IndexStyle.render[String])
+        link(rel:="stylesheet", href:="/styles/index.css"),
+        link(rel:="stylesheet", href:="/styles/films.css"),
       ),
       body(
         style := "margin: 0",

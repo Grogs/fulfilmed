@@ -10,22 +10,13 @@ import japgolly.scalajs.react.vdom.html_<^._
 import me.gregd.cineworld.domain.{Cinema, CinemaApi}
 import me.gregd.cineworld.frontend.components.film.FilmPageComponent.Today
 import me.gregd.cineworld.frontend.services.Geolocation
+import me.gregd.cineworld.frontend.styles.IndexStyle
 import me.gregd.cineworld.frontend.{Client, Films, Page}
-import org.scalajs.dom.experimental.permissions.PermissionName.geolocation
-import org.scalajs.dom.experimental.permissions.PermissionState.granted
-import org.scalajs.dom.experimental.permissions._
-import org.scalajs.dom.raw.Position
-import org.scalajs.dom.window.navigator
 
 import scala.concurrent.Future.successful
-import scala.concurrent.{Future, Promise}
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-import scala.scalajs.js
-import scala.util.Try
-import scalacss.ScalaCssReact.scalacssStyleaToTagMod
 
 object IndexPage {
-  import me.gregd.cineworld.frontend.components.{IndexStyle => styles}
   val label = VdomAttr("label")
 
   sealed trait Loadable[+T]
@@ -83,7 +74,7 @@ object IndexPage {
 
       val cinemaDropdowns = state.allCinemas match {
         case Unloaded | Loading =>
-          <.div(styles.blurb, "Loading")
+          <.div(^.`class` := IndexStyle.blurb, "Loading")
         case Loaded(cinemas) =>
           Composite(
             for {
@@ -91,7 +82,7 @@ object IndexPage {
             } yield
               <.div(
                 <.select(
-                  styles.selectWithOffset,
+                  ^.`class` := IndexStyle.select,
                   ^.id := "cinemas",
                   ^.`class` := ".flat",
                   ^.onChange ==> selectCinema,
@@ -106,7 +97,7 @@ object IndexPage {
         state.nearbyCinemas match {
           case Unloaded =>
             <.button(
-              styles.btn,
+              ^.`class` := IndexStyle.btn,
               ^.onClick --> loadNearbyCinemas,
               "Load Nearby Cinemas"
             )
@@ -114,7 +105,7 @@ object IndexPage {
             <.div(^.color.white, ^.textAlign.center, <.i(^.`class` := s"fa fa-refresh fa-spin fa-5x"))
           case Loaded(cinemas) =>
             <.select(
-              styles.selectWithOffset,
+              ^.`class` := IndexStyle.select,
               ^.id := "nearby-cinemas",
               ^.`class` := ".flat",
               ^.onChange ==> selectCinema,
@@ -128,14 +119,14 @@ object IndexPage {
       <.div(
         ^.id := "indexPage",
         <.div(
-          styles.top,
-          <.div(styles.title, "Fulfilmed"),
-          <.div(styles.blurb, "See films showing at your local cinema, with inline movie ratings and the ability to sort by rating."),
+          ^.`class` := IndexStyle.top,
+          <.div(^.`class` := IndexStyle.title, "Fulfilmed"),
+          <.div(^.`class` := IndexStyle.blurb, "See films showing at your local cinema, with inline movie ratings and the ability to sort by rating."),
           nearbyCinemas,
           cinemaDropdowns
         ),
         <.div(
-          styles.description,
+          ^.`class` := IndexStyle.description,
           ^.id := "description"
         )
       )

@@ -13,6 +13,7 @@ import upickle.Js.Obj
 import upickle.default.{Reader, Writer}
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.io.Source
 
 class CinemaController(env: Environment, cinemaService: CinemaService, cc: ControllerComponents) extends AbstractController(cc) with LazyLogging {
 
@@ -44,6 +45,12 @@ class CinemaController(env: Environment, cinemaService: CinemaService, cc: Contr
       Ok(upickle.json.write(res))
     )
   }
+
+  def stylesheet(name: String) = Action(
+    Ok(
+      Source.fromResource(s"styles/$name.css").mkString
+    ).as("text/css")
+  )
 
   def index() = Action(
     Ok(

@@ -11,4 +11,5 @@ GET         /debug/cinemas                me.gregd.cineworld.DebugController.cin
 GET         /debug/warmup                 me.gregd.cineworld.DebugController.warmup()
 GET         /debug/log                    me.gregd.cineworld.DebugController.log()
 
+GET         /styles/*style.css            me.gregd.cineworld.CinemaController.stylesheet(style)
 GET         /assets/*file                 controllers.Assets.at(path="/public", file)

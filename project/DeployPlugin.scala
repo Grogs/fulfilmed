@@ -38,7 +38,7 @@ object DeployPlugin extends AutoPlugin {
       def warmup(instance: Int) =
         List(
           s"echo 'Warming up instance $instance'",
-          s"curl --fail --output /dev/null http://localhost:900$instance/debug/warmup"
+          s"curl --fail http://localhost:900$instance/debug/warmup"
         ).mkString(" && ")
 
       def deploy(instance: Int) = List(stop(_), remove(_), create(_), (_:Int)=>sleep, warmup(_)).map(step => step(instance)).mkString(" && ")

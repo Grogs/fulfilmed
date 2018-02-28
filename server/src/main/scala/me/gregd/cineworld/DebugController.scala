@@ -12,6 +12,7 @@ import play.api.mvc.{AbstractController, Action, ControllerComponents}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.control.NonFatal
 
 class DebugController(tmdb: TheMovieDB, movies: Movies, ratingService: Ratings, cinemaApi: CinemaApi, inMemoryLog: InMemoryLog, cc: ControllerComponents) extends AbstractController(cc)
     with LazyLogging {
@@ -48,6 +49,11 @@ class DebugController(tmdb: TheMovieDB, movies: Movies, ratingService: Ratings, 
           cinemaApi.getCinemas()
         ))
       .map(_ => Ok("Movies and cinema caches are populated."))
+      .recover{
+        case NonFatal(ex) =>
+          logger.error("Warmup failed", ex)
+          InternalServerError(s"Warmup failed with a ${ex.getClass.getSimpleName}, with message: ${ex.getMessage}")
+      }
   )
 
   def log() = Secured {

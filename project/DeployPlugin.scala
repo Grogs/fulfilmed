@@ -33,15 +33,13 @@ object DeployPlugin extends AutoPlugin {
         s"docker run -d --name $app.$instance -p $exposeTo:9000 $image"
       }
 
-      val sleep = "echo 'Sleeping before app warmup' && sleep 60"
-
       def warmup(instance: Int) =
         List(
           s"echo 'Warming up instance $instance'",
-          s"curl --fail http://localhost:900$instance/debug/warmup"
+          s"curl --fail --retry 10 --retry-max-time 90 http://localhost:900$instance/debug/warmup"
         ).mkString(" && ")
 
-      def deploy(instance: Int) = List(stop(_), remove(_), create(_), (_:Int)=>sleep, warmup(_)).map(step => step(instance)).mkString(" && ")
+      def deploy(instance: Int) = List(stop(_), remove(_), create(_), warmup(_)).map(step => step(instance)).mkString(" && ")
 
       val deployAll = instances.map(deploy).mkString(" && ")
 

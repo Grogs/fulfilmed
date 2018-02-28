@@ -30,7 +30,7 @@ object DeployPlugin extends AutoPlugin {
 
       def create(instance: Int) = {
         val exposeTo = "900" + instance
-        s"docker run -d --name $app.$instance -p $exposeTo:9000 $image"
+        s"docker run -d --name $app.$instance -p $exposeTo:9000 $image && sleep 10"
       }
 
       def warmup(instance: Int) =

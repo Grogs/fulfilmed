@@ -11,7 +11,7 @@ import org.scalatest.{FunSuite, Matchers}
 
 class CinemaServiceTest extends FunSuite with ScalaFutures with Matchers {
 
-  implicit val defaultPatienceConfig = PatienceConfig(Span(3000, Millis))
+  implicit val defaultPatienceConfig = PatienceConfig(Span(5000, Millis))
 
   val date = LocalDate.parse("2017-05-23")
 

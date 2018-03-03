@@ -30,13 +30,13 @@ object DeployPlugin extends AutoPlugin {
 
       def create(instance: Int) = {
         val exposeTo = "900" + instance
-        s"docker run -d --name $app.$instance -p $exposeTo:9000 $image && sleep 10"
+        s"docker run -d --name $app.$instance -p $exposeTo:9000 $image && sleep 20"
       }
 
       def warmup(instance: Int) =
         List(
           s"echo 'Warming up instance $instance'",
-          s"curl --fail --retry 10 --retry-max-time 90 --retry-connrefused http://localhost:900$instance/debug/warmup"
+          s"curl --fail --retry 10 --retry-max-time 90 http://localhost:900$instance/debug/warmup"
         ).mkString(" && ")
 
       def deploy(instance: Int) = List(stop(_), remove(_), create(_), warmup(_)).map(step => step(instance)).mkString(" && ")

@@ -29,6 +29,8 @@ class PlayWiring(context: Context)
 
   lazy val mode = environment.mode
 
+  lazy val defaults = new controllers.Default
+
   lazy val loggingFilter = wire[LoggingFilter]
 
   def httpFilters: Seq[EssentialFilter] = Seq(allowedHostsFilter, gzipFilter, loggingFilter)

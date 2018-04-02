@@ -8,24 +8,29 @@ resolvers += Resolver.sonatypeRepo("releases")
 
 addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3")
 
-lazy val client = project.enablePlugins(ScalaJSPlugin, ScalaJSWeb).settings(
+lazy val client = project.enablePlugins(ScalaJSBundlerPlugin, ScalaJSWeb).settings(
   commonSettings,
   name := "fulfilmed-scala-frontend",
   scalaJSUseMainModuleInitializer in Compile := true,
   mainClass in Compile := Some("me.gregd.cineworld.frontend.Main"),
-  scalaJSUseMainModuleInitializer in Test := false,
+//  scalaJSUseMainModuleInitializer in Test := false,
   scalaJSStage in Test := FastOptStage,
+  scalacOptions += "-P:scalajs:sjsDefinedByDefault",
+  addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M11" cross CrossVersion.full),
   libraryDependencies ++= Seq(
     "org.scala-js" %%% "scalajs-dom" % "0.9.4",
-    "com.github.japgolly.scalajs-react" %%% "core" % "1.1.1",
-    "com.github.japgolly.scalajs-react" %%% "extra" % "1.1.1",
+    "me.shadaj" %%% "slinky-core" % "0.3.2",                 // core React functionality, no React DOM
+    "me.shadaj" %%% "slinky-web" % "0.3.2",                  // React DOM, HTML and SVG tags
+    "me.shadaj" %%% "slinky-hot" % "0.3.2",                  // Hot loading, requires react-proxy package
   ),
-  jsDependencies ++= Seq(
-    "org.webjars.bower" % "react" % "15.6.1" / "react-with-addons.js" minified "react-with-addons.min.js" commonJSName "React",
-    "org.webjars.bower" % "react" % "15.6.1" / "react-dom.js" minified "react-dom.min.js" dependsOn "react-with-addons.js" commonJSName "ReactDOM",
-    "org.webjars.bower" % "react" % "15.6.1" / "react-dom-server.js" minified "react-dom-server.min.js" dependsOn "react-with-addons.js" commonJSName "ReactDOMServer",
+  npmDependencies in Compile ++= Seq(
+    "react" -> "16.2.0",
+    "react-dom" -> "16.2.0",
+    "react-proxy" -> "1.1.8",
+    "react-router-dom" -> "4.2.2",
+    "history" -> "4.7.2",
   ),
-  (emitSourceMaps in fullOptJS) := true,
+  emitSourceMaps in fullOptJS := true,
 ).dependsOn(sharedJs)
 
 
@@ -34,7 +39,7 @@ lazy val server = project.settings(
   name := "fulfilmed",
   dockerRepository := Some("grogs"),
   buildInfoKeys := Seq[BuildInfoKey](name, version, git.gitHeadCommit, git.gitHeadMessage),
-  buildInfoOptions += BuildInfoOption.BuildTime,
+  buildInfoOptions ++= Seq(BuildInfoOption.BuildTime, BuildInfoOption.ToJson),
   buildInfoPackage := "fulfilmed",
   scalaJSProjects := Seq(client),
   pipelineStages in Assets := Seq(scalaJSPipeline),
@@ -78,7 +83,7 @@ lazy val server = project.settings(
     "org.webjars" % "font-awesome" % "4.7.0",
   ),
   compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value)
-  .enablePlugins(PlayScala, GitVersioning, BuildInfoPlugin, DeployPlugin)
+  .enablePlugins(PlayScala, GitVersioning, BuildInfoPlugin, DeployPlugin, WebScalaJSBundlerPlugin)
   .disablePlugins(PlayLayoutPlugin)
   .dependsOn(sharedJvm)
 

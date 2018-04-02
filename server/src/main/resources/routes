@@ -1,5 +1,3 @@
-GET         /                             me.gregd.cineworld.CinemaController.index()
-
 GET         /api/*path                    me.gregd.cineworld.CinemaController.api(path)
 POST        /api/*path                    me.gregd.cineworld.CinemaController.api(path)
 
@@ -10,6 +8,10 @@ GET         /debug/ratings/*imdbid        me.gregd.cineworld.DebugController.rat
 GET         /debug/cinemas                me.gregd.cineworld.DebugController.cinemas()
 GET         /debug/warmup                 me.gregd.cineworld.DebugController.warmup()
 GET         /debug/log                    me.gregd.cineworld.DebugController.log()
+GET         /debug/version                me.gregd.cineworld.DebugController.version()
 
 GET         /styles/*style.css            me.gregd.cineworld.CinemaController.stylesheet(style)
 GET         /assets/*file                 controllers.Assets.at(path="/public", file)
+
+GET         /                             controllers.Default.redirect(to = "/index")
+GET         /*path                        me.gregd.cineworld.CinemaController.index(path)

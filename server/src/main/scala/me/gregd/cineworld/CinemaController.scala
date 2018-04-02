@@ -22,10 +22,9 @@ class CinemaController(env: Environment, cinemaService: CinemaService, cc: Contr
   implicit val movieFormat = Json.format[Movie]
 
   val scriptPaths  = List(
-    "assets/fulfilmed-scala-frontend-jsdeps.js",
-    "assets/fulfilmed-scala-frontend-" + (env.mode match {
-      case Dev | Test => "fastopt.js"
-      case Prod => "opt.js"
+    "/assets/fulfilmed-scala-frontend-" + (env.mode match {
+      case Dev | Test => "fastopt-bundle.js"
+      case Prod => "opt-bundle.js"
     })
   )
 
@@ -52,7 +51,7 @@ class CinemaController(env: Environment, cinemaService: CinemaService, cc: Contr
     ).as("text/css")
   )
 
-  def index() = Action(
+  def index(path: String) = Action(
     Ok(
       Index(scriptPaths).render
     ).as("text/html")

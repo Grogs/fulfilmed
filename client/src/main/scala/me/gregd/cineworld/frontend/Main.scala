@@ -1,17 +1,24 @@
 package me.gregd.cineworld.frontend
 
-import japgolly.scalajs.react.extra.router._
+import me.gregd.cineworld.frontend.components.{FilmsPage, IndexPage}
+import me.gregd.cineworld.frontend.util._
 import org.scalajs.dom._
+import slinky.web.ReactDOM
 
 object Main {
 
   def main(): Unit = {
 
-    val baseUrl = BaseUrl.fromWindowOrigin + "/"
+    ReactDOM.render(
+      Router(History.createBrowserHistory())(
+        Switch(
+          Route("/index", IndexPage),
+          Route("/films/:cinemaId/:date", FilmsPage),
+        )
+      ),
+      document.getElementById("content")
+    )
 
-    val router = new Wiring(baseUrl).router
-
-    router().renderIntoDOM(document.getElementById("content"))
   }
 
 }

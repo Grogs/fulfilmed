@@ -2,6 +2,7 @@ package me.gregd.cineworld
 
 
 import com.typesafe.scalalogging.LazyLogging
+import fulfilmed.BuildInfo
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.movies.Movies
 import me.gregd.cineworld.dao.ratings.Ratings
@@ -40,6 +41,10 @@ class DebugController(tmdb: TheMovieDB, movies: Movies, ratingService: Ratings, 
   def cinemas() = Action.async(
     cinemaApi.getCinemas().map(cinemas => Ok(Json.toJson(cinemas)))
   )
+
+  def version() = Action{
+    Ok(BuildInfo.toJson).as("application/json")
+  }
 
   def warmup() = Action.async(
     Future

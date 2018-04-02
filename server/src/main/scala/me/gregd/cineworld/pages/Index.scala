@@ -12,7 +12,7 @@ object Index {
         link(rel:="stylesheet", href:="/styles/films.css"),
       ),
       body(
-        style := "margin: 0",
+        style := "margin: 0; background-color: #111;",
         div(id := "content"),
         for (p <- scriptPaths) yield script(`type` := "text/javascript", src := p)
       )

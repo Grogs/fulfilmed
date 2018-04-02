@@ -1,5 +1,6 @@
 package me.gregd.cineworld.dao.cinema.cineworld.raw
 
+import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.config.CineworldConfig
 import me.gregd.cineworld.dao.cinema.cineworld.raw.model._
 import play.api.libs.json.Json
@@ -11,7 +12,7 @@ import scala.concurrent.duration._
 import scalacache.ScalaCache
 import scalacache.memoization._
 
-class CineworldRepository(ws: WSClient, implicit val cache: ScalaCache[Array[Byte]], config: CineworldConfig) {
+class CineworldRepository(ws: WSClient, implicit val cache: ScalaCache[Array[Byte]], config: CineworldConfig) extends LazyLogging {
 
   implicit val d = Json.format[Showing]
   implicit val c = Json.format[Day]
@@ -31,12 +32,22 @@ class CineworldRepository(ws: WSClient, implicit val cache: ScalaCache[Array[Byt
       .map(_.body)
   }
 
+  private def parse(string: String) = {
+    try {
+      Json.parse(string)
+    } catch {
+      case e: Throwable =>
+        logger.error(s"Failed to parse response from Cineworld. Response was: $string", e)
+        throw e
+    }
+  }
+
   def retrieveCinemas(): Future[Seq[CinemaResp]] = {
-    curlCinemas().map( r => Json.parse(r).as[Seq[CinemaResp]])
+    curlCinemas().map( r => parse(r).as[Seq[CinemaResp]])
   }
 
   def retrieve7DayListings(cinema: String): Future[Seq[MovieResp]] = {
-    curl7DayListings(cinema).map(r => Json.parse(r).as[Seq[MovieResp]])
+    curl7DayListings(cinema).map(r => parse(r).as[Seq[MovieResp]])
   }
 
 }

@@ -8,8 +8,8 @@ import me.gregd.cineworld.domain._
 
 object CineworldRepositoryTransformer {
 
-  def toCinema(cinemaResp: CinemaResp): Cinema =
-    Cinema(cinemaResp.id.toString, "Cineworld", cinemaResp.n, Option(Coordinates(cinemaResp.lat, cinemaResp.long)))
+  def toCinema(cinemaResp: CinemaResp, coordinates: Option[Coordinates]): Cinema =
+    Cinema(cinemaResp.id.toString, "Cineworld", cinemaResp.displayName, coordinates)
 
   def toMovie(cinemaId: String, movieResp: MovieResp): Map[Film, Map[LocalDate, Seq[Performance]]] =
     movieResp.TYPD.map { typ =>

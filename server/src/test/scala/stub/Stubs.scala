@@ -78,7 +78,7 @@ object Stubs {
   object cineworld {
 
     val route: Route =
-      (get & path("getSites") & parameter('json, 'max)) { (_, max) =>
+      (get & path("uk" / "data-api-service" / "v1" / "quickbook" / "10108" / "cinemas" / "with-event" / "until" / Segment) & parameter('attr, 'lang)) { (_, _, _) =>
         complete(
           HttpEntity(`application/json`,
             Source.fromResource("cineworld/cinemas.json")(UTF8).mkString

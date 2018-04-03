@@ -9,7 +9,7 @@ import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.cinema.cineworld.raw.CineworldRepository
 import me.gregd.cineworld.dao.movies.Movies
 import me.gregd.cineworld.domain._
-import me.gregd.cineworld.util.NoOpCache
+import me.gregd.cineworld.util.{NoOpCache, RealClock}
 import monix.execution.Scheduler
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.time.{Millis, Span}
@@ -24,7 +24,7 @@ class CineworldCinemaDaoTest extends FunSuite with ScalaFutures with Matchers wi
   val wsClient = AhcWSClient()(ActorMaterializer()(ActorSystem()))
   val tmdb = new TheMovieDB(wsClient, NoOpCache.cache, Scheduler.global, Stubs.tmdb.config)
   val movieDao = new Movies(tmdb, FakeRatings)
-  val cineworldRaw = new CineworldRepository(wsClient, NoOpCache.cache, Stubs.cineworld.config)
+  val cineworldRaw = new CineworldRepository(wsClient, NoOpCache.cache, Stubs.cineworld.config, RealClock)
   val cineworld = new CineworldCinemaDao(movieDao, tmdb, cineworldRaw)
 
   test("retrieveCinemas") {
@@ -39,9 +39,9 @@ class CineworldCinemaDaoTest extends FunSuite with ScalaFutures with Matchers wi
   }
 
   val expectedCinemas = List(
-    Cinema("1010804", "Cineworld", "Aberdeen - Queens Links", Option(Coordinates(57.1503, -2.07796))),
-    Cinema("1010808", "Cineworld", "Aberdeen - Union Square", Option(Coordinates(57.1436, -2.0969))),
-    Cinema("1010805", "Cineworld", "Aldershot", Option(Coordinates(51.25, -0.768377)))
+    Cinema("8014", "Cineworld", "Aberdeen - Queens Links", Option(Coordinates(57.1503, -2.07796))),
+    Cinema("8018", "Cineworld", "Aberdeen - Union Square", Option(Coordinates(57.1436, -2.0969))),
+    Cinema("8015", "Cineworld", "Aldershot", Option(Coordinates(51.25, -0.768377)))
   )
 
   private val ticketBase = "https://www.cineworld.co.uk/ecom-tickets?siteId=1010882&prsntId"

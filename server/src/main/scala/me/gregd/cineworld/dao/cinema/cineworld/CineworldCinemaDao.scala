@@ -26,7 +26,7 @@ class CineworldCinemaDao(
     dao
       .retrieveCinemas()
       .map(
-        _.map(CineworldRepositoryTransformer.toCinema)
+        _.map(CineworldRepositoryTransformer.toCinema(_, None)) //TODO Lookup coordinates
       )
 
   override def retrieveMoviesAndPerformances(cinemaId: String, date: LocalDate): Future[Map[Movie, List[Performance]]] = {

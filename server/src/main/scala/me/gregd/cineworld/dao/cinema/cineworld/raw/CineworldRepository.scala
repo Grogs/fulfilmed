@@ -3,6 +3,7 @@ package me.gregd.cineworld.dao.cinema.cineworld.raw
 import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.config.CineworldConfig
 import me.gregd.cineworld.dao.cinema.cineworld.raw.model._
+import me.gregd.cineworld.util.Clock
 import play.api.libs.json.Json
 import play.api.libs.ws._
 
@@ -12,7 +13,7 @@ import scala.concurrent.duration._
 import scalacache.ScalaCache
 import scalacache.memoization._
 
-class CineworldRepository(ws: WSClient, implicit val cache: ScalaCache[Array[Byte]], config: CineworldConfig) extends LazyLogging {
+class CineworldRepository(ws: WSClient, implicit val cache: ScalaCache[Array[Byte]], config: CineworldConfig, clock: Clock) extends LazyLogging {
 
   implicit val d = Json.format[Showing]
   implicit val c = Json.format[Day]
@@ -20,7 +21,8 @@ class CineworldRepository(ws: WSClient, implicit val cache: ScalaCache[Array[Byt
   implicit val a = Json.format[CinemaResp]
 
   private def curlCinemas(): Future[String] = memoize(1.day) {
-    ws.url(s"${config.baseUrl}/getSites?json=1&max=200")
+    val today = clock.today().toString
+    ws.url(s"${config.baseUrl}/uk/data-api-service/v1/quickbook/10108/cinemas/with-event/until/$today?attr=&lang=en_GB")
       .get()
       .map(_.body)
   }
@@ -43,7 +45,11 @@ class CineworldRepository(ws: WSClient, implicit val cache: ScalaCache[Array[Byt
   }
 
   def retrieveCinemas(): Future[Seq[CinemaResp]] = {
-    curlCinemas().map( r => parse(r).as[Seq[CinemaResp]])
+    curlCinemas().map{ r =>
+      val json = parse(r)
+        val cinemas = json \ "body" \ "cinemas"
+        cinemas.as[Seq[CinemaResp]]
+    }
   }
 
   def retrieve7DayListings(cinema: String): Future[Seq[MovieResp]] = {

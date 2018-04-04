@@ -41,10 +41,10 @@ class CinemaService(movieDao: MovieDao, cineworld: CineworldCinemaDao, vue: VueC
     }
   }
 
-  override def getMoviesAndPerformancesFor(cinemaId: String, dateRaw: String): Future[Map[Movie, List[Performance]]] =
+  override def getMoviesAndPerformancesFor(cinemaId: String, dateRaw: String): Future[Map[Movie, Seq[Performance]]] =
     getMoviesAndPerformances(cinemaId, parse(dateRaw))
 
-  override def getMoviesAndPerformances(cinemaId: String, date: LocalDate): Future[Map[Movie, List[Performance]]] = {
+  override def getMoviesAndPerformances(cinemaId: String, date: LocalDate): Future[Map[Movie, Seq[Performance]]] = {
     //Relying on IDs not conflicting
     Future
       .sequence(

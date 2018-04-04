@@ -15,4 +15,5 @@ trait TypesafeConfigWiring {
   val tmdbConfig = appConfig.tmdb
   val cineworldConfig = appConfig.cineworld
   val vueConfig = appConfig.vue
+  val postcodesIoConfig = appConfig.postcodesIo
 }

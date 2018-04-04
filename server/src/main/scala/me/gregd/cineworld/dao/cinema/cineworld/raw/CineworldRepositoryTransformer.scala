@@ -11,25 +11,15 @@ object CineworldRepositoryTransformer {
   def toCinema(cinemaResp: CinemaResp, coordinates: Option[Coordinates]): Cinema =
     Cinema(cinemaResp.id.toString, "Cineworld", cinemaResp.displayName, coordinates)
 
-  def toMovie(cinemaId: String, movieResp: MovieResp): Map[Film, Map[LocalDate, Seq[Performance]]] =
-    movieResp.TYPD.map { typ =>
-      val showings = movieResp.BD.map(toPerformances(cinemaId)).toMap
-      val film: Film = toFilm(movieResp)
-      film -> showings
-    }.toMap
-
-  def toFilm(movieResp: MovieResp): Film = {
-    val img = s"https://www.cineworld.co.uk/xmedia-cw/repo/feats/posters/${movieResp.code}.jpg"
-    Film(movieResp.code, movieResp.n, img)
+  def toFilm(raw: RawFilm): Film = {
+    val img = s"https://www.cineworld.co.uk/${raw.posterLink}"
+    Film(raw.id, raw.name, img)
   }
 
-  def toPerformances(cinemaId: String)(day: Day): (LocalDate, Seq[Performance]) = {
-    val date = LocalDate.parse(day.date, DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-    val showings = day.P.map { s =>
-      val typ = if (s.is3d) "3D" else "2D"
-      val bookingUrl = s"https://www.cineworld.co.uk/ecom-tickets?siteId=$cinemaId&prsntId=${s.code}"
-      Performance(s.time, !s.sold, typ, bookingUrl, Option(day.date))
-    }
-    date -> showings
+  def toPerformances(raw: RawEvent): Performance = {
+    val typ = if (raw.attributeIds contains "3d") "3D" else "2D"
+    val bookingUrl = s"https://www.cineworld.co.uk/${raw.bookingLink}"
+    val time = raw.eventDateTime.replaceFirst(".*T", "").replaceFirst(":00$", "")
+    Performance(time, !raw.soldOut, typ, bookingUrl, Option(raw.businessDay))
   }
 }

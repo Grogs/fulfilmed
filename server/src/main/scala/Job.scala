@@ -56,7 +56,7 @@ object Job extends App {
 class Listings(cinemaService: CinemaService) {
   val rateLimiter = RateLimiter(2.seconds, 10)
 
-  def retrieve(date: LocalDate): Future[List[(Cinema, Map[Movie, List[Performance]])]] = {
+  def retrieve(date: LocalDate): Future[Seq[(Cinema, Map[Movie, Seq[Performance]])]] = {
     cinemaService
       .getCinemas()
       .flatMap(cinemas =>
@@ -74,7 +74,7 @@ class Store() {
   implicit val performanceFormat = Json.format[Performance]
   implicit val movieFormat = Json.format[Movie]
 
-  def publish(cinema: Cinema, date: LocalDate)(listings: Map[Movie, List[Performance]]) = {
+  def publish(cinema: Cinema, date: LocalDate)(listings: Map[Movie, Seq[Performance]]) = {
     val path = bucket / s"listings-${cinema.id}-$date.json"
     Future {
       val json = Json.toBytes(Json.toJson(listings))

@@ -25,7 +25,7 @@ class CineworldRepositoryTest extends FunSuite with ScalaFutures with Integratio
   }
 
   test("retrieve7DayListings") {
-    cineworld.retrieve7DayListings("1010882").futureValue should not be empty
+    cineworld.retrieveListings("1010882").futureValue should not be empty
   }
 
 }

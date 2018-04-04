@@ -1,31 +1,43 @@
 package me.gregd.cineworld
 
+import me.gregd.cineworld.config.PostcodesIoConfig
 import me.gregd.cineworld.domain.Coordinates
+import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class PostcodeService(baseUrl: String, wSClient: WSClient) {
+class PostcodeService(config: PostcodesIoConfig, wSClient: WSClient) {
 
   object model {
 
     case class Request(postcodes: Seq[String])
 
-    case class Response(status: Int, result: Seq[IndividualResponse])
 
-    case class IndividualResponse(query: String, result: Result)
 
-    case class Result(postcode: String, latitude: Double, longitude: Double)
+    case class Result(postcode: String, latitude: Option[Double], longitude: Option[Double])
+    case class Response(query: String, result: Option[Result])
+    case class BulkResponse(status: Int, result: Seq[Response])
 
+    implicit val a = Json.format[Request]
+    implicit val d = Json.format[Result]
+    implicit val c = Json.format[Response]
+    implicit val b = Json.format[BulkResponse]
   }
 
   def lookup(postcodes: Seq[String]): Future[Map[String, Coordinates]] = {
     import model._
     wSClient
-      .url("api.postcodes.io/postcodes")
-      .post(Request(postcodes))
+      .url(s"${config.baseUrl}/postcodes")
+      .post(Json.toJson(Request(postcodes)))
       .map { resp =>
-        val res = for (IndividualResponse(_, Result(postcode, lat, long)) <- resp.json.as[Response].result) yield postcode -> Coordinates(lat, long)
+        val res =
+          for {
+            Response(_, Some(Result(postcode, lat, long))) <- resp.json.as[BulkResponse].result
+            latitude <- lat
+            longitude <- long
+          } yield postcode -> Coordinates(latitude, longitude)
         res.toMap
       }
   }

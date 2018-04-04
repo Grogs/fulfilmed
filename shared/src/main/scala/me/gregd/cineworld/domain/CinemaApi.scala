@@ -14,9 +14,9 @@ trait CinemaApi {
 
   def getNearbyCinemas(coordinates: Coordinates): Future[Seq[Cinema]]
 
-  def getMoviesAndPerformancesFor(cinemaId: String, date: String): Future[Map[Movie, List[Performance]]]
+  def getMoviesAndPerformancesFor(cinemaId: String, date: String): Future[Map[Movie, Seq[Performance]]]
 }
 
 trait TypesafeCinemaApi extends CinemaApi {
-  def getMoviesAndPerformances(cinemaId: String, date: LocalDate): Future[Map[Movie, List[Performance]]]
+  def getMoviesAndPerformances(cinemaId: String, date: LocalDate): Future[Map[Movie, Seq[Performance]]]
 }

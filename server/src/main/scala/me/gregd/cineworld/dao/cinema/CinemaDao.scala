@@ -11,5 +11,5 @@ import scala.concurrent.Future
 @ImplementedBy(classOf[CineworldCinemaDao])
 trait CinemaDao {
   def retrieveCinemas(): Future[Seq[Cinema]]
-  def retrieveMoviesAndPerformances(cinemaId: String, date: LocalDate): Future[Map[Movie, List[Performance]]]
+  def retrieveMoviesAndPerformances(cinemaId: String, date: LocalDate): Future[Map[Movie, Seq[Performance]]]
 }

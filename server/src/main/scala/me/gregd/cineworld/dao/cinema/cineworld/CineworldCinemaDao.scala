@@ -3,6 +3,7 @@ package me.gregd.cineworld.dao.cinema.cineworld
 import java.time.LocalDate
 
 import com.typesafe.scalalogging.LazyLogging
+import me.gregd.cineworld.PostcodeService
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.cinema.CinemaDao
 import me.gregd.cineworld.dao.cinema.cineworld.raw.{CineworldRepository, CineworldRepositoryTransformer}
@@ -16,46 +17,38 @@ import scala.concurrent.Future
 class CineworldCinemaDao(
     imdb: MovieDao,
     tmdb: TheMovieDB,
-    dao: CineworldRepository
+    dao: CineworldRepository,
+    postcodeService: PostcodeService
 ) extends CinemaDao
     with LazyLogging {
 
   implicit val formats = DefaultFormats
 
   override def retrieveCinemas(): Future[Seq[Cinema]] =
-    dao
-      .retrieveCinemas()
-      .map(
-        _.map(CineworldRepositoryTransformer.toCinema(_, None)) //TODO Lookup coordinates
+    for {
+      rawCinemas <- dao.retrieveCinemas()
+      postcodes = rawCinemas.map(_.postcode)
+      coordinates <- postcodeService.lookup(postcodes)
+    } yield {
+      rawCinemas.map( raw =>
+        CineworldRepositoryTransformer.toCinema(raw, coordinates.get(raw.postcode))
       )
-
-  override def retrieveMoviesAndPerformances(cinemaId: String, date: LocalDate): Future[Map[Movie, List[Performance]]] = {
-
-    def sequence[K, V](m: Map[Future[K], V]): Future[Map[K, V]] = {
-      import cats.Traverse
-      import cats.instances.all._
-      Traverse[({type M[A] = Map[V, A] })#M].sequence(m.map(_.swap)).map(_.map(_.swap))
     }
 
-    dao.retrieve7DayListings(cinemaId).flatMap { rawMovies =>
+  override def retrieveMoviesAndPerformances(cinemaId: String, date: LocalDate): Future[Map[Movie, Seq[Performance]]] = {
+
+    dao.retrieveListings(cinemaId, date).flatMap { listingsBody =>
       logger.debug(s"Retrieving listings for $cinemaId:$date")
+      val performancesById = listingsBody.events.groupBy(_.filmId)
+
       val res = for {
-        movieResp <- rawMovies
-        (film, allPerformances) <- CineworldRepositoryTransformer.toMovie(cinemaId, movieResp)
+        raw <- listingsBody.films
+        film = CineworldRepositoryTransformer.toFilm(raw)
         movie = imdb.toMovie(film)
-        performances = allPerformances.getOrElse(date, Nil).toList
-        if performances.nonEmpty
-      } yield movie -> performances
-      sequence(res.toMap)
+        performances = performancesById(raw.id).map(CineworldRepositoryTransformer.toPerformances)
+      } yield movie.map(_ -> performances)
+
+      Future.sequence(res).map(_.toMap)
     }
   }
-
-  def sequence[A, B](t: (Future[A], Future[B])): Future[(A, B)] = t match {
-    case (a, b) =>
-      for {
-        a <- a
-        b <- b
-      } yield (a, b)
-  }
-
 }

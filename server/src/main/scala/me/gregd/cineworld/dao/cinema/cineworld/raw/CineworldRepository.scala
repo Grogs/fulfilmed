@@ -1,5 +1,7 @@
 package me.gregd.cineworld.dao.cinema.cineworld.raw
 
+import java.time.LocalDate
+
 import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.config.CineworldConfig
 import me.gregd.cineworld.dao.cinema.cineworld.raw.model._
@@ -15,9 +17,9 @@ import scalacache.memoization._
 
 class CineworldRepository(ws: WSClient, implicit val cache: ScalaCache[Array[Byte]], config: CineworldConfig, clock: Clock) extends LazyLogging {
 
-  implicit val d = Json.format[Showing]
-  implicit val c = Json.format[Day]
-  implicit val b = Json.format[MovieResp]
+  implicit val d = Json.format[RawFilm]
+  implicit val c = Json.format[RawEvent]
+  implicit val b = Json.format[ListingsBody]
   implicit val a = Json.format[CinemaResp]
 
   private def curlCinemas(): Future[String] = memoize(1.day) {
@@ -27,8 +29,8 @@ class CineworldRepository(ws: WSClient, implicit val cache: ScalaCache[Array[Byt
       .map(_.body)
   }
 
-  private def curl7DayListings(cinema: String): Future[String] = memoize(6.hours) {
-    val url = s"${config.baseUrl}/pgm-site?si=$cinema&max=365"
+  private def curl7DayListings(cinema: String, date: LocalDate): Future[String] = memoize(6.hours) {
+    val url = s"${config.baseUrl}/uk/data-api-service/v1/quickbook/10108/film-events/in-cinema/$cinema/at-date/$date?attr=&lang=en_GB"
     ws.url(url)
       .get()
       .map(_.body)
@@ -45,16 +47,18 @@ class CineworldRepository(ws: WSClient, implicit val cache: ScalaCache[Array[Byt
   }
 
   def retrieveCinemas(): Future[Seq[CinemaResp]] = {
-    curlCinemas().map{ r =>
+    curlCinemas().map { r =>
       val json = parse(r)
-        val cinemas = json \ "body" \ "cinemas"
-        cinemas.as[Seq[CinemaResp]]
+      val cinemas = json \ "body" \ "cinemas"
+      cinemas.as[Seq[CinemaResp]]
     }
   }
 
-  def retrieve7DayListings(cinema: String): Future[Seq[MovieResp]] = {
-    curl7DayListings(cinema).map(r => parse(r).as[Seq[MovieResp]])
+  def retrieveListings(cinema: String, date: LocalDate): Future[ListingsBody] = {
+    curl7DayListings(cinema, date).map{r =>
+      val films = parse(r) \ "body"
+      films.as[ListingsBody]
+    }
   }
 
 }
-

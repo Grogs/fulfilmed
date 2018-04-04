@@ -43,7 +43,7 @@ object Stubs {
     val notFound: Route = DebuggingDirectives.logRequest(("Not found", Logging.ErrorLevel))(complete("Failed"))
 
     val route: Route = handleExceptions(exceptionHandler) {
-      tmdb.route ~ cineworld.route ~ vue.route ~ omdb.route ~ notFound
+      tmdb.route ~ cineworld.route ~ vue.route ~ omdb.route ~ postcodesio.route ~ notFound
     }
 
     Await.result(Http().bindAndHandle(route, "localhost", 0), 10.seconds)
@@ -141,4 +141,17 @@ object Stubs {
     lazy val config = OmdbConfig(serverBase, "")
   }
 
+  object postcodesio {
+    val route = {
+      (post & path("postcodes")) {
+        complete(
+          HttpEntity(`application/json`,
+            Source.fromResource("postcodesio/response.json")(UTF8).mkString
+          )
+        )
+      }
+    }
+
+    lazy val config = PostcodesIoConfig(serverBase)
+  }
 }

@@ -1,5 +1,6 @@
 package me.gregd.cineworld.wiring
 
+import me.gregd.cineworld.config.PostcodesIoConfig
 import stub.Stubs
 
 trait StubConfigWiring extends ConfigWiring {
@@ -7,4 +8,5 @@ trait StubConfigWiring extends ConfigWiring {
   def tmdbConfig = Stubs.tmdb.config
   def cineworldConfig = Stubs.cineworld.config
   def vueConfig = Stubs.vue.config
+  def postcodesIoConfig = Stubs.postcodesio.config
 }

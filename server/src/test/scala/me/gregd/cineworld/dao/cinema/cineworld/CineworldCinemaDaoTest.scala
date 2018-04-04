@@ -5,6 +5,7 @@ import java.time.LocalDate
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import fakes.FakeRatings
+import me.gregd.cineworld.PostcodeService
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.cinema.cineworld.raw.CineworldRepository
 import me.gregd.cineworld.dao.movies.Movies
@@ -25,7 +26,8 @@ class CineworldCinemaDaoTest extends FunSuite with ScalaFutures with Matchers wi
   val tmdb = new TheMovieDB(wsClient, NoOpCache.cache, Scheduler.global, Stubs.tmdb.config)
   val movieDao = new Movies(tmdb, FakeRatings)
   val cineworldRaw = new CineworldRepository(wsClient, NoOpCache.cache, Stubs.cineworld.config, RealClock)
-  val cineworld = new CineworldCinemaDao(movieDao, tmdb, cineworldRaw)
+  val postcodeService = new PostcodeService(Stubs.postcodesio.config, wsClient)
+  val cineworld = new CineworldCinemaDao(movieDao, tmdb, cineworldRaw, postcodeService)
 
   test("retrieveCinemas") {
     val cinemas = cineworld.retrieveCinemas().futureValue.take(3)
@@ -39,9 +41,9 @@ class CineworldCinemaDaoTest extends FunSuite with ScalaFutures with Matchers wi
   }
 
   val expectedCinemas = List(
-    Cinema("8014", "Cineworld", "Aberdeen - Queens Links", Option(Coordinates(57.1503, -2.07796))),
-    Cinema("8018", "Cineworld", "Aberdeen - Union Square", Option(Coordinates(57.1436, -2.0969))),
-    Cinema("8015", "Cineworld", "Aldershot", Option(Coordinates(51.25, -0.768377)))
+    Cinema("8014", "Cineworld", "Aberdeen - Queens Links", Option(Coordinates(57.1502699571208, -2.07796067079163))),
+    Cinema("8018", "Cineworld", "Aberdeen - Union Square", Option(Coordinates(57.1443735096293, -2.09607620679942))),
+    Cinema("8015", "Cineworld", "Aldershot", Option(Coordinates(51.2496276978637, -0.76918738639163)))
   )
 
   private val ticketBase = "https://www.cineworld.co.uk/ecom-tickets?siteId=1010882&prsntId"

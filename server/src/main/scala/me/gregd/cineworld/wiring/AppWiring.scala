@@ -10,12 +10,11 @@ import me.gregd.cineworld.dao.cinema.vue.raw.VueRepository
 import me.gregd.cineworld.dao.movies.{MovieDao, Movies}
 import me.gregd.cineworld.dao.ratings.Ratings
 import me.gregd.cineworld.util._
-import me.gregd.cineworld.CinemaService
+import me.gregd.cineworld.{CinemaService, PostcodeService}
 import monix.execution.Scheduler
 import org.slf4j.LoggerFactory
 import play.api.libs.ws.WSClient
 import me.gregd.cineworld.domain.CinemaApi
-
 import scalacache.ScalaCache
 
 trait AppWiring extends ConfigWiring {
@@ -46,6 +45,8 @@ trait AppWiring extends ConfigWiring {
 
   lazy val cineworldRepository: CineworldRepository = wire[CineworldRepository]
   lazy val vueRepository: VueRepository = wire[VueRepository]
+
+  lazy val postcodeService: PostcodeService = wire[PostcodeService]
 
   lazy val cineworldDao: CineworldCinemaDao = wire[CineworldCinemaDao]
   lazy val vueDao: VueCinemaDao = wire[VueCinemaDao]

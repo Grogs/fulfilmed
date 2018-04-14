@@ -3,19 +3,19 @@ package me.gregd.cineworld.dao.movies
 
 import com.typesafe.scalalogging.LazyLogging
 import info.debatty.java.stringsimilarity.SorensenDice
+import me.gregd.cineworld.config.MoviesConfig
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.model.TmdbMovie
 import me.gregd.cineworld.dao.ratings.{Ratings, RatingsResult}
 import me.gregd.cineworld.domain.{Film, Format, Movie}
 import monix.execution.FutureUtils.extensions._
 import monix.execution.Scheduler.Implicits.global
-import org.json4s._
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
-class Movies(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with LazyLogging {
+class Movies(tmdb: TheMovieDB, ratings: Ratings, config: MoviesConfig) extends MovieDao with LazyLogging {
 
   def toMovie(film: Film): Future[Movie] = {
     logger.debug(s"Creating movie from $film")
@@ -54,7 +54,7 @@ class Movies(tmdb: TheMovieDB, ratings: Ratings) extends MovieDao with LazyLoggi
       if (age.millis > 10.hours) refresh
     )
     cachedMovies
-  }.timeoutTo(300.millis, Future.successful(Seq.empty))
+  }.timeoutTo(config.cacheTimeout, Future.successful(Seq.empty))
 
   private def allMovies(): Future[Seq[Movie]] = {
     collapse(

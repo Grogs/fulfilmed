@@ -1,7 +1,8 @@
 package me.gregd.cineworld.wiring
 
-import me.gregd.cineworld.config.PostcodesIoConfig
+import me.gregd.cineworld.config.{MoviesConfig, PostcodesIoConfig}
 import stub.Stubs
+import scala.concurrent.duration._
 
 trait StubConfigWiring extends ConfigWiring {
   def omdbConfig = Stubs.omdb.config
@@ -9,4 +10,5 @@ trait StubConfigWiring extends ConfigWiring {
   def cineworldConfig = Stubs.cineworld.config
   def vueConfig = Stubs.vue.config
   def postcodesIoConfig = Stubs.postcodesio.config
+  def moviesConfig = MoviesConfig(1.second)
 }

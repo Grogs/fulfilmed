@@ -1,5 +1,6 @@
 package me.gregd.cineworld.dao.movies
 
+import me.gregd.cineworld.config.MoviesConfig
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.model.TmdbMovie
 import me.gregd.cineworld.dao.ratings.{Ratings, RatingsResult}
@@ -10,6 +11,7 @@ import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FunSuite, Matchers}
 
 import scala.concurrent.Future
+import scala.concurrent.duration._
 
 class MoviesTest extends FunSuite with ScalaFutures with Matchers with MockFactory {
 
@@ -27,7 +29,7 @@ class MoviesTest extends FunSuite with ScalaFutures with Matchers with MockFacto
 
   (ratings.fetchRatings _).when(*).returns(Future.successful(RatingsResult(Some(7.1), Some(59166), None, None)))
 
-  val movieDao = new Movies(tmdb, ratings)
+  val movieDao = new Movies(tmdb, ratings, MoviesConfig(1.second))
 
   test("unknown film can be converted to movie") {
     val film = Film("1", "Test", "")

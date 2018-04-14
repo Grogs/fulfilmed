@@ -1,5 +1,7 @@
 package me.gregd.cineworld.dao.cinema.cineworld.raw
 
+import java.time.LocalDate
+
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import me.gregd.cineworld.util.{NoOpCache, RealClock}
@@ -25,7 +27,9 @@ class CineworldRepositoryTest extends FunSuite with ScalaFutures with Integratio
   }
 
   test("retrieve7DayListings") {
-    cineworld.retrieveListings("1010882").futureValue should not be empty
+    val listings = cineworld.retrieveListings("8112", LocalDate.now()).futureValue
+    listings.films should not be empty
+    listings.events should not be empty
   }
 
 }

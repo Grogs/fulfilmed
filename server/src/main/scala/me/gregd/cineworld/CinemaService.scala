@@ -26,8 +26,8 @@ class CinemaService(movieDao: MovieDao, cineworld: CineworldCinemaDao, vue: VueC
 
   override def getNearbyCinemas(coordinates: Coordinates): Future[Seq[Cinema]] = {
     def distance(c: Cinema): Double = c.coordinates.map(c => haversine(coordinates, c)).getOrElse(Double.MaxValue)
-    val maxDistance = 50
-    val maxResults = 10
+    val maxDistance = 150
+    val maxResults = 50
     val nearbyCinemas = tree.flatMap(_.nearest(coordinates, maxDistance, maxResults))
     nearbyCinemas.map { cinemas =>
       val modifyAndKeepDistance = for {
@@ -37,7 +37,7 @@ class CinemaService(movieDao: MovieDao, cineworld: CineworldCinemaDao, vue: VueC
         distKm = distance(cinema)
         dist = "%.1f".format(distKm)
       } yield distKm -> cinema.copy(name = s"$chain - $name ($dist km)")
-      modifyAndKeepDistance.sortBy(_._1).map(_._2)
+      modifyAndKeepDistance.sortBy(_._1).map(_._2).take(10)
     }
   }
 
@@ -46,13 +46,9 @@ class CinemaService(movieDao: MovieDao, cineworld: CineworldCinemaDao, vue: VueC
 
   override def getMoviesAndPerformances(cinemaId: String, date: LocalDate): Future[Map[Movie, Seq[Performance]]] = {
     //Relying on IDs not conflicting
-    Future
-      .sequence(
-        Seq(
-          cineworld.retrieveMoviesAndPerformances(cinemaId, date),
-          vue.retrieveMoviesAndPerformances(cinemaId, date)
-        ))
-      .map(_.flatten.toMap)
+    val cineworldResults = cineworld.retrieveMoviesAndPerformances(cinemaId, date)
+    val vueResults = vue.retrieveMoviesAndPerformances(cinemaId, date)
+    cineworldResults fallbackTo vueResults
   }
 
   override def getCinemasGrouped() = {

@@ -7,4 +7,5 @@ trait ConfigWiring {
   def cineworldConfig: CineworldConfig
   def vueConfig: VueConfig
   def postcodesIoConfig: PostcodesIoConfig
+  def moviesConfig: MoviesConfig
 }

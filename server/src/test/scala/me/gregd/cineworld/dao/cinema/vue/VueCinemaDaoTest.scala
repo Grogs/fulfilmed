@@ -5,12 +5,14 @@ import java.time.LocalDate
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import fakes.FakeRatings
+import me.gregd.cineworld.config.MoviesConfig
 import me.gregd.cineworld.dao.TheMovieDB
 import me.gregd.cineworld.dao.cinema.vue.raw.VueRepository
 import me.gregd.cineworld.dao.movies.Movies
 import me.gregd.cineworld.util.{FixedClock, NoOpCache}
 import monix.execution.Scheduler
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
+import scala.concurrent.duration._
 import org.scalatest.{FunSuite, Matchers}
 import play.api.libs.ws.ahc.AhcWSClient
 import stub.Stubs
@@ -22,7 +24,7 @@ class VueCinemaDaoTest extends FunSuite with ScalaFutures with IntegrationPatien
   val wsClient = AhcWSClient()(ActorMaterializer()(ActorSystem()))
   val tmdb = new TheMovieDB(wsClient, NoOpCache.cache, Scheduler.global, Stubs.tmdb.config)
   val repo = new VueRepository(wsClient, NoOpCache.cache, Stubs.vue.config)
-  val movieDao = new Movies(tmdb, FakeRatings)
+  val movieDao = new Movies(tmdb, FakeRatings, MoviesConfig(3.seconds))
   val dao = new VueCinemaDao(repo, movieDao, clock)
 
   test("retrieveCinemas") {

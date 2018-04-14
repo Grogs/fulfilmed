@@ -21,13 +21,13 @@ class CinemaServiceTest extends FunSuite with ScalaFutures with Matchers {
 
   test("getMoviesAndPerformances") {
 
-    val res = cinemaService.getMoviesAndPerformances("1010882", date).futureValue.toSeq
+    val res = cinemaService.getMoviesAndPerformances("10032", date).futureValue.toSeq
 
-    res.size shouldBe 11
+    res.size shouldBe 10
 
     val Some((movie, performances)) = res.find(_._1.title == "Guardians Of The Galaxy Vol. 2")
 
-    performances.size shouldBe 4
+    performances.size shouldBe 5
   }
 
   test("getCinemasGrouped") {
@@ -45,9 +45,9 @@ class CinemaServiceTest extends FunSuite with ScalaFutures with Matchers {
 
   test("getNearbyCinemas") {
 
-    val res = cinemaService.getNearbyCinemas(Coordinates(50,0)).futureValue
+    val res = cinemaService.getNearbyCinemas(Coordinates(51.513605, -0.128382)).futureValue
     val nearbyCinemaNames = res.map(_.name)
 
-    nearbyCinemaNames shouldBe Seq("Cineworld - Brighton (90.7 km)", "Cineworld - Eastbourne (91.3 km)", "Cineworld - Chichester (107.8 km)", "Cineworld - Isle Of Wight (120.1 km)", "Cineworld - Crawley (125.3 km)", "Cineworld - Ashford (143.1 km)", "Cineworld - Aldershot (149.2 km)", "Cineworld - Bromley (156.5 km)", "Cineworld - Rochester (157.1 km)", "Cineworld - London - Bexleyheath (162.3 km)")
+    nearbyCinemaNames shouldBe Seq("Cineworld - Aldershot (53.3 km)", "Vue - Bury - The Rock (273.9 km)", "Cineworld - Aberdeen - Union Square (639.1 km)", "Cineworld - Aberdeen - Queens Links (639.5 km)")
   }
 }

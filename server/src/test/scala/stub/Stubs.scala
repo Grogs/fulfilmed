@@ -84,7 +84,7 @@ object Stubs {
             Source.fromResource("cineworld/cinemas.json")(UTF8).mkString
           )
         )
-      } ~ (get & path("pgm-site") & parameter('si, 'max)) { (cinemaId, _) =>
+      } ~ (get & path("uk" / "data-api-service" / "v1" / "quickbook" / "10108" / "film-events" / "in-cinema" / LongNumber / "at-date" / Segment) & parameter('attr, 'lang)) { (cinemaId, date, _, _) =>
         complete(
           HttpEntity(`application/json`,
             Source.fromResource(s"cineworld/listings-$cinemaId.json")(UTF8).mkString

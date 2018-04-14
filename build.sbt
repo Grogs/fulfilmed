@@ -1,6 +1,6 @@
 lazy val commonSettings = Seq(
   organization := "me.gregd",
-  version := "1.7",
+  git.baseVersion := "1.8",
   scalaVersion := "2.12.4",
 )
 
@@ -8,7 +8,7 @@ resolvers += Resolver.sonatypeRepo("releases")
 
 addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3")
 
-lazy val client = project.enablePlugins(ScalaJSBundlerPlugin, ScalaJSWeb).settings(
+lazy val client = project.enablePlugins(ScalaJSBundlerPlugin, ScalaJSWeb, GitVersioning).settings(
   commonSettings,
   name := "fulfilmed-scala-frontend",
   scalaJSUseMainModuleInitializer in Compile := true,
@@ -94,7 +94,7 @@ lazy val shared = crossProject.crossType(CrossType.Pure).settings(
     "com.lihaoyi" %%% "scalatags" % "0.6.7",
   ),
   commonSettings,
-).jsConfigure(_ enablePlugins ScalaJSWeb)
+).jsConfigure(_ enablePlugins ScalaJSWeb).enablePlugins(GitVersioning)
 
 lazy val sharedJvm = shared.jvm
 lazy val sharedJs = shared.js

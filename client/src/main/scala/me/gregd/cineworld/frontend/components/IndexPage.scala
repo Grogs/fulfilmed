@@ -55,8 +55,6 @@ import scala.concurrent.Future
     def selectCinema(e: Event): Unit = {
       val cinemaId = e.target.asInstanceOf[Input].value
       setState(_.copy(redirect = Some(cinemaId)))
-//      forceUpdate()
-//      props.history.push("#!/films/1010829/today")
     }
 
     def cinemaSelect(typ: String, allCinemas: Map[String, Seq[Cinema]]) = {
@@ -118,8 +116,7 @@ import scala.concurrent.Future
 
     state.redirect match {
       case Some(cinemaId) =>
-//        Redirect(s"/films")
-        Redirect(s"/films/$cinemaId/today")
+        Redirect(s"/films/$cinemaId/today", push = true)
       case None =>
         div(id := "indexPage")(
           div(className := IndexStyle.top)(

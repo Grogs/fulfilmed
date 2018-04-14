@@ -66,7 +66,7 @@ object Switch extends ExternalComponentNoProps {
 }
 
 @react object Redirect extends ExternalComponent {
-  case class Props(to: String)
+  case class Props(to: String, push: Boolean = false)
   override val component = ReactRouterDOM.Redirect
 }
 

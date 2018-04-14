@@ -1,4 +1,4 @@
-# Fulfilmed [![Build Status](https://travis-ci.org/Grogs/cinema-service.svg?branch=master)](https://travis-ci.org/Grogs/cinema-service)
+# Fulfilmed [![Build Status](https://travis-ci.org/Grogs/cinema-service.svg?branch=master)](https://travis-ci.org/Grogs/fulfilmed)
 
 UK Cinema movie listings and ratings, supports Cineworld and Vue cinemas.
 

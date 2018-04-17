@@ -21,6 +21,7 @@
 .FilmsStyle-header {
     width: 100%;
     background-color: #690B0B;
+    padding: 0.3em;
     text-align: center;
 }
 
@@ -30,14 +31,14 @@
 }
 
 .FilmsStyle-select {
-    margin: 0.5em 0.1em 0.5em 0.1em;
+    margin: 0em 1em 0em 0.8em;
     border: 0.01em solid #7F1717;
     font-family: Calibri, Verdana, Arial, sans-serif;
     font-size: 1em;
     height: 1.8em;
     color: white;
     min-width: 190px;
-    background-color: #640F0F;
+    background-color: hsl(0, 81%, 16%);
 }
 
 .FilmsStyle-label {
@@ -52,7 +53,7 @@
     width: 296px;
     height: 434px;
     position: relative;
-    border: solid 4px #690B0B;
+    border: solid 1px #404040;
     overflow: hidden;
     margin: 5px;
     display: inline-block;

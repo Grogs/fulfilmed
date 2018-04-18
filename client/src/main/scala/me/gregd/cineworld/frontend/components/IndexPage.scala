@@ -116,7 +116,7 @@ import scala.concurrent.Future
 
     state.redirect match {
       case Some(cinemaId) =>
-        Redirect(s"/films/$cinemaId/today", push = true)
+        Redirect(s"/films/$cinemaId/today", push = Some(true))
       case None =>
         div(id := "indexPage")(
           div(className := IndexStyle.top)(

@@ -9,9 +9,7 @@ import play.api.Mode.{Dev, Prod, Test}
 
 import scalacache.ScalaCache
 
-trait CacheWiring {
-
-  def mode: Mode
+class CacheWiring(mode: Mode) {
 
   lazy val cache: ScalaCache[Array[Byte]] = {
     val home = System.getProperty("user.home")

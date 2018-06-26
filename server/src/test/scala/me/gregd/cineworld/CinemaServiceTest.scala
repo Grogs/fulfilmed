@@ -2,12 +2,18 @@ package me.gregd.cineworld
 
 import java.time.LocalDate
 
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
+import me.gregd.cineworld.config.{Config, MoviesConfig}
 import me.gregd.cineworld.domain.Coordinates
-import me.gregd.cineworld.util.FixedClock
-import me.gregd.cineworld.wiring.TestAppWiring
+import me.gregd.cineworld.util.{FixedClock, NoOpCache}
+import me.gregd.cineworld.wiring.AppWiring
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FunSuite, Matchers}
+import play.api.libs.ws.ahc.AhcWSClient
+import stub.Stubs
+import scala.concurrent.duration._
 
 class CinemaServiceTest extends FunSuite with ScalaFutures with Matchers {
 
@@ -17,7 +23,11 @@ class CinemaServiceTest extends FunSuite with ScalaFutures with Matchers {
 
   val fakeClock = FixedClock(date)
 
-  val cinemaService = new TestAppWiring(fakeClock).cinemaService
+  val config = Config(Stubs.omdb.config, Stubs.tmdb.config, Stubs.cineworld.config, Stubs.vue.config, Stubs.postcodesio.config, MoviesConfig(1.second))
+
+  val wsClient = AhcWSClient()(ActorMaterializer()(ActorSystem()))
+
+  val cinemaService = new AppWiring(wsClient, NoOpCache.cache, fakeClock, config).cinemaService
 
   test("getMoviesAndPerformances") {
 
@@ -48,6 +58,11 @@ class CinemaServiceTest extends FunSuite with ScalaFutures with Matchers {
     val res = cinemaService.getNearbyCinemas(Coordinates(51.513605, -0.128382)).futureValue
     val nearbyCinemaNames = res.map(_.name)
 
-    nearbyCinemaNames shouldBe Seq("Cineworld - Aldershot (53.3 km)", "Vue - Bury - The Rock (273.9 km)", "Cineworld - Aberdeen - Union Square (639.1 km)", "Cineworld - Aberdeen - Queens Links (639.5 km)")
+    nearbyCinemaNames shouldBe Seq(
+      "Cineworld - Aldershot (53.3 km)",
+      "Vue - Bury - The Rock (273.9 km)",
+      "Cineworld - Aberdeen - Union Square (639.1 km)",
+      "Cineworld - Aberdeen - Queens Links (639.5 km)"
+    )
   }
 }

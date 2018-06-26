@@ -5,7 +5,7 @@ import play.api.Mode
 import play.api.Mode.Prod
 import play.api.libs.ws.WSClient
 
-class ProdAppWiring(val wsClient: WSClient) extends AppWiring with CacheWiring with TypesafeConfigWiring {
+class ProdAppWiring(val wsClient: WSClient) {
   val clock: Clock = RealClock
   val mode: Mode = Prod
 }

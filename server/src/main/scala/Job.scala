@@ -5,27 +5,40 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import better.files._
 import me.gregd.cineworld.CinemaService
+import me.gregd.cineworld.config.Config
 import me.gregd.cineworld.domain.{Cinema, Coordinates, Movie, Performance}
-import me.gregd.cineworld.util.RateLimiter
-import me.gregd.cineworld.wiring.ProdAppWiring
+import me.gregd.cineworld.util.{NoOpCache, RateLimiter, RealClock}
+import me.gregd.cineworld.wiring.AppWiring
 import play.api.libs.json.Json
 import play.api.libs.ws.ahc.AhcWSClient
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration.Inf
-import scala.concurrent.{Await, Future, blocking}
 import scala.concurrent.duration._
+import scala.concurrent.{Await, Future, blocking}
 
 object Job extends App {
 
   private val actorSystem = ActorSystem()
 
   val wsClient = AhcWSClient()(ActorMaterializer()(actorSystem))
-  val wiring = new ProdAppWiring(wsClient)
+
+  val config = Config.load() match {
+    case Left(failures) =>
+      System.err.println(failures.toList.mkString("Failed to read config, errors:\n\t", "\n\t", ""))
+      throw new IllegalArgumentException("Invalid config")
+    case Right(conf) => conf
+  }
+
+  val wiring = new AppWiring(wsClient, NoOpCache.cache, RealClock, config)
 
   val cinemaService = wiring.cinemaService
-  //  TODO make sure movies cache is warm first
-  val listings = new Listings(cinemaService)
+
+  println("Refreshing movies cache")
+  Await.result(wiring.movieDao.refresh(), 2.minutes)
+  println("Refreshed movies cache")
+
+  val listings = new ListingsService(cinemaService)
 
   val start = System.currentTimeMillis()
 
@@ -33,6 +46,7 @@ object Job extends App {
 
   val date = LocalDate.now plusDays 1
 
+  println("Retrieving listings")
   val res = listings
     .retrieve(date)
     .flatMap(eventualListings =>
@@ -42,7 +56,7 @@ object Job extends App {
     })
 
   Await.result(res, Inf)
-
+  println("Retrieved listings")
 
   val end = System.currentTimeMillis()
 
@@ -53,7 +67,7 @@ object Job extends App {
   wsClient.close()
 }
 
-class Listings(cinemaService: CinemaService) {
+class ListingsService(cinemaService: CinemaService) {
   val rateLimiter = RateLimiter(2.seconds, 10)
 
   def retrieve(date: LocalDate): Future[Seq[(Cinema, Map[Movie, Seq[Performance]])]] = {
@@ -68,7 +82,7 @@ class Listings(cinemaService: CinemaService) {
 }
 
 class Store() {
-  val bucket = File(URI.create("gs://fulfilmed-listings"))
+  val bucket = File.currentWorkingDirectory
 
   implicit val coordinatesFormat = Json.format[Coordinates]
   implicit val performanceFormat = Json.format[Performance]

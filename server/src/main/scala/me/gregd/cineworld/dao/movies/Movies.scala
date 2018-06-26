@@ -1,6 +1,5 @@
 package me.gregd.cineworld.dao.movies
 
-
 import com.typesafe.scalalogging.LazyLogging
 import info.debatty.java.stringsimilarity.SorensenDice
 import me.gregd.cineworld.config.MoviesConfig
@@ -37,21 +36,29 @@ class Movies(tmdb: TheMovieDB, ratings: Ratings, config: MoviesConfig) extends M
 
   private var cachedMovies: Future[Seq[Movie]] = Future.failed(new UninitializedError)
   private var lastCached: Long = 0
-  def allMoviesCached() = {
-    def refresh = {
-      logger.info(s"refreshing movies cache, old value:\n$cachedMovies")
-      val start = System.currentTimeMillis()
-      cachedMovies = allMovies()
-      def elapsed = (System.currentTimeMillis() - start) / 1000
-      cachedMovies.onComplete{
-        case Failure(ex) => logger.error(s"Failed to update movie cache (after $elapsed seconds)", ex)
-        case Success(movies) => logger.info(s"Movies cache updates with ${movies.length} items. Took $elapsed seconds.")
-      }
-      lastCached = System.currentTimeMillis()
+
+  def refresh(): Future[Unit] = {
+    logger.info(s"refreshing movies cache, old value:\n$cachedMovies")
+    val start = System.currentTimeMillis()
+    cachedMovies = allMovies()
+    lastCached = System.currentTimeMillis()
+
+    def elapsed = (System.currentTimeMillis() - start) / 1000
+
+    cachedMovies.transform {
+      case Failure(ex) =>
+        logger.error(s"Failed to update movie cache (after $elapsed seconds)", ex)
+        Failure(ex)
+      case Success(movies) =>
+        logger.info(s"Movies cache updates with ${movies.length} items. Took $elapsed seconds.")
+        Success(())
     }
+  }
+
+  def allMoviesCached() = {
     val age = System.currentTimeMillis() - lastCached
     this.synchronized(
-      if (age.millis > 10.hours) refresh
+      if (age.millis > 10.hours) refresh()
     )
     cachedMovies
   }.timeoutTo(config.cacheTimeout, Future.successful(Seq.empty))
@@ -117,7 +124,7 @@ class Movies(tmdb: TheMovieDB, ratings: Ratings, config: MoviesConfig) extends M
 
   private def sequence[A, B](ot: Option[(A, B)]): (Option[A], Option[B]) = {
     ot match {
-      case None => None -> None
+      case None         => None -> None
       case Some((a, b)) => Option(a) -> Option(b)
     }
   }

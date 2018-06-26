@@ -31,6 +31,7 @@ lazy val client = project.enablePlugins(ScalaJSBundlerPlugin, ScalaJSWeb, GitVer
     "history" -> "4.7.2",
   ),
   emitSourceMaps in fullOptJS := true,
+//  webpackDevServerExtraArgs := Seq("--inline", "--hot"),
 ).dependsOn(sharedJs)
 
 
@@ -38,6 +39,7 @@ lazy val server = project.settings(
   commonSettings,
   name := "fulfilmed",
   dockerRepository := Some("grogs"),
+//  dockerUpdateLatest := true,
   buildInfoKeys := Seq[BuildInfoKey](name, version, git.gitHeadCommit, git.gitHeadMessage),
   buildInfoOptions ++= Seq(BuildInfoOption.BuildTime, BuildInfoOption.ToJson),
   buildInfoPackage := "fulfilmed",

@@ -3,6 +3,7 @@ package me.gregd.cineworld
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import me.gregd.cineworld.domain.Coordinates
+import me.gregd.cineworld.integration.PostcodeService
 import org.scalatest.{FunSuite, Matchers}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import play.api.libs.ws.ahc.AhcWSClient

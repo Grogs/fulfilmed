@@ -2,6 +2,8 @@ package me.gregd.cineworld.domain
 
 import java.time.LocalDate
 
+import me.gregd.cineworld.domain.model.{Movie, Performance}
+
 import scala.concurrent.Future
 
 trait CinemaApi {

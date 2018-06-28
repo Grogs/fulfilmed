@@ -4,15 +4,17 @@ import java.time.LocalDate
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import me.gregd.cineworld.config.{Config, MoviesConfig}
+import me.gregd.cineworld.wiring.MoviesConfig
 import me.gregd.cineworld.domain.Coordinates
 import me.gregd.cineworld.util.{FixedClock, NoOpCache}
-import me.gregd.cineworld.wiring.AppWiring
+import me.gregd.cineworld.wiring.{Config, DomainWiring, IntegrationWiring, MoviesConfig}
+import monix.execution.Scheduler
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Span}
 import org.scalatest.{FunSuite, Matchers}
 import play.api.libs.ws.ahc.AhcWSClient
 import stub.Stubs
+
 import scala.concurrent.duration._
 
 class CinemaServiceTest extends FunSuite with ScalaFutures with Matchers {
@@ -27,7 +29,9 @@ class CinemaServiceTest extends FunSuite with ScalaFutures with Matchers {
 
   val wsClient = AhcWSClient()(ActorMaterializer()(ActorSystem()))
 
-  val cinemaService = new AppWiring(wsClient, NoOpCache.cache, fakeClock, config).cinemaService
+  val integrationWiring = new IntegrationWiring(wsClient, NoOpCache.cache, fakeClock, Scheduler.global, config)
+
+  val cinemaService = new DomainWiring(fakeClock, config, integrationWiring).cinemaService
 
   test("getMoviesAndPerformances") {
 

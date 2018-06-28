@@ -1,6 +1,6 @@
 package me.gregd.cineworld.frontend.components
 
-import me.gregd.cineworld.domain.{Movie, Performance}
+import me.gregd.cineworld.domain.model.{Movie, Performance}
 import me.gregd.cineworld.frontend.components.Sort.Sort
 import me.gregd.cineworld.frontend.styles.FilmsStyle
 import me.gregd.cineworld.frontend.util.Loadable

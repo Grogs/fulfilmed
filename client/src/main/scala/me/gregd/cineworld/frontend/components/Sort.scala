@@ -1,6 +1,6 @@
 package me.gregd.cineworld.frontend.components
 
-import me.gregd.cineworld.domain.{Movie, Performance}
+import me.gregd.cineworld.domain.model.{Movie, Performance}
 
 object Sort {
   type Entry = (Movie, Seq[Performance])

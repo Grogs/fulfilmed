@@ -1,18 +1,13 @@
-import ch.qos.logback.classic.{Logger, LoggerContext}
 import com.softwaremill.macwire._
-import me.gregd.cineworld.config.Config
-import me.gregd.cineworld.util.{Clock, InMemoryLog, InMemoryLogbackAppender, RealClock}
-import me.gregd.cineworld.wiring.{AppWiring, CacheWiring}
-import me.gregd.cineworld.{CinemaController, DebugController}
-import org.slf4j.LoggerFactory
+import me.gregd.cineworld.util._
+import me.gregd.cineworld.wiring._
+import monix.execution.Scheduler
 import play.api.ApplicationLoader.Context
 import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.mvc.EssentialFilter
-import play.api.routing.Router
-import play.api.{Application, ApplicationLoader, BuiltInComponentsFromContext, Mode}
+import play.api.{Application, ApplicationLoader, BuiltInComponentsFromContext}
 import play.filters.gzip.GzipFilterComponents
 import play.filters.hosts.AllowedHostsComponents
-import router.Routes
 import scalacache.ScalaCache
 
 class PlayAppLoader extends ApplicationLoader {
@@ -40,32 +35,15 @@ class PlayWiring(context: Context)
 
   val cache: ScalaCache[Array[Byte]] = new CacheWiring(mode).cache
 
-  val appWiring: AppWiring = new AppWiring(wsClient, cache, clock, config)
+  val integrationWiring = new IntegrationWiring(wsClient, cache, clock, Scheduler.global, config)
+  val domainWiring: DomainWiring = new DomainWiring(clock, config, integrationWiring)
+  val webWiring: WebWiring = wire[WebWiring]
 
-  val inMemoryLog = new InMemoryLog()
-
-  val inMemoryAppender = new InMemoryLogbackAppender(inMemoryLog)
-  inMemoryAppender.setContext(LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext])
-  inMemoryAppender.start()
-
-  LoggerFactory.getLogger("ROOT").asInstanceOf[Logger].addAppender(inMemoryAppender)
-
-  import appWiring._
 
   lazy val defaults = new controllers.Default
 
-  lazy val loggingFilter = wire[LoggingFilter]
 
-  def httpFilters: Seq[EssentialFilter] = Seq(allowedHostsFilter, gzipFilter, loggingFilter)
+  def httpFilters: Seq[EssentialFilter] = Seq(allowedHostsFilter, gzipFilter, webWiring.loggingFilter)
 
-
-
-  lazy val cinemaController: CinemaController = wire[CinemaController]
-  lazy val debugController: DebugController = wire[DebugController]
-
-  lazy val router: Router = {
-    // add the prefix string in local scope for the Routes constructor
-    val prefix: String = "/"
-    wire[Routes]
-  }
+  lazy val router = webWiring.routes
 }

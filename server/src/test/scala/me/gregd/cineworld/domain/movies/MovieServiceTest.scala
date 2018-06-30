@@ -1,8 +1,9 @@
 package me.gregd.cineworld.domain.movies
 
-import me.gregd.cineworld.dao.ratings.{OmdbService, RatingsResult}
+import me.gregd.cineworld.dao.ratings.{OmdbIntegrationService, RatingsResult}
 import me.gregd.cineworld.domain.model.{Film, Movie}
-import me.gregd.cineworld.integration.tmdb.TmdbService
+import me.gregd.cineworld.domain.service.MovieService
+import me.gregd.cineworld.integration.tmdb.TmdbIntegrationService
 import me.gregd.cineworld.integration.tmdb.model.TmdbMovie
 import me.gregd.cineworld.wiring.MoviesConfig
 import org.scalamock.scalatest.MockFactory
@@ -13,12 +14,12 @@ import org.scalatest.{FunSuite, Matchers}
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class MoviesTest extends FunSuite with ScalaFutures with Matchers with MockFactory {
+class MovieServiceTest extends FunSuite with ScalaFutures with Matchers with MockFactory {
 
   implicit val defaultPatienceConfig = PatienceConfig(Span(2500, Millis))
 
-  val tmdb = stub[TmdbService]
-  val ratings = stub[OmdbService]
+  val tmdb = stub[TmdbIntegrationService]
+  val ratings = stub[OmdbIntegrationService]
 
   (tmdb.fetchMovies _).when().returns(Future.successful(Vector(someTmdbMovie)))
   (tmdb.fetchImdbId _).when(*).onCall{(id: String) => id match {
@@ -29,7 +30,7 @@ class MoviesTest extends FunSuite with ScalaFutures with Matchers with MockFacto
 
   (ratings.fetchRatings _).when(*).returns(Future.successful(RatingsResult(Some(7.1), Some(59166), None, None)))
 
-  val movieDao = new Movies(tmdb, ratings, MoviesConfig(1.second))
+  val movieDao = new MovieService(tmdb, ratings, MoviesConfig(1.second))
 
   test("unknown film can be converted to movie") {
     val film = Film("1", "Test", "")

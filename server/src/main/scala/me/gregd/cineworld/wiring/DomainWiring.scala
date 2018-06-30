@@ -1,8 +1,8 @@
 package me.gregd.cineworld.wiring
 
 import com.softwaremill.macwire.wire
-import me.gregd.cineworld.domain.movies.{MovieDao, Movies}
-import me.gregd.cineworld.domain.{CinemaService, CineworldCinemaDao, VueCinemaDao}
+import me.gregd.cineworld.domain.{CinemasService, ListingsService}
+import me.gregd.cineworld.domain.service._
 import me.gregd.cineworld.util._
 
 class DomainWiring(clock: Clock, config: Config, integrationWiring: IntegrationWiring) {
@@ -10,12 +10,14 @@ class DomainWiring(clock: Clock, config: Config, integrationWiring: IntegrationW
   import config.movies
   import integrationWiring.{cineworldService, postcodeService, ratings, tmdbService, vueService}
 
-  lazy val cineworldDao = wire[CineworldCinemaDao]
+  lazy val cineworldDao = wire[CineworldService]
 
-  lazy val vueDao = wire[VueCinemaDao]
+  lazy val vueDao = wire[VueService]
 
-  lazy val movieDao: Movies with MovieDao = wire[Movies]
+  lazy val movieDao: MovieService = wire[MovieService]
 
-  lazy val cinemaService: CinemaService = wire[CinemaService]
+  lazy val cinemaService: CinemasService = wire[DefaultCinemasService]
+
+  lazy val listingService: ListingsService = wire[DefaultCinemaListingsService]
 
 }

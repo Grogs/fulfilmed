@@ -14,7 +14,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class TmdbService(ws: WSClient, implicit val cache: ScalaCache[Array[Byte]], scheduler: Scheduler, config: TmdbConfig) extends LazyLogging {
+class TmdbIntegrationService(ws: WSClient, implicit val cache: ScalaCache[Array[Byte]], scheduler: Scheduler, config: TmdbConfig) extends LazyLogging {
 
   private lazy val key = config.apiKey
 

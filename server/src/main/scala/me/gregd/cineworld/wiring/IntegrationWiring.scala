@@ -1,11 +1,11 @@
 package me.gregd.cineworld.wiring
 
 import com.softwaremill.macwire.wire
-import me.gregd.cineworld.dao.ratings.OmdbService
-import me.gregd.cineworld.integration.PostcodeService
-import me.gregd.cineworld.integration.cineworld.CineworldService
-import me.gregd.cineworld.integration.tmdb.TmdbService
-import me.gregd.cineworld.integration.vue.VueService
+import me.gregd.cineworld.dao.ratings.OmdbIntegrationService
+import me.gregd.cineworld.integration.PostcodeIoIntegrationService
+import me.gregd.cineworld.integration.cineworld.CineworldIntegrationService
+import me.gregd.cineworld.integration.tmdb.TmdbIntegrationService
+import me.gregd.cineworld.integration.vue.VueIntegrationService
 import me.gregd.cineworld.util.Clock
 import monix.execution.Scheduler
 import play.api.libs.ws.WSClient
@@ -15,13 +15,13 @@ class IntegrationWiring(wsClient: WSClient, cache: ScalaCache[Array[Byte]], cloc
 
   import config.{vue, cineworld, omdb, tmdb, postcodesIo}
 
-  lazy val tmdbService: TmdbService = wire[TmdbService]
+  lazy val tmdbService: TmdbIntegrationService = wire[TmdbIntegrationService]
 
-  lazy val ratings: OmdbService = wire[OmdbService]
+  lazy val ratings: OmdbIntegrationService = wire[OmdbIntegrationService]
 
-  lazy val postcodeService: PostcodeService = wire[PostcodeService]
+  lazy val postcodeService: PostcodeIoIntegrationService = wire[PostcodeIoIntegrationService]
 
-  lazy val cineworldService: CineworldService = wire[CineworldService]
+  lazy val cineworldService: CineworldIntegrationService = wire[CineworldIntegrationService]
 
-  lazy val vueService: VueService = wire[VueService]
+  lazy val vueService: VueIntegrationService = wire[VueIntegrationService]
 }

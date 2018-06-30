@@ -8,7 +8,7 @@ import play.api.libs.ws.WSClient
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class PostcodeService(config: PostcodesIoConfig, wSClient: WSClient) {
+class PostcodeIoIntegrationService(config: PostcodesIoConfig, wSClient: WSClient) {
 
   object model {
 

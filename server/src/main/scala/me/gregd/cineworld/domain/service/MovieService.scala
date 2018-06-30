@@ -1,10 +1,10 @@
-package me.gregd.cineworld.domain.movies
+package me.gregd.cineworld.domain.service
 
 import com.typesafe.scalalogging.LazyLogging
 import info.debatty.java.stringsimilarity.SorensenDice
-import me.gregd.cineworld.dao.ratings.{OmdbService, RatingsResult}
+import me.gregd.cineworld.dao.ratings.{OmdbIntegrationService, RatingsResult}
 import me.gregd.cineworld.domain.model.{Film, Format, Movie}
-import me.gregd.cineworld.integration.tmdb.TmdbService
+import me.gregd.cineworld.integration.tmdb.TmdbIntegrationService
 import me.gregd.cineworld.integration.tmdb.model.TmdbMovie
 import me.gregd.cineworld.wiring.MoviesConfig
 import monix.execution.FutureUtils.extensions._
@@ -14,7 +14,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
-class Movies(tmdb: TmdbService, ratings: OmdbService, config: MoviesConfig) extends MovieDao with LazyLogging {
+class MovieService(tmdb: TmdbIntegrationService, ratings: OmdbIntegrationService, config: MoviesConfig) extends LazyLogging {
 
   def toMovie(film: Film): Future[Movie] = {
     logger.debug(s"Creating movie from $film")

@@ -15,7 +15,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class CineworldService(ws: WSClient, implicit val cache: ScalaCache[Array[Byte]], config: CineworldConfig, clock: Clock) extends LazyLogging {
+class CineworldIntegrationService(ws: WSClient, implicit val cache: ScalaCache[Array[Byte]], config: CineworldConfig, clock: Clock) extends LazyLogging {
 
   implicit val d = Json.format[RawFilm]
   implicit val c = Json.format[RawEvent]

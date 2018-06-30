@@ -7,10 +7,10 @@ import akka.stream.ActorMaterializer
 import fakes.FakeOmdbService
 import me.gregd.cineworld.domain._
 import me.gregd.cineworld.domain.model.{Film, Movie, Performance}
-import me.gregd.cineworld.domain.movies.Movies
-import me.gregd.cineworld.integration.PostcodeService
-import me.gregd.cineworld.integration.cineworld.CineworldService
-import me.gregd.cineworld.integration.tmdb.TmdbService
+import me.gregd.cineworld.domain.service.{CineworldService, MovieService}
+import me.gregd.cineworld.integration.PostcodeIoIntegrationService
+import me.gregd.cineworld.integration.cineworld.CineworldIntegrationService
+import me.gregd.cineworld.integration.tmdb.TmdbIntegrationService
 import me.gregd.cineworld.util.{NoOpCache, RealClock}
 import me.gregd.cineworld.wiring.MoviesConfig
 import monix.execution.Scheduler
@@ -22,16 +22,16 @@ import stub.Stubs
 
 import scala.concurrent.duration._
 
-class CineworldCinemaDaoTest extends FunSuite with ScalaFutures with Matchers with Eventually {
+class CineworldServiceTest extends FunSuite with ScalaFutures with Matchers with Eventually {
 
   implicit val defaultPatienceConfig = PatienceConfig(Span(3000, Millis))
 
   val wsClient = AhcWSClient()(ActorMaterializer()(ActorSystem()))
-  val tmdb = new TmdbService(wsClient, NoOpCache.cache, Scheduler.global, Stubs.tmdb.config)
-  val movieDao = new Movies(tmdb, FakeOmdbService, MoviesConfig(1.second))
-  val cineworldRaw = new CineworldService(wsClient, NoOpCache.cache, Stubs.cineworld.config, RealClock)
-  val postcodeService = new PostcodeService(Stubs.postcodesio.config, wsClient)
-  val cineworld = new CineworldCinemaDao(cineworldRaw, postcodeService)
+  val tmdb = new TmdbIntegrationService(wsClient, NoOpCache.cache, Scheduler.global, Stubs.tmdb.config)
+  val movieDao = new MovieService(tmdb, FakeOmdbService, MoviesConfig(1.second))
+  val cineworldRaw = new CineworldIntegrationService(wsClient, NoOpCache.cache, Stubs.cineworld.config, RealClock)
+  val postcodeService = new PostcodeIoIntegrationService(Stubs.postcodesio.config, wsClient)
+  val cineworld = new CineworldService(cineworldRaw, postcodeService)
 
   test("retrieveCinemas") {
     val cinemas = cineworld.retrieveCinemas().futureValue.take(3)

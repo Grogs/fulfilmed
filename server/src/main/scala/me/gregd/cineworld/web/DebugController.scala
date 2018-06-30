@@ -2,11 +2,11 @@ package me.gregd.cineworld.web
 
 import com.typesafe.scalalogging.LazyLogging
 import fulfilmed.BuildInfo
-import me.gregd.cineworld.dao.ratings.OmdbService
+import me.gregd.cineworld.dao.ratings.OmdbIntegrationService
 import me.gregd.cineworld.domain.model.Movie
-import me.gregd.cineworld.domain.movies.Movies
-import me.gregd.cineworld.domain.{Cinema, CinemaApi, Coordinates}
-import me.gregd.cineworld.integration.tmdb.TmdbService
+import me.gregd.cineworld.domain.service.MovieService
+import me.gregd.cineworld.domain.{Cinema, CinemasService, Coordinates}
+import me.gregd.cineworld.integration.tmdb.TmdbIntegrationService
 import me.gregd.cineworld.util.InMemoryLog
 import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, Action, ControllerComponents}
@@ -15,7 +15,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 
-class DebugController(tmdb: TmdbService, movies: Movies, ratingService: OmdbService, cinemaApi: CinemaApi, inMemoryLog: InMemoryLog, cc: ControllerComponents) extends AbstractController(cc)
+class DebugController(tmdb: TmdbIntegrationService, movies: MovieService, ratingService: OmdbIntegrationService, cinemaApi: CinemasService, inMemoryLog: InMemoryLog, cc: ControllerComponents) extends AbstractController(cc)
     with LazyLogging {
 
   implicit val movieFormat = Json.format[Movie]

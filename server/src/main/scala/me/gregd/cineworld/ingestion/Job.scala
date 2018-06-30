@@ -7,6 +7,7 @@ import akka.stream.ActorMaterializer
 import better.files._
 import me.gregd.cineworld.domain._
 import me.gregd.cineworld.domain.model.{Movie, Performance}
+import me.gregd.cineworld.domain.service.DefaultCinemasService
 import me.gregd.cineworld.util.{NoOpCache, RateLimiter, RealClock}
 import me.gregd.cineworld.wiring.{Config, DomainWiring, IntegrationWiring}
 import monix.execution.Scheduler
@@ -34,12 +35,13 @@ object Job extends App {
   val wiring = new DomainWiring(RealClock, config, new IntegrationWiring(wsClient, NoOpCache.cache, RealClock, Scheduler.global, config))
 
   val cinemaService = wiring.cinemaService
+  val listingsService = wiring.listingService
 
   println("Refreshing movies cache")
   Await.result(wiring.movieDao.refresh(), 2.minutes)
   println("Refreshed movies cache")
 
-  val listings = new ListingsService(cinemaService)
+  val listings = new AllListingsService(cinemaService, listingsService)
 
   val start = System.currentTimeMillis()
 
@@ -68,7 +70,7 @@ object Job extends App {
   wsClient.close()
 }
 
-class ListingsService(cinemaService: CinemaService) {
+class AllListingsService(cinemaService: CinemasService, listingsService: ListingsService) {
   val rateLimiter = RateLimiter(2.seconds, 10)
 
   def retrieve(date: LocalDate): Future[Seq[(Cinema, Map[Movie, Seq[Performance]])]] = {
@@ -77,7 +79,7 @@ class ListingsService(cinemaService: CinemaService) {
       .flatMap(cinemas =>
         Future.traverse(cinemas)(c =>
           rateLimiter {
-            cinemaService.getMoviesAndPerformances(c.id, date).map(c -> _)
+            listingsService.getMoviesAndPerformancesFor(c.id, date.toString).map(c -> _)
         }))
   }
 }

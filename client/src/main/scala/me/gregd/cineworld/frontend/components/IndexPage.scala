@@ -1,6 +1,6 @@
 package me.gregd.cineworld.frontend.components
 
-import me.gregd.cineworld.domain.{Cinema, CinemaApi}
+import me.gregd.cineworld.domain.{Cinema, CinemasService}
 import me.gregd.cineworld.frontend.services.Geolocation
 import me.gregd.cineworld.frontend.Client
 import me.gregd.cineworld.frontend.styles.IndexStyle
@@ -38,7 +38,7 @@ import scala.concurrent.Future
 
   def loadAllCinemas() = {
     for {
-      cinemas <- Client[CinemaApi].getCinemasGrouped().call()
+      cinemas <- Client[CinemasService].getCinemasGrouped().call()
     } yield setState(_.copy(allCinemas = Loaded(cinemas)))
   }
 
@@ -46,7 +46,7 @@ import scala.concurrent.Future
     setState(_.copy(nearbyCinemas = Loading))
     for {
       userLocation <- Geolocation.getCurrentPosition()
-      nearbyCinemas <- Client[CinemaApi].getNearbyCinemas(userLocation).call()
+      nearbyCinemas <- Client[CinemasService].getNearbyCinemas(userLocation).call()
     } yield setState(_.copy(nearbyCinemas = Loaded(nearbyCinemas)))
   }
 

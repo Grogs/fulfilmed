@@ -2,7 +2,7 @@ package me.gregd.cineworld.dao.cinema.vue.raw
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import me.gregd.cineworld.integration.vue.VueService
+import me.gregd.cineworld.integration.vue.VueIntegrationService
 import me.gregd.cineworld.integration.vue.cinemas.VueCinema
 import me.gregd.cineworld.util.NoOpCache
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
@@ -10,10 +10,10 @@ import org.scalatest.{FunSuite, Matchers}
 import play.api.libs.ws.ahc.AhcWSClient
 import stub.Stubs
 
-class VueServiceTest extends FunSuite with ScalaFutures with IntegrationPatience with Matchers with JsonMatchers {
+class VueIntegrationServiceTest extends FunSuite with ScalaFutures with IntegrationPatience with Matchers with JsonMatchers {
 
   val wsClient = AhcWSClient()(ActorMaterializer()(ActorSystem()))
-  val vue = new VueService(wsClient, NoOpCache.cache, Stubs.vue.config)
+  val vue = new VueIntegrationService(wsClient, NoOpCache.cache, Stubs.vue.config)
 
   test("curlCinemas") {
     val response = vue.curlCinemas().futureValue

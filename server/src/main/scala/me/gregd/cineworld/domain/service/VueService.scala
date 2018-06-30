@@ -1,28 +1,28 @@
-package me.gregd.cineworld.domain
+package me.gregd.cineworld.domain.service
 
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalTime}
 
 import me.gregd.cineworld.dao.cinema.vue.ImageUrl
 import me.gregd.cineworld.domain.model.{Film, Performance}
-import me.gregd.cineworld.domain.movies.MovieDao
-import me.gregd.cineworld.integration.vue.VueService
+import me.gregd.cineworld.domain.{Cinema, Coordinates}
+import me.gregd.cineworld.integration.vue.VueIntegrationService
 import me.gregd.cineworld.integration.vue.listings.Showings
 import me.gregd.cineworld.util.Clock
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class VueCinemaDao(vueRepository: VueService, clock: Clock) extends CinemaDao {
+class VueService(underlying: VueIntegrationService, clock: Clock) {
 
   private val timeFormat = DateTimeFormatter ofPattern "h:m a"
 
   def retrieveCinemas(): Future[Seq[Cinema]] = {
-    val res = vueRepository
+    val res = underlying
       .retrieveCinemas()
       .map(raw =>
         for { c <- raw } yield {
-          vueRepository
+          underlying
             .retrieveLocation(c)
             .map(loc => {
               val coordinatesOpt = loc.map { case (lat, long) => Coordinates(lat, long) }
@@ -34,7 +34,7 @@ class VueCinemaDao(vueRepository: VueService, clock: Clock) extends CinemaDao {
   }
 
   def retrieveMoviesAndPerformances(cinemaId: String, date: LocalDate): Future[Map[Film, List[Performance]]] = {
-    vueRepository.retrieveListings(cinemaId).map { raw =>
+    underlying.retrieveListings(cinemaId).map { raw =>
 
       val converted = for {
         f <- raw.films

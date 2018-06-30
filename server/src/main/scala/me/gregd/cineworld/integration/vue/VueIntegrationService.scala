@@ -14,7 +14,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class VueService(ws: WSClient, implicit val cache: ScalaCache[Array[Byte]], config: VueConfig) {
+class VueIntegrationService(ws: WSClient, implicit val cache: ScalaCache[Array[Byte]], config: VueConfig) {
 
   private implicit val formats = DefaultFormats
 

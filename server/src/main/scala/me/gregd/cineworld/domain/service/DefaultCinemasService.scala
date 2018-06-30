@@ -1,16 +1,13 @@
-package me.gregd.cineworld.domain
+package me.gregd.cineworld.domain.service
 
-import java.time.LocalDate
-
-import me.gregd.cineworld.domain.model.{Movie, Performance}
-import me.gregd.cineworld.domain.movies.MovieDao
-import me.gregd.cineworld.util.{Clock, RTree}
+import me.gregd.cineworld.domain.{Cinema, CinemasService, Coordinates}
+import me.gregd.cineworld.util.RTree
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.math._
 
-class CinemaService(movieDao: MovieDao, cineworld: CineworldCinemaDao, vue: VueCinemaDao, clock: Clock) extends TypesafeCinemaApi {
+class DefaultCinemasService(cineworld: CineworldService, vue: VueService) extends CinemasService {
 
   private lazy val tree: Future[RTree[Cinema]] =
     getCinemas().map { cinemas =>
@@ -38,21 +35,6 @@ class CinemaService(movieDao: MovieDao, cineworld: CineworldCinemaDao, vue: VueC
     }
   }
 
-  override def getMoviesAndPerformancesFor(cinemaId: String, dateRaw: String): Future[Map[Movie, Seq[Performance]]] =
-    getMoviesAndPerformances(cinemaId, parse(dateRaw))
-
-  override def getMoviesAndPerformances(cinemaId: String, date: LocalDate): Future[Map[Movie, Seq[Performance]]] = {
-    //Relying on IDs not conflicting
-    val cineworldResults = cineworld.retrieveMoviesAndPerformances(cinemaId, date)
-    val vueResults = vue.retrieveMoviesAndPerformances(cinemaId, date)
-
-    (cineworldResults fallbackTo vueResults).flatMap( res =>
-      Future.traverse(res){ case (film, performances) =>
-        movieDao.toMovie(film).map(_ -> performances)
-      }.map(_.toMap)
-    )
-  }
-
   override def getCinemasGrouped() = {
     def isLondon(s: Cinema) = if (s.name startsWith "London - ") "London cinemas" else "All other cinemas"
     val allCinemas = getCinemas()
@@ -62,13 +44,7 @@ class CinemaService(movieDao: MovieDao, cineworld: CineworldCinemaDao, vue: VueC
   override def getCinemas() =
     Future.sequence(List(cineworld.retrieveCinemas(), vue.retrieveCinemas())).map(_.flatten)
 
-  private def parse(s: String) = s match {
-    case "today"    => clock.today()
-    case "tomorrow" => clock.today() plusDays 1
-    case other      => LocalDate.parse(other)
-  }
-
-  def haversine(pos1: Coordinates, pos2: Coordinates) = {
+  private def haversine(pos1: Coordinates, pos2: Coordinates) = {
     val R = 6372.8 //radius in km
     val dLat = (pos2.lat - pos1.lat).toRadians
     val dLon = (pos2.long - pos1.long).toRadians

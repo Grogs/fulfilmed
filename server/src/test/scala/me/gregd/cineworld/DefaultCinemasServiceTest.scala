@@ -17,7 +17,7 @@ import stub.Stubs
 
 import scala.concurrent.duration._
 
-class CinemaServiceTest extends FunSuite with ScalaFutures with Matchers {
+class DefaultCinemasServiceTest extends FunSuite with ScalaFutures with Matchers {
 
   implicit val defaultPatienceConfig = PatienceConfig(Span(5000, Millis))
 
@@ -31,11 +31,14 @@ class CinemaServiceTest extends FunSuite with ScalaFutures with Matchers {
 
   val integrationWiring = new IntegrationWiring(wsClient, NoOpCache.cache, fakeClock, Scheduler.global, config)
 
-  val cinemaService = new DomainWiring(fakeClock, config, integrationWiring).cinemaService
+  val domainWiring = new DomainWiring(fakeClock, config, integrationWiring)
 
-  test("getMoviesAndPerformances") {
+  val cinemaService = domainWiring.cinemaService
+  val listingService = domainWiring.listingService
 
-    val res = cinemaService.getMoviesAndPerformances("10032", date).futureValue.toSeq
+  test("getMoviesAndPerformances") { //TODO split into separate test
+
+    val res = listingService.getMoviesAndPerformancesFor("10032", date.toString).futureValue.toSeq
 
     res.size shouldBe 10
 

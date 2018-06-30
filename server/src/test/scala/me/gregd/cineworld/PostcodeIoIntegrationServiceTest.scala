@@ -3,18 +3,18 @@ package me.gregd.cineworld
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import me.gregd.cineworld.domain.Coordinates
-import me.gregd.cineworld.integration.PostcodeService
+import me.gregd.cineworld.integration.PostcodeIoIntegrationService
 import org.scalatest.{FunSuite, Matchers}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import play.api.libs.ws.ahc.AhcWSClient
 import stub.Stubs
 
-class PostcodeServiceTest extends FunSuite with ScalaFutures with IntegrationPatience with Matchers {
+class PostcodeIoIntegrationServiceTest extends FunSuite with ScalaFutures with IntegrationPatience with Matchers {
   private val actorSystem = ActorSystem()
 
   val wsClient = AhcWSClient()(ActorMaterializer()(actorSystem))
 
-  val postcodeService = new PostcodeService(Stubs.postcodesio.config, wsClient)
+  val postcodeService = new PostcodeIoIntegrationService(Stubs.postcodesio.config, wsClient)
 
   test("it works") {
     val examplePostcodes = Seq("OX49 5NU", "M32 0JG", "NE30 1DP")

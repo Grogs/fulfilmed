@@ -1,13 +1,13 @@
 package fakes
 
-import me.gregd.cineworld.dao.ratings.{OmdbService, RatingsResult}
+import me.gregd.cineworld.dao.ratings.{OmdbIntegrationService, RatingsResult}
 
 import scala.concurrent.Future
 import eu.timepit.refined.auto._
 import me.gregd.cineworld.util.NoOpCache
 import me.gregd.cineworld.wiring.OmdbConfig
 
-object FakeOmdbService extends OmdbService(null, NoOpCache.cache, OmdbConfig("http://dummy","")) {
+object FakeOmdbService extends OmdbIntegrationService(null, NoOpCache.cache, OmdbConfig("http://dummy","")) {
 
   val someRatingAndVotes = RatingsResult(Some(6.9), Some(1337), None, None)
 

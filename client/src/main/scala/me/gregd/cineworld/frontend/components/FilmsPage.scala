@@ -1,7 +1,7 @@
 package me.gregd.cineworld.frontend.components
 
 import autowire._
-import me.gregd.cineworld.domain.CinemaApi
+import me.gregd.cineworld.domain.{CinemasService, ListingsService}
 import me.gregd.cineworld.frontend.Client
 import me.gregd.cineworld.frontend.components.Sort.{NextShowing, Sort}
 import me.gregd.cineworld.frontend.styles.FilmsStyle
@@ -52,7 +52,7 @@ import scala.util.{Failure, Success}
   }
 
   private def reloadListings() = {
-    Client[CinemaApi].getMoviesAndPerformancesFor(currentCinema(), currentDate()).call().onComplete{
+    Client[ListingsService].getMoviesAndPerformancesFor(currentCinema(), currentDate()).call().onComplete{
       case Success(movies) =>
         setState(_.copy(films = Loaded(movies)))
       case Failure(ex) =>

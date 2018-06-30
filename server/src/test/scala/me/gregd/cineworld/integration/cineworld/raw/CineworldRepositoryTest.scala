@@ -4,8 +4,8 @@ import java.time.LocalDate
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import me.gregd.cineworld.domain.CineworldTransformer
-import me.gregd.cineworld.integration.cineworld.CineworldService
+import me.gregd.cineworld.domain.transformer.CineworldTransformer
+import me.gregd.cineworld.integration.cineworld.CineworldIntegrationService
 import me.gregd.cineworld.util.{NoOpCache, RealClock}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSuite, Matchers}
@@ -15,7 +15,7 @@ import stub.Stubs
 class CineworldRepositoryTest extends FunSuite with ScalaFutures with IntegrationPatience with Matchers {
 
   val wsClient = AhcWSClient()(ActorMaterializer()(ActorSystem()))
-  val cineworld = new CineworldService(wsClient, NoOpCache.cache, Stubs.cineworld.config, RealClock)
+  val cineworld = new CineworldIntegrationService(wsClient, NoOpCache.cache, Stubs.cineworld.config, RealClock)
 
   test("retrieveCinemas") {
     val cinemas = cineworld.retrieveCinemas().futureValue

@@ -13,7 +13,7 @@ import scala.util.Try
 import scalacache.ScalaCache
 import scalacache.memoization._
 
-class OmdbService(ws: WSClient, implicit val cache: ScalaCache[Array[Byte]], config: OmdbConfig) extends LazyLogging {
+class OmdbIntegrationService(ws: WSClient, implicit val cache: ScalaCache[Array[Byte]], config: OmdbConfig) extends LazyLogging {
 
   private implicit val formats = Json.reads[OmdbRatings]
 

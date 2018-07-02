@@ -4,7 +4,8 @@ import akka.stream.Materializer
 import ch.qos.logback.classic.{Logger, LoggerContext}
 import com.softwaremill.macwire.wire
 import controllers.{Assets, Default}
-import me.gregd.cineworld.util.{InMemoryLog, InMemoryLogbackAppender, LoggingFilter}
+import me.gregd.cineworld.util.{Clock, InMemoryLog, InMemoryLogbackAppender, LoggingFilter}
+import me.gregd.cineworld.web.service.{DefaultCinemaService, DefaultListingService}
 import me.gregd.cineworld.web.{CinemaController, DebugController}
 import org.slf4j.LoggerFactory
 import play.api.Environment
@@ -19,10 +20,14 @@ class WebWiring(integrationWiring: IntegrationWiring, domainWiring: DomainWiring
                                                                                   assets: Assets,
                                                                                   environment: Environment,
                                                                                   default: Default,
+                                                                                  clock: Clock,
                                                                                   implicit val mat: Materializer,
                                                                                   implicit val ec: ExecutionContext) {
 
   private val prefix: String = "/"
+
+  import integrationWiring._
+  import domainWiring._
 
   val inMemoryLog: InMemoryLog = {
     val res = new InMemoryLog()
@@ -36,7 +41,8 @@ class WebWiring(integrationWiring: IntegrationWiring, domainWiring: DomainWiring
     res
   }
 
-  import integrationWiring._, domainWiring._
+  private val defaultCinemaService = wire[DefaultCinemaService]
+  private val defaultListingsService = wire[DefaultListingService]
 
   private val debugController = wire[DebugController]
   private val cinemaController = wire[CinemaController]

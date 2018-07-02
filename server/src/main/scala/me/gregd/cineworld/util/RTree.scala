@@ -3,7 +3,7 @@ package me.gregd.cineworld.util
 import com.github.davidmoten.rtree.geometry.{Geometries, Point}
 import com.github.davidmoten.rtree.internal.EntryDefault
 import com.github.davidmoten.rtree.{RTree => UnderlyingRTree}
-import me.gregd.cineworld.domain.Coordinates
+import me.gregd.cineworld.domain.model.Coordinates
 import rx.Observable
 
 import scala.collection.JavaConverters._

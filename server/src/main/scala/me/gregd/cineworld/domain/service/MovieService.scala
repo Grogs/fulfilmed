@@ -3,7 +3,7 @@ package me.gregd.cineworld.domain.service
 import com.typesafe.scalalogging.LazyLogging
 import info.debatty.java.stringsimilarity.SorensenDice
 import me.gregd.cineworld.dao.ratings.{OmdbIntegrationService, RatingsResult}
-import me.gregd.cineworld.domain.model.{Film, Format, Movie}
+import me.gregd.cineworld.domain.model.{Film, Movie}
 import me.gregd.cineworld.integration.tmdb.TmdbIntegrationService
 import me.gregd.cineworld.integration.tmdb.model.TmdbMovie
 import me.gregd.cineworld.wiring.MoviesConfig
@@ -19,14 +19,16 @@ class MovieService(tmdb: TmdbIntegrationService, ratings: OmdbIntegrationService
   def toMovie(film: Film): Future[Movie] = {
     logger.debug(s"Creating movie from $film")
 
+    val title = cleanTitle(film)
+
     for {
-      movieOpt <- find(film.cleanTitle)
+      movieOpt <- find(title)
       movie = movieOpt.getOrElse(Movie(film.title))
-      format = Format.split(film.title)._1
+      format = split(film.title)._1
       poster = movie.posterUrl orElse Option(film.poster_url).filter(!_.isEmpty)
     } yield
       movie.copy(
-        title = film.cleanTitle,
+        title = title,
         cineworldId = Option(film.id),
         format = Option(format),
         posterUrl = poster
@@ -131,5 +133,16 @@ class MovieService(tmdb: TmdbIntegrationService, ratings: OmdbIntegrationService
 
   private def collapse[T](fsfsT: Future[Seq[Future[Seq[T]]]]): Future[Seq[T]] =
     fsfsT.map(sfsT => Future.sequence(sfsT).map(_.flatten)).flatMap(identity)
+
+  private def split(title: String) = {
+    title.take(5) match {
+      case "2D - " | "(2D) " => ("2D", title.substring(5))
+      case "3D - "           => ("3D", title.substring(5))
+      case _                 => ("default", title)
+    }
+  }
+
+  private val textToStrip = List(" - Unlimited Screening", " (English subtitles)", ": Movies For Juniors", " - Movies For Juniors", " Movies For Juniors", "Take 2 - ", "3D - ", "2D - ", "Autism Friendly Screening: ", " for Juniors", " (English dubbed version)", " (Japanese with English subtitles)", " (Punjabi)", " (Hindi)", " Unlimited Screening")
+  private def cleanTitle(f: Film) = textToStrip.foldLeft(f.title)((res, r) => res.replace(r,""))
 
 }

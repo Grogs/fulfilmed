@@ -1,6 +1,6 @@
 package me.gregd.cineworld.integration
 
-import me.gregd.cineworld.domain.Coordinates
+import me.gregd.cineworld.domain.model.Coordinates
 import me.gregd.cineworld.wiring.PostcodesIoConfig
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient

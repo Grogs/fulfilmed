@@ -14,13 +14,3 @@ case class Movie (
   metascore: Option[Int] = None,
   rottenTomatoes: Option[String] = None
 )
-
-object Format {
-  def split(title:String) = {
-    title.take(5) match {
-      case "2D - " | "(2D) " => ("2D",title.substring(5))
-      case "3D - " => ("3D",title.substring(5))
-      case _       => ("default",title)
-    }
-  }
-}

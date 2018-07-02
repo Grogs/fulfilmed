@@ -6,7 +6,7 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import fakes.FakeOmdbService
 import me.gregd.cineworld.domain._
-import me.gregd.cineworld.domain.model.{Film, Movie, Performance}
+import me.gregd.cineworld.domain.model._
 import me.gregd.cineworld.domain.service.{CineworldService, MovieService}
 import me.gregd.cineworld.integration.PostcodeIoIntegrationService
 import me.gregd.cineworld.integration.cineworld.CineworldIntegrationService

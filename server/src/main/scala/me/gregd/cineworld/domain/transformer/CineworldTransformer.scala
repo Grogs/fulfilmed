@@ -1,7 +1,6 @@
 package me.gregd.cineworld.domain.transformer
 
-import me.gregd.cineworld.domain.model.{Film, Performance}
-import me.gregd.cineworld.domain.{Cinema, Coordinates}
+import me.gregd.cineworld.domain.model.{Cinema, Coordinates, Film, Performance}
 import me.gregd.cineworld.integration.cinema.cineworld.{CinemaResp, RawEvent, RawFilm}
 
 object CineworldTransformer {

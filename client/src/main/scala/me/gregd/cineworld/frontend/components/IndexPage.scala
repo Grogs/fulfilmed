@@ -1,6 +1,5 @@
 package me.gregd.cineworld.frontend.components
 
-import me.gregd.cineworld.domain.{Cinema, CinemasService}
 import me.gregd.cineworld.frontend.services.Geolocation
 import me.gregd.cineworld.frontend.Client
 import me.gregd.cineworld.frontend.styles.IndexStyle
@@ -9,8 +8,10 @@ import slinky.core._
 import slinky.core.annotations.react
 import slinky.web.html._
 import autowire._
+import me.gregd.cineworld.domain.model.Cinema
 import me.gregd.cineworld.frontend.util.{Loadable, Redirect, RouteProps}
 import me.gregd.cineworld.frontend.util.Loadable.{Loaded, Loading, Unloaded}
+import me.gregd.cineworld.web.service.CinemaService
 import org.scalajs.dom.html.Input
 import slinky.core.facade.ReactElement
 
@@ -38,7 +39,7 @@ import scala.concurrent.Future
 
   def loadAllCinemas() = {
     for {
-      cinemas <- Client[CinemasService].getCinemasGrouped().call()
+      cinemas <- Client[CinemaService].getCinemasGrouped().call()
     } yield setState(_.copy(allCinemas = Loaded(cinemas)))
   }
 
@@ -46,7 +47,7 @@ import scala.concurrent.Future
     setState(_.copy(nearbyCinemas = Loading))
     for {
       userLocation <- Geolocation.getCurrentPosition()
-      nearbyCinemas <- Client[CinemasService].getNearbyCinemas(userLocation).call()
+      nearbyCinemas <- Client[CinemaService].getNearbyCinemas(userLocation).call()
     } yield setState(_.copy(nearbyCinemas = Loaded(nearbyCinemas)))
   }
 

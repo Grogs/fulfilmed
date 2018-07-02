@@ -1,7 +1,6 @@
 package me.gregd.cineworld.wiring
 
 import com.softwaremill.macwire.wire
-import me.gregd.cineworld.domain.{CinemasService, ListingsService}
 import me.gregd.cineworld.domain.service._
 import me.gregd.cineworld.util._
 
@@ -16,8 +15,8 @@ class DomainWiring(clock: Clock, config: Config, integrationWiring: IntegrationW
 
   lazy val movieDao: MovieService = wire[MovieService]
 
-  lazy val cinemaService: CinemasService = wire[DefaultCinemasService]
+  lazy val cinemaService: CompositeCinemaService = wire[CompositeCinemaService]
 
-  lazy val listingService: ListingsService = wire[DefaultCinemaListingsService]
+  lazy val listingService: CompositeListingService = wire[CompositeListingService]
 
 }

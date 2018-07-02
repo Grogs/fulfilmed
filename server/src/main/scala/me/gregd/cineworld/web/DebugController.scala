@@ -3,11 +3,11 @@ package me.gregd.cineworld.web
 import com.typesafe.scalalogging.LazyLogging
 import fulfilmed.BuildInfo
 import me.gregd.cineworld.dao.ratings.OmdbIntegrationService
-import me.gregd.cineworld.domain.model.Movie
+import me.gregd.cineworld.domain.model.{Cinema, Coordinates, Movie}
 import me.gregd.cineworld.domain.service.MovieService
-import me.gregd.cineworld.domain.{Cinema, CinemasService, Coordinates}
 import me.gregd.cineworld.integration.tmdb.TmdbIntegrationService
 import me.gregd.cineworld.util.InMemoryLog
+import me.gregd.cineworld.web.service.{CinemaService, DefaultCinemaService}
 import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, Action, ControllerComponents}
 
@@ -15,7 +15,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 
-class DebugController(tmdb: TmdbIntegrationService, movies: MovieService, ratingService: OmdbIntegrationService, cinemaApi: CinemasService, inMemoryLog: InMemoryLog, cc: ControllerComponents) extends AbstractController(cc)
+class DebugController(tmdb: TmdbIntegrationService, movies: MovieService, ratingService: OmdbIntegrationService, cinemaApi: CinemaService, inMemoryLog: InMemoryLog, cc: ControllerComponents) extends AbstractController(cc)
     with LazyLogging {
 
   implicit val movieFormat = Json.format[Movie]
@@ -39,7 +39,7 @@ class DebugController(tmdb: TmdbIntegrationService, movies: MovieService, rating
   )
 
   def cinemas() = Action.async(
-    cinemaApi.getCinemas().map(cinemas => Ok(Json.toJson(cinemas)))
+    cinemaApi.getCinemasGrouped().map(cinemas => Ok(Json.toJson(cinemas)))
   )
 
   def version() = Action{
@@ -51,7 +51,7 @@ class DebugController(tmdb: TmdbIntegrationService, movies: MovieService, rating
       .sequence(
         Seq(
           movies.allMoviesCached(),
-          cinemaApi.getCinemas()
+          cinemaApi.getCinemasGrouped()
         ))
       .map(_ => Ok("Movies and cinema caches are populated."))
       .recover{

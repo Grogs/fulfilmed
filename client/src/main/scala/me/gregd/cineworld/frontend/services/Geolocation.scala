@@ -1,6 +1,6 @@
 package me.gregd.cineworld.frontend.services
 
-import me.gregd.cineworld.domain.Coordinates
+import me.gregd.cineworld.domain.model.Coordinates
 import org.scalajs.dom.experimental.permissions._
 import org.scalajs.dom.experimental.permissions.PermissionName.geolocation
 import org.scalajs.dom.raw.Position

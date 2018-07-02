@@ -2,9 +2,8 @@ package me.gregd.cineworld.web
 
 import autowire.Core.Request
 import com.typesafe.scalalogging.LazyLogging
-import me.gregd.cineworld.domain._
-import me.gregd.cineworld.domain.model.{Movie, Performance}
-import me.gregd.cineworld.domain.service.DefaultCinemasService
+import me.gregd.cineworld.domain.model.{Coordinates, Movie, Performance}
+import me.gregd.cineworld.web.service.{CinemaService, ListingsService}
 import play.api.Environment
 import play.api.Mode._
 import play.api.libs.json.Json
@@ -16,7 +15,7 @@ import upickle.default.{Reader, Writer}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.io.Source
 
-class CinemaController(env: Environment, cinemaService: CinemasService, listingsService: ListingsService, cc: ControllerComponents) extends AbstractController(cc) with LazyLogging {
+class CinemaController(env: Environment, cinemaService: CinemaService, listingsService: ListingsService, cc: ControllerComponents) extends AbstractController(cc) with LazyLogging {
 
   implicit val coordinatesFormat = Json.format[Coordinates]
   implicit val performanceFormat = Json.format[Performance]
@@ -34,7 +33,7 @@ class CinemaController(env: Environment, cinemaService: CinemasService, listings
     def write[Result: Writer](r: Result) = upickle.default.writeJs(r)
   }
 
-  val cinemasServiceRouter = ApiServer.route[CinemasService](cinemaService)
+  val cinemasServiceRouter = ApiServer.route[CinemaService](cinemaService)
   val listingsServiceRouter = ApiServer.route[ListingsService](listingsService)
 
   val router = cinemasServiceRouter orElse listingsServiceRouter

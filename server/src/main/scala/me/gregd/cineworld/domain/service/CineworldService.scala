@@ -3,8 +3,7 @@ package me.gregd.cineworld.domain.service
 import java.time.LocalDate
 
 import com.typesafe.scalalogging.LazyLogging
-import me.gregd.cineworld.domain.Cinema
-import me.gregd.cineworld.domain.model.{Film, Performance}
+import me.gregd.cineworld.domain.model.{Cinema, Film, Performance}
 import me.gregd.cineworld.domain.transformer.CineworldTransformer
 import me.gregd.cineworld.integration.PostcodeIoIntegrationService
 import me.gregd.cineworld.integration.cineworld.CineworldIntegrationService

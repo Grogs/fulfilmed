@@ -1,13 +1,13 @@
-package me.gregd.cineworld
+package me.gregd.cineworld.web
 
 import java.time.LocalDate
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import me.gregd.cineworld.wiring.MoviesConfig
-import me.gregd.cineworld.domain.Coordinates
+import me.gregd.cineworld.domain.model.Coordinates
 import me.gregd.cineworld.util.{FixedClock, NoOpCache}
-import me.gregd.cineworld.wiring.{Config, DomainWiring, IntegrationWiring, MoviesConfig}
+import me.gregd.cineworld.web.service.DefaultCinemaService
+import me.gregd.cineworld.wiring._
 import monix.execution.Scheduler
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Span}
@@ -17,7 +17,7 @@ import stub.Stubs
 
 import scala.concurrent.duration._
 
-class DefaultCinemasServiceTest extends FunSuite with ScalaFutures with Matchers {
+class DefaultCinemaServiceTest extends FunSuite with ScalaFutures with Matchers {
 
   implicit val defaultPatienceConfig = PatienceConfig(Span(5000, Millis))
 
@@ -25,7 +25,7 @@ class DefaultCinemasServiceTest extends FunSuite with ScalaFutures with Matchers
 
   val fakeClock = FixedClock(date)
 
-  val config = Config(Stubs.omdb.config, Stubs.tmdb.config, Stubs.cineworld.config, Stubs.vue.config, Stubs.postcodesio.config, MoviesConfig(1.second))
+  val config = Config(Stubs.omdb.config, Stubs.tmdb.config, Stubs.cineworld.config, Stubs.vue.config, Stubs.postcodesio.config, MoviesConfig(1.second), DatabaseConfig("test"))
 
   val wsClient = AhcWSClient()(ActorMaterializer()(ActorSystem()))
 
@@ -33,19 +33,7 @@ class DefaultCinemasServiceTest extends FunSuite with ScalaFutures with Matchers
 
   val domainWiring = new DomainWiring(fakeClock, config, integrationWiring)
 
-  val cinemaService = domainWiring.cinemaService
-  val listingService = domainWiring.listingService
-
-  test("getMoviesAndPerformances") { //TODO split into separate test
-
-    val res = listingService.getMoviesAndPerformancesFor("10032", date.toString).futureValue.toSeq
-
-    res.size shouldBe 10
-
-    val Some((movie, performances)) = res.find(_._1.title == "Guardians Of The Galaxy Vol. 2")
-
-    performances.size shouldBe 5
-  }
+  val cinemaService = new DefaultCinemaService(domainWiring.cinemaService)
 
   test("getCinemasGrouped") {
 

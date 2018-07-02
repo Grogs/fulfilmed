@@ -1,16 +1,16 @@
-package me.gregd.cineworld.domain.service
+package me.gregd.cineworld.web.service
 
-import me.gregd.cineworld.domain.{Cinema, CinemasService, Coordinates}
+import me.gregd.cineworld.domain.service.CompositeCinemaService
+import me.gregd.cineworld.domain.model.{Cinema, Coordinates}
 import me.gregd.cineworld.util.RTree
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.math._
 
-class DefaultCinemasService(cineworld: CineworldService, vue: VueService) extends CinemasService {
-
+class DefaultCinemaService(cinemaService: CompositeCinemaService) extends CinemaService {
   private lazy val tree: Future[RTree[Cinema]] =
-    getCinemas().map { cinemas =>
+    cinemaService.getCinemas().map { cinemas =>
       val coordsAndCinemas = for {
         cinema <- cinemas
         coordinates <- cinema.coordinates
@@ -18,7 +18,7 @@ class DefaultCinemasService(cineworld: CineworldService, vue: VueService) extend
       new RTree(coordsAndCinemas)
     }
 
-  override def getNearbyCinemas(coordinates: Coordinates): Future[Seq[Cinema]] = {
+  def getNearbyCinemas(coordinates: Coordinates): Future[Seq[Cinema]] = {
     def distance(c: Cinema): Double = c.coordinates.map(c => haversine(coordinates, c)).getOrElse(Double.MaxValue)
     val maxDistance = 150
     val maxResults = 50
@@ -35,14 +35,11 @@ class DefaultCinemasService(cineworld: CineworldService, vue: VueService) extend
     }
   }
 
-  override def getCinemasGrouped() = {
+  def getCinemasGrouped() = {
     def isLondon(s: Cinema) = if (s.name startsWith "London - ") "London cinemas" else "All other cinemas"
-    val allCinemas = getCinemas()
+    val allCinemas = cinemaService.getCinemas()
     allCinemas.map(all => all.groupBy(_.chain).mapValues(_.groupBy(isLondon)))
   }
-
-  override def getCinemas() =
-    Future.sequence(List(cineworld.retrieveCinemas(), vue.retrieveCinemas())).map(_.flatten)
 
   private def haversine(pos1: Coordinates, pos2: Coordinates) = {
     val R = 6372.8 //radius in km
@@ -53,4 +50,5 @@ class DefaultCinemasService(cineworld: CineworldService, vue: VueService) extend
     val c = 2 * asin(sqrt(a))
     R * c
   }
+
 }

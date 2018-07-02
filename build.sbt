@@ -76,9 +76,13 @@ lazy val server = project.settings(
     "com.lihaoyi" %% "pprint" % "0.5.3" % Test,
     "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % Test,
     "com.typesafe.akka" %% "akka-http" % "10.0.11" % Test,
-    //gcp deps
-    "com.google.cloud" % "google-cloud-nio" % "0.33.0-alpha",
     "com.github.pathikrit" %% "better-files" % "3.2.0",
+    "com.typesafe.slick" %% "slick" % "3.2.3",
+    "com.typesafe.slick" %% "slick-hikaricp" % "3.2.3",
+    "org.xerial" % "sqlite-jdbc" % "3.23.1",
+    "io.circe" %% "circe-core" % "0.9.3",
+    "io.circe" %% "circe-generic" % "0.9.3",
+    "io.circe" %% "circe-parser" % "0.9.3",
   ),
   libraryDependencies ++= Seq(
     "org.webjars" %% "webjars-play" % "2.6.3",

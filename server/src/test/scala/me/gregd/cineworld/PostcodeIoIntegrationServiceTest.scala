@@ -2,7 +2,7 @@ package me.gregd.cineworld
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import me.gregd.cineworld.domain.Coordinates
+import me.gregd.cineworld.domain.model.Coordinates
 import me.gregd.cineworld.integration.PostcodeIoIntegrationService
 import org.scalatest.{FunSuite, Matchers}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}

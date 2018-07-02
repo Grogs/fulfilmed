@@ -6,9 +6,10 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import better.files._
 import me.gregd.cineworld.domain._
-import me.gregd.cineworld.domain.model.{Movie, Performance}
-import me.gregd.cineworld.domain.service.DefaultCinemasService
+import me.gregd.cineworld.domain.model.{Cinema, Coordinates, Movie, Performance}
+import me.gregd.cineworld.domain.service.{CompositeCinemaService, CompositeListingService}
 import me.gregd.cineworld.util.{NoOpCache, RateLimiter, RealClock}
+import me.gregd.cineworld.web.service.{DefaultCinemaService, ListingsService}
 import me.gregd.cineworld.wiring.{Config, DomainWiring, IntegrationWiring}
 import monix.execution.Scheduler
 import play.api.libs.json.Json
@@ -70,7 +71,7 @@ object Job extends App {
   wsClient.close()
 }
 
-class AllListingsService(cinemaService: CinemasService, listingsService: ListingsService) {
+class AllListingsService(cinemaService: CompositeCinemaService, listingsService: CompositeListingService) {
   val rateLimiter = RateLimiter(2.seconds, 10)
 
   def retrieve(date: LocalDate): Future[Seq[(Cinema, Map[Movie, Seq[Performance]])]] = {
@@ -79,7 +80,7 @@ class AllListingsService(cinemaService: CinemasService, listingsService: Listing
       .flatMap(cinemas =>
         Future.traverse(cinemas)(c =>
           rateLimiter {
-            listingsService.getMoviesAndPerformancesFor(c.id, date.toString).map(c -> _)
+            listingsService.getMoviesAndPerformances(c.id, date).map(c -> _)
         }))
   }
 }

@@ -1,11 +1,6 @@
 GET         /api/*path                    me.gregd.cineworld.web.CinemaController.api(path)
 POST        /api/*path                    me.gregd.cineworld.web.CinemaController.api(path)
 
-GET         /debug/tmdbNowPlaying         me.gregd.cineworld.web.DebugController.tmdbNowPlaying()
-GET         /debug/allMovies              me.gregd.cineworld.web.DebugController.allMovies()
-GET         /debug/imdbid/*tmdbid         me.gregd.cineworld.web.DebugController.imdbId(tmdbid)
-GET         /debug/ratings/*imdbid        me.gregd.cineworld.web.DebugController.ratings(imdbid)
-GET         /debug/cinemas                me.gregd.cineworld.web.DebugController.cinemas()
 GET         /debug/warmup                 me.gregd.cineworld.web.DebugController.warmup()
 GET         /debug/log                    me.gregd.cineworld.web.DebugController.log()
 GET         /debug/version                me.gregd.cineworld.web.DebugController.version()

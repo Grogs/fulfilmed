@@ -1,6 +1,6 @@
 package me.gregd.cineworld.wiring
 
-import com.softwaremill.macwire.wire
+import com.softwaremill.macwire.{Module, wire}
 import me.gregd.cineworld.dao.ratings.OmdbIntegrationService
 import me.gregd.cineworld.integration.PostcodeIoIntegrationService
 import me.gregd.cineworld.integration.cineworld.CineworldIntegrationService
@@ -11,17 +11,20 @@ import monix.execution.Scheduler
 import play.api.libs.ws.WSClient
 import scalacache.ScalaCache
 
-class IntegrationWiring(wsClient: WSClient, cache: ScalaCache[Array[Byte]], clock: Clock, scheduler: Scheduler, config: Config) {
+@Module
+class IntegrationWiring(wsClient: WSClient, cache: ScalaCache[Array[Byte]], clock: Clock, scheduler: Scheduler)(vueConfig: VueConfig,
+                                                                                                                cineworldConfig: CineworldConfig,
+                                                                                                                omdbConfig: OmdbConfig,
+                                                                                                                tmdbConfig: TmdbConfig,
+                                                                                                                postcodesIoConfig: PostcodesIoConfig) {
 
-  import config.{vue, cineworld, omdb, tmdb, postcodesIo}
+  lazy val tmdbIntegrationService: TmdbIntegrationService = wire[TmdbIntegrationService]
 
-  lazy val tmdbService: TmdbIntegrationService = wire[TmdbIntegrationService]
+  lazy val omdbIntegrationService: OmdbIntegrationService = wire[OmdbIntegrationService]
 
-  lazy val ratings: OmdbIntegrationService = wire[OmdbIntegrationService]
+  lazy val postcodeIntegrationService: PostcodeIoIntegrationService = wire[PostcodeIoIntegrationService]
 
-  lazy val postcodeService: PostcodeIoIntegrationService = wire[PostcodeIoIntegrationService]
+  lazy val cineworldIntegrationService: CineworldIntegrationService = wire[CineworldIntegrationService]
 
-  lazy val cineworldService: CineworldIntegrationService = wire[CineworldIntegrationService]
-
-  lazy val vueService: VueIntegrationService = wire[VueIntegrationService]
+  lazy val vueIntegrationService: VueIntegrationService = wire[VueIntegrationService]
 }

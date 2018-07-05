@@ -15,50 +15,31 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 
-class DebugController(tmdb: TmdbIntegrationService, movies: MovieService, ratingService: OmdbIntegrationService, cinemaApi: CinemaService, inMemoryLog: InMemoryLog, cc: ControllerComponents) extends AbstractController(cc)
+class DebugController(inMemoryLog: InMemoryLog, cc: ControllerComponents) extends AbstractController(cc)
     with LazyLogging {
 
   implicit val movieFormat = Json.format[Movie]
   implicit val coordinatesFormat = Json.format[Coordinates]
   implicit val cinemaFormat = Json.format[Cinema]
 
-  def tmdbNowPlaying() = Action.async(
-    tmdb.fetchMovies().map(nowPlaying => Ok(Json.toJson(nowPlaying)))
-  )
-
-  def allMovies() = Action.async(
-    movies.allMoviesCached().map(allMovies => Ok(Json.toJson(allMovies)))
-  )
-
-  def imdbId(tmdbId: String) = Action.async(
-    tmdb.fetchImdbId(tmdbId).map(imdbId => Ok(Json.toJson(imdbId)))
-  )
-
-  def ratings(imdbId: String) = Action.async(
-    ratingService.fetchRatings(imdbId).map(r => Ok(Json.toJson(r)))
-  )
-
-  def cinemas() = Action.async(
-    cinemaApi.getCinemasGrouped().map(cinemas => Ok(Json.toJson(cinemas)))
-  )
-
   def version() = Action{
     Ok(BuildInfo.toJson).as("application/json")
   }
 
-  def warmup() = Action.async(
-    Future
-      .sequence(
-        Seq(
-          movies.allMoviesCached(),
-          cinemaApi.getCinemasGrouped()
-        ))
-      .map(_ => Ok("Movies and cinema caches are populated."))
-      .recover{
-        case NonFatal(ex) =>
-          logger.error("Warmup failed", ex)
-          InternalServerError(s"Warmup failed with a ${ex.getClass.getSimpleName}, with message: ${ex.getMessage}")
-      }
+  def warmup() = Action(
+    Ok("Warmed up.")
+//    Future
+//      .sequence(
+//        Seq(
+//          movies.allMoviesCached(),
+//          cinemaApi.getCinemasGrouped()
+//        ))
+//      .map(_ => Ok("Movies and cinema caches are populated."))
+//      .recover{
+//        case NonFatal(ex) =>
+//          logger.error("Warmup failed", ex)
+//          InternalServerError(s"Warmup failed with a ${ex.getClass.getSimpleName}, with message: ${ex.getMessage}")
+//      }
   )
 
   def log() = Secured {

@@ -17,10 +17,6 @@ import scala.io.Source
 
 class CinemaController(env: Environment, cinemaService: CinemaService, listingsService: ListingsService, cc: ControllerComponents) extends AbstractController(cc) with LazyLogging {
 
-  implicit val coordinatesFormat = Json.format[Coordinates]
-  implicit val performanceFormat = Json.format[Performance]
-  implicit val movieFormat = Json.format[Movie]
-
   val scriptPaths  = List(
     "/assets/fulfilmed-scala-frontend-" + (env.mode match {
       case Dev | Test => "fastopt-bundle.js"

@@ -5,7 +5,7 @@ import scala.concurrent.Future
 
 trait CinemaRepository {
 
-  def fetchAll(): Future[List[Cinema]]
+  def fetchAll(): Future[Seq[Cinema]]
 
-  def persist(cinemas: List[Cinema]): Future[Unit]
+  def persist(cinemas: Seq[Cinema]): Future[Unit]
 }

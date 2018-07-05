@@ -80,7 +80,7 @@ class TmdbIntegrationService(ws: WSClient, implicit val cache: ScalaCache[Array[
   private def fetchUpcomingPage(page: Int): Future[Vector[TmdbMovie]] = memoize(1.day) {
     limiter {
       val url = s"$baseUrl/3/movie/now_playing?api_key=$key&language=en-US&page=$page&region=GB"
-      logger.info(s"Fetching now playing page $page")
+      logger.info(s"Fetching upcoming movies page $page")
       ws.url(url)
         .get()
         .map(_.json.as[NowShowingResponse].results)

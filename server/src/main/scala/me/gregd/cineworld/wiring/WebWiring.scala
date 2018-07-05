@@ -15,19 +15,18 @@ import router.Routes
 
 import scala.concurrent.ExecutionContext
 
-class WebWiring(integrationWiring: IntegrationWiring, domainWiring: DomainWiring)(controllerComponents: ControllerComponents,
-                                                                                  errorHandler: HttpErrorHandler,
-                                                                                  assets: Assets,
-                                                                                  environment: Environment,
-                                                                                  default: Default,
-                                                                                  clock: Clock,
-                                                                                  implicit val mat: Materializer,
-                                                                                  implicit val ec: ExecutionContext) {
+class WebWiring(domainRepositoryWiring: DomainRepositoryWiring)(controllerComponents: ControllerComponents,
+                                                                errorHandler: HttpErrorHandler,
+                                                                assets: Assets,
+                                                                environment: Environment,
+                                                                default: Default,
+                                                                clock: Clock,
+                                                                implicit val mat: Materializer,
+                                                                implicit val ec: ExecutionContext) {
 
   private val prefix: String = "/"
 
-  import integrationWiring._
-  import domainWiring._
+  import domainRepositoryWiring._
 
   val inMemoryLog: InMemoryLog = {
     val res = new InMemoryLog()

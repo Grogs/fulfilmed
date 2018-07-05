@@ -1,16 +1,17 @@
 package me.gregd.cineworld.web.service
 
-import me.gregd.cineworld.domain.service.CompositeCinemaService
+import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.domain.model.{Cinema, Coordinates}
+import me.gregd.cineworld.domain.repository.CinemaRepository
 import me.gregd.cineworld.util.RTree
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.math._
 
-class DefaultCinemaService(cinemaService: CompositeCinemaService) extends CinemaService {
+class DefaultCinemaService(cinemaRepository: CinemaRepository) extends CinemaService with LazyLogging {
   private lazy val tree: Future[RTree[Cinema]] =
-    cinemaService.getCinemas().map { cinemas =>
+    cinemaRepository.fetchAll().map { cinemas =>
       val coordsAndCinemas = for {
         cinema <- cinemas
         coordinates <- cinema.coordinates
@@ -37,7 +38,10 @@ class DefaultCinemaService(cinemaService: CompositeCinemaService) extends Cinema
 
   def getCinemasGrouped() = {
     def isLondon(s: Cinema) = if (s.name startsWith "London - ") "London cinemas" else "All other cinemas"
-    val allCinemas = cinemaService.getCinemas()
+    val allCinemas = cinemaRepository.fetchAll().recover{case e =>
+      logger.error("Failed to retrieve cinemas", e)
+      Nil
+    }
     allCinemas.map(all => all.groupBy(_.chain).mapValues(_.groupBy(isLondon)))
   }
 

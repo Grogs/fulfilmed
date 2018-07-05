@@ -1,5 +1,6 @@
 package me.gregd.cineworld.integration.vue
 
+import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.integration.vue.cinemas.{VueCinema, VueCinemasResp}
 import me.gregd.cineworld.integration.vue.listings.VueListingsResp
 import me.gregd.cineworld.wiring.VueConfig
@@ -13,8 +14,9 @@ import scalacache.memoization._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
+import scala.util.control.NonFatal
 
-class VueIntegrationService(ws: WSClient, implicit val cache: ScalaCache[Array[Byte]], config: VueConfig) {
+class VueIntegrationService(ws: WSClient, implicit val cache: ScalaCache[Array[Byte]], config: VueConfig) extends LazyLogging {
 
   private implicit val formats = DefaultFormats
 
@@ -22,9 +24,17 @@ class VueIntegrationService(ws: WSClient, implicit val cache: ScalaCache[Array[B
   private val latLong = "http://maps.apple.com/\\?q=([-0-9.]+),([-0-9.]+)".r
 
   def retrieveCinemas(): Future[Seq[VueCinema]] = {
-    curlCinemas().map(resp =>
-      parse(resp).extract[VueCinemasResp].venues.flatMap(_.cinemas)
-    )
+    curlCinemas().map(resp => extract[VueCinemasResp](resp).venues.flatMap(_.cinemas))
+  }
+
+  private def extract[T](resp: String)(implicit formats: Formats, mf: scala.reflect.Manifest[T]) = {
+    try {
+      parse(resp).extract[T]
+    } catch {
+      case NonFatal(e) =>
+        logger.error(s"Failed to parse vue response: ${resp.take(400)}", e)
+        throw e
+    }
   }
 
   def retrieveLocation(vueCinema: VueCinema): Future[Option[(Double, Double)]] = {
@@ -39,11 +49,8 @@ class VueIntegrationService(ws: WSClient, implicit val cache: ScalaCache[Array[B
   }
 
   def retrieveListings(cinemaId: String): Future[VueListingsResp] = {
-    curlListings(cinemaId).map(resp =>
-      parse(resp).extract[VueListingsResp]
-    )
+    curlListings(cinemaId).map(extract[VueListingsResp])
   }
-
 
   def curlCinemas(): Future[String] = memoize(7.days) {
     ws.url(s"$base/data/locations/")

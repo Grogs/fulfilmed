@@ -49,6 +49,7 @@ class CineworldIntegrationService(ws: WSClient, implicit val cache: ScalaCache[A
   def retrieveCinemas(): Future[Seq[CinemaResp]] = {
     curlCinemas().map { r =>
       val json = parse(r)
+      logger.debug(s"Retrieved cinemas response:\n$r")
       val cinemas = json \ "body" \ "cinemas"
       cinemas.as[Seq[CinemaResp]]
     }

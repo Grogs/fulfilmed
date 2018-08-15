@@ -9,6 +9,7 @@ import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.util.{Clock, NoOpCache, RealClock}
 import me.gregd.cineworld.wiring._
 import monix.execution.Scheduler
+import play.api.Mode
 import play.api.libs.ws.ahc.AhcWSClient
 import scalacache.ScalaCache
 
@@ -25,20 +26,12 @@ object IngestionRunner extends LazyLogging {
   }
 
   private val actorSystem = ActorSystem()
-
   private val wsClient = AhcWSClient()(ActorMaterializer()(actorSystem))
-
-  private val cache: ScalaCache[Array[Byte]] = NoOpCache.cache
   private val clock: Clock = RealClock
-  private val scheduler: Scheduler = Scheduler.global
+  private val mode = Mode.Prod
+  private val wiring: Wiring = wire[Wiring]
 
-  import config.{omdb, tmdb, cineworld, vue, postcodesIo, movies, database, chains}
-
-  private val integrationWiring: IntegrationWiring = wire[IntegrationWiring]
-  private val domainServiceWiring: DomainServiceWiring = wire[DomainServiceWiring]
-  private val domainRepositoryWiring: DomainRepositoryWiring = wire[DomainRepositoryWiring]
-
-  private val ingestionService: IngestionService = wire[IngestionService]
+  private val ingestionService = wire[IngestionService]
 
   def main(args: Array[String]): Unit = {
 

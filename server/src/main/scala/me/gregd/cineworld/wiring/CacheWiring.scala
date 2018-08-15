@@ -3,12 +3,13 @@ package me.gregd.cineworld.wiring
 import java.io.File
 import java.nio.file.Files
 
+import com.softwaremill.macwire.Module
 import me.gregd.cineworld.util.{FileCache, NoOpCache}
 import play.api.Mode
 import play.api.Mode.{Dev, Prod, Test}
-
 import scalacache.ScalaCache
 
+@Module
 class CacheWiring(mode: Mode) {
 
   lazy val cache: ScalaCache[Array[Byte]] = {

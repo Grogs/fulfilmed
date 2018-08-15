@@ -13,7 +13,7 @@ import scala.scalajs.js.Dynamic
 
 @react class FilmsList extends StatelessComponent {
 
-  case class Props(listings: Loadable[Map[Movie, Seq[Performance]]], sort: Sort)
+  case class Props(listings: Loadable[Seq[(Movie, Seq[Performance])]], sort: Sort)
 
   val filmCard = (m: Movie, pl: Seq[Performance]) => {
     def tmdbLink(m: Movie) = m.tmdbRating.map(div(className := FilmsStyle.tmdb)(_))
@@ -82,7 +82,7 @@ import scala.scalajs.js.Dynamic
           icon("fa-frown-o", "No movies found!")
         } else {
           div(className := FilmsStyle.filmListContainer)(
-            for (m <- listings.toSeq.sorted(props.sort.ordering)) yield filmCard.tupled(m)
+            for (m <- listings.sorted(props.sort.ordering)) yield filmCard.tupled(m)
           )
         }
     }

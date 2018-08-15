@@ -1,4 +1,4 @@
-package me.gregd.cineworld.web.service
+package me.gregd.cineworld.domain.service
 
 import java.time.LocalDate
 
@@ -10,11 +10,11 @@ import me.gregd.cineworld.util.Clock
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class DefaultListingService(listingsRepository: ListingsRepository, clock: Clock) extends ListingsService with LazyLogging {
-  def getMoviesAndPerformancesFor(cinemaId: String, dateRaw: String): Future[Map[Movie, Seq[Performance]]] = {
+class ListingsService(listingsRepository: ListingsRepository, clock: Clock) extends Listings with LazyLogging {
+  def getMoviesAndPerformancesFor(cinemaId: String, dateRaw: String): Future[Seq[(Movie, Seq[Performance])]] = {
     listingsRepository.fetch(cinemaId, parse(dateRaw)).recover{ case e =>
       logger.error("Failed to retrieve listings", e)
-      Map.empty
+      Nil
     }
   }
 
@@ -23,5 +23,4 @@ class DefaultListingService(listingsRepository: ListingsRepository, clock: Clock
     case "tomorrow" => clock.today() plusDays 1
     case other      => LocalDate.parse(other)
   }
-
 }

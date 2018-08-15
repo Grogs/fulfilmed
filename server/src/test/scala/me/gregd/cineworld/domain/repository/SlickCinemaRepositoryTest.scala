@@ -1,21 +1,20 @@
 package me.gregd.cineworld.domain.repository
 
 import me.gregd.cineworld.domain.model.{Cinema, Coordinates}
-import me.gregd.cineworld.wiring.DatabaseConfig
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSuite, Matchers}
+import slick.jdbc.SQLiteProfile.api._
 
 class SlickCinemaRepositoryTest extends FunSuite with ScalaFutures with IntegrationPatience with Matchers {
 
+  val db = Database.forURL("jdbc:sqlite::memory:SlickCinemaRepositoryTest")
+  val repo = new SlickCinemaRepository(db)
+
   test("create") {
-    val config = DatabaseConfig("jdbc:sqlite::memory:test-creation")
-    val repo = new SlickCinemaRepository(config)
     repo.create().futureValue
   }
 
   test("persist and fetch") {
-    val config = DatabaseConfig("jdbc:sqlite::memory:test-creation")
-    val repo = new SlickCinemaRepository(config)
     repo.create().futureValue
 
     val input = List(

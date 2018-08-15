@@ -1,6 +1,7 @@
 package me.gregd.cineworld.frontend.components
 
 import autowire._
+import io.circe.generic.auto._
 import me.gregd.cineworld.frontend.Client
 import me.gregd.cineworld.frontend.components.Sort.{NextShowing, Sort}
 import me.gregd.cineworld.frontend.styles.FilmsStyle
@@ -13,7 +14,7 @@ import slinky.core.annotations.react
 import slinky.web.html._
 import autowire._
 import me.gregd.cineworld.domain.model.{Movie, Performance}
-import me.gregd.cineworld.web.service.ListingsService
+import me.gregd.cineworld.domain.service.Listings
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js.Dynamic
@@ -28,7 +29,7 @@ import scala.util.{Failure, Success}
   type Props = RouteProps
 
   case class State(
-      films: Loadable[Map[Movie, Seq[Performance]]],
+      films: Loadable[Seq[(Movie, Seq[Performance])]],
       selectedSort: Sort = NextShowing,
       redirect: Option[String] = None
   ) {
@@ -52,7 +53,7 @@ import scala.util.{Failure, Success}
   }
 
   private def reloadListings() = {
-    Client[ListingsService].getMoviesAndPerformancesFor(currentCinema(), currentDate()).call().onComplete{
+    Client[Listings].getMoviesAndPerformancesFor(currentCinema(), currentDate()).call().onComplete{
       case Success(movies) =>
         setState(_.copy(films = Loaded(movies)))
       case Failure(ex) =>

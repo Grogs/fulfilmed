@@ -72,7 +72,6 @@ lazy val server = project.settings(
     "com.softwaremill.macwire" %% "util" % "2.3.0",
     ws,
     filters,
-    guice,
     "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test,
     "org.scalatest" %% "scalatest" % "3.0.4" % Test,
     "com.lihaoyi" %% "pprint" % "0.5.3" % Test,
@@ -82,9 +81,7 @@ lazy val server = project.settings(
     "com.typesafe.slick" %% "slick" % "3.2.3",
     "com.typesafe.slick" %% "slick-hikaricp" % "3.2.3",
     "org.xerial" % "sqlite-jdbc" % "3.23.1",
-    "io.circe" %% "circe-core" % "0.9.3",
-    "io.circe" %% "circe-generic" % "0.9.3",
-    "io.circe" %% "circe-parser" % "0.9.3",
+    "ru.yandex.qatools.embed" % "postgresql-embedded" % "2.9" % Test,
   ),
   libraryDependencies ++= Seq(
     "org.webjars" %% "webjars-play" % "2.6.3",
@@ -97,7 +94,9 @@ lazy val server = project.settings(
 
 lazy val shared = crossProject.crossType(CrossType.Pure).settings(
   libraryDependencies ++= Seq(
-    "com.lihaoyi" %%% "upickle" % "0.4.4",
+    "io.circe" %%% "circe-core" % "0.9.3",
+    "io.circe" %%% "circe-generic" % "0.9.3",
+    "io.circe" %%% "circe-parser" % "0.9.3",
     "com.lihaoyi" %%% "autowire" % "0.2.6",
     "com.lihaoyi" %%% "scalatags" % "0.6.7",
   ),

@@ -5,7 +5,7 @@ import java.time.LocalDate
 import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.domain.model.{Cinema, Movie, Performance}
 import me.gregd.cineworld.domain.repository.{CinemaRepository, ListingsRepository}
-import me.gregd.cineworld.domain.service.{CompositeCinemaService, CompositeListingService, MovieService}
+import me.gregd.cineworld.domain.service.{CinemasService, CompositeListingService, MovieService}
 import me.gregd.cineworld.util.RateLimiter
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -13,19 +13,20 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.control.NonFatal
 
-class IngestionService(cinemaService: CompositeCinemaService,
+class IngestionService(cinemaService: CinemasService,
                        listingsService: CompositeListingService,
                        listingsRepository: ListingsRepository,
                        cinemaRepository: CinemaRepository,
                        movieService: MovieService)
     extends LazyLogging {
 
-  case class Listings(cinemaId: String, date: LocalDate, listings: Map[Movie, Seq[Performance]])
+  case class Listings(cinemaId: String, date: LocalDate, listings: Seq[(Movie, Seq[Performance])])
 
   def refresh(dates: Seq[LocalDate]): Future[Unit] = {
     for {
       _ <- movieService.refresh()
       cinemas <- cinemaService.getCinemas()
+      _ = logger.info(s"Retrieved ${cinemas.size} cinemas")
       _ <- cinemaRepository.persist(cinemas)
       permutations = combinations(cinemas, dates)
       allListings <- fetchListings(permutations)
@@ -48,6 +49,7 @@ class IngestionService(cinemaService: CompositeCinemaService,
   }
 
   private def persistListings(allListings: Seq[Listings]) = {
+    logger.info(s"Persisting ${allListings.size} listings")
     Future.traverse(allListings) { listings =>
       listingsRepository.persist(listings.cinemaId, listings.date)(listings.listings)
     }
@@ -61,7 +63,7 @@ class IngestionService(cinemaService: CompositeCinemaService,
     }.recover {
       case NonFatal(e) =>
         logger.error(s"failed to retrieve listings for cinema $id")
-        Listings(id, date, Map.empty)
+        Listings(id, date, Nil)
     }
   }
 

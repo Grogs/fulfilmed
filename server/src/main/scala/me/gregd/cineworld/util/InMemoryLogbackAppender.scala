@@ -1,8 +1,10 @@
 package me.gregd.cineworld.util
 
+import ch.qos.logback.classic.{Logger, LoggerContext}
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.AppenderBase
 import enumeratum._
+import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
 
@@ -21,7 +23,7 @@ object Level extends Enum[Level] {
   case object Debug extends Level
 }
 
-class InMemoryLog{
+class InMemoryLog {
   val maxEntries = 100
 
   private val entries = new java.util.concurrent.ConcurrentLinkedQueue[LogEntry]()
@@ -35,6 +37,15 @@ class InMemoryLog{
     }
   }
 }
+
+object InMemoryLog extends InMemoryLog {
+  val inMemoryAppender: InMemoryLogbackAppender = new InMemoryLogbackAppender(this)
+  inMemoryAppender.setContext(LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext])
+  inMemoryAppender.start()
+
+  LoggerFactory.getLogger("ROOT").asInstanceOf[Logger].addAppender(inMemoryAppender)
+}
+
 
 class InMemoryLogbackAppender(log: InMemoryLog) extends AppenderBase[ILoggingEvent] {
 

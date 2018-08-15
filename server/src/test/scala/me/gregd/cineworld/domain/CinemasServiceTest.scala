@@ -15,7 +15,7 @@ import stub.Stubs
 
 import scala.concurrent.duration._
 
-class CompositeCinemaServiceTest extends FunSuite with ScalaFutures with Matchers {
+class CinemasServiceTest extends FunSuite with ScalaFutures with Matchers {
 
   implicit val defaultPatienceConfig = PatienceConfig(Span(5000, Millis))
 

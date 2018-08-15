@@ -2,20 +2,17 @@ package me.gregd.cineworld.web
 
 import autowire.Core.Request
 import com.typesafe.scalalogging.LazyLogging
-import me.gregd.cineworld.domain.model.{Coordinates, Movie, Performance}
-import me.gregd.cineworld.web.service.{CinemaService, ListingsService}
+import io.circe.syntax._
+import io.circe.generic.auto._
+import me.gregd.cineworld.domain.service.{Cinemas, Listings, NearbyCinemas, NearbyCinemasService}
 import play.api.Environment
 import play.api.Mode._
-import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, ControllerComponents}
-import upickle.Js
-import upickle.Js.Obj
-import upickle.default.{Reader, Writer}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.io.Source
 
-class CinemaController(env: Environment, cinemaService: CinemaService, listingsService: ListingsService, cc: ControllerComponents) extends AbstractController(cc) with LazyLogging {
+class CinemaController(env: Environment, cinemaService: Cinemas, listingsService: Listings, nearbyCinemasService: NearbyCinemasService, cc: ControllerComponents) extends AbstractController(cc) with LazyLogging {
 
   val scriptPaths  = List(
     "/assets/fulfilmed-scala-frontend-" + (env.mode match {
@@ -24,28 +21,29 @@ class CinemaController(env: Environment, cinemaService: CinemaService, listingsS
     })
   )
 
-  object ApiServer extends autowire.Server[Js.Value, Reader, Writer] {
-    def read[Result: Reader](p: Js.Value) = upickle.default.readJs[Result](p)
-    def write[Result: Writer](r: Result) = upickle.default.writeJs(r)
+  object ApiServer extends autowire.Server[io.circe.Json, io.circe.Decoder, io.circe.Encoder] {
+    def read[Result: io.circe.Decoder](p: io.circe.Json) = p.as[Result].toTry.get
+    def write[Result: io.circe.Encoder](r: Result) = r.asJson
   }
 
-  val cinemasServiceRouter = ApiServer.route[CinemaService](cinemaService)
-  val listingsServiceRouter = ApiServer.route[ListingsService](listingsService)
+  val cinemasServiceRouter = ApiServer.route[Cinemas](cinemaService)
+  val listingsServiceRouter = ApiServer.route[Listings](listingsService)
+  val nearbyCinemasServiceRouter = ApiServer.route[NearbyCinemas](nearbyCinemasService)
 
-  val router = cinemasServiceRouter orElse listingsServiceRouter
+  val router = cinemasServiceRouter orElse listingsServiceRouter orElse nearbyCinemasServiceRouter
 
 
   def api(pathRaw: String) = Action.async { implicit request =>
     logger.debug(s"API request: $pathRaw")
     val path = pathRaw.split("/")
     val body = request.body.asText.getOrElse("")
-    val args = upickle.json.read(body).asInstanceOf[Obj].value.toMap
+    val args = io.circe.parser.parse(body).toTry.get.asObject.get.toMap
     val req = Request(path, args)
 
     val response = router(req)
 
     response.map(res =>
-      Ok(upickle.json.write(res))
+      Ok(res.noSpaces)
     )
   }
 

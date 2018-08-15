@@ -1,15 +1,16 @@
-package me.gregd.cineworld.web.service
+package me.gregd.cineworld.domain.service
 
 import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.domain.model.{Cinema, Coordinates}
 import me.gregd.cineworld.domain.repository.CinemaRepository
 import me.gregd.cineworld.util.RTree
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.math._
 
-class DefaultCinemaService(cinemaRepository: CinemaRepository) extends CinemaService with LazyLogging {
+class NearbyCinemasService(cinemaRepository: CinemaRepository) extends NearbyCinemas with LazyLogging {
+
   private lazy val tree: Future[RTree[Cinema]] =
     cinemaRepository.fetchAll().map { cinemas =>
       val coordsAndCinemas = for {
@@ -34,15 +35,6 @@ class DefaultCinemaService(cinemaRepository: CinemaRepository) extends CinemaSer
       } yield distKm -> cinema.copy(name = s"$chain - $name ($dist km)")
       modifyAndKeepDistance.sortBy(_._1).map(_._2).take(10)
     }
-  }
-
-  def getCinemasGrouped() = {
-    def isLondon(s: Cinema) = if (s.name startsWith "London - ") "London cinemas" else "All other cinemas"
-    val allCinemas = cinemaRepository.fetchAll().recover{case e =>
-      logger.error("Failed to retrieve cinemas", e)
-      Nil
-    }
-    allCinemas.map(all => all.groupBy(_.chain).mapValues(_.groupBy(isLondon)))
   }
 
   private def haversine(pos1: Coordinates, pos2: Coordinates) = {

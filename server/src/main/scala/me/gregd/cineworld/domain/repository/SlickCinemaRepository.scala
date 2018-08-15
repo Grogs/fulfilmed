@@ -1,20 +1,16 @@
 package me.gregd.cineworld.domain.repository
 
-import me.gregd.cineworld.domain.model.Cinema
-import me.gregd.cineworld.wiring.DatabaseConfig
-import slick.jdbc.SQLiteProfile
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.syntax._
-
-import scala.concurrent.Future
+import me.gregd.cineworld.domain.model.Cinema
+import slick.jdbc.SQLiteProfile
 import slick.jdbc.SQLiteProfile.api._
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-class SlickCinemaRepository(databaseConfig: DatabaseConfig) extends CinemaRepository {
-
-  val db: SQLiteProfile.backend.DatabaseDef = Database.forURL(databaseConfig.url)
+class SlickCinemaRepository(db: SQLiteProfile.backend.DatabaseDef) extends CinemaRepository {
 
   def create(): Future[Int] = {
     db.run(sqlu"""
@@ -22,6 +18,9 @@ class SlickCinemaRepository(databaseConfig: DatabaseConfig) extends CinemaReposi
             json varchar not null,
             primary key (json)
           )
+    """)
+    db.run(sqlu"""
+      insert into cinemas(json) select '' where not exists (select json from cinemas)
     """)
   }
 

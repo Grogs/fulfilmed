@@ -1,7 +1,8 @@
 package me.gregd.cineworld.wiring
 
 import com.softwaremill.macwire.wire
-import me.gregd.cineworld.util.{Clock, RealClock}
+import me.gregd.cineworld.util._
+import me.gregd.cineworld.web.{CinemaController, DebugController}
 import play.api.ApplicationLoader.Context
 import play.api.BuiltInComponentsFromContext
 import play.api.libs.ws.ahc.AhcWSComponents
@@ -9,7 +10,7 @@ import play.api.mvc.EssentialFilter
 import play.api.routing.Router
 import play.filters.gzip.GzipFilterComponents
 import play.filters.hosts.AllowedHostsComponents
-import scalacache.ScalaCache
+import router.Routes
 
 class PlayWiring(context: Context)
     extends BuiltInComponentsFromContext(context)
@@ -19,8 +20,9 @@ class PlayWiring(context: Context)
     with GzipFilterComponents {
 
   lazy val defaults = new controllers.Default
+  lazy val loggingFilter = wire[LoggingFilter]
 
-  val webWiring: WebWiring = {
+  lazy val routes = {
     val clock = RealClock
 
     val config = Config.load() match {
@@ -34,12 +36,18 @@ class PlayWiring(context: Context)
 
     val cache = new CacheWiring(mode).cache
 
-    val domainRepositoryWiring = new DomainRepositoryWiring(config.database)
-    wire[WebWiring]
+    val wiring = wire[Wiring]
+
+    val inMemoryLog = InMemoryLog
+
+    val debugController = wire[DebugController]
+    val cinemaController = wire[CinemaController]
+
+    wire[Routes]
   }
 
-  def httpFilters: Seq[EssentialFilter] = Seq(allowedHostsFilter, gzipFilter, webWiring.loggingFilter)
+  def httpFilters: Seq[EssentialFilter] = Seq(allowedHostsFilter, gzipFilter, loggingFilter)
 
-  lazy val router: Router = webWiring.routes
+  lazy val router: Router = routes
 
 }

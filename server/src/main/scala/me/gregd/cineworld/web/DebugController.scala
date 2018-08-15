@@ -7,7 +7,6 @@ import me.gregd.cineworld.domain.model.{Cinema, Coordinates, Movie}
 import me.gregd.cineworld.domain.service.MovieService
 import me.gregd.cineworld.integration.tmdb.TmdbIntegrationService
 import me.gregd.cineworld.util.InMemoryLog
-import me.gregd.cineworld.web.service.{CinemaService, DefaultCinemaService}
 import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, Action, ControllerComponents}
 

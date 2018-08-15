@@ -6,7 +6,7 @@ import me.gregd.cineworld.wiring.ChainConfig
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class CompositeCinemaService(cineworld: CineworldService, vue: VueService, config: ChainConfig) {
+class CinemasService(cineworld: CineworldService, vue: VueService, config: ChainConfig) extends Cinemas {
 
   private def cinemasFor(chain: String) = chain match {
     case "vue"       => vue.retrieveCinemas()

@@ -11,9 +11,10 @@ import autowire._
 import me.gregd.cineworld.domain.model.Cinema
 import me.gregd.cineworld.frontend.util.{Loadable, Redirect, RouteProps}
 import me.gregd.cineworld.frontend.util.Loadable.{Loaded, Loading, Unloaded}
-import me.gregd.cineworld.web.service.CinemaService
 import org.scalajs.dom.html.Input
 import slinky.core.facade.ReactElement
+import io.circe.generic.auto._
+import me.gregd.cineworld.domain.service.{Cinemas, NearbyCinemas}
 
 import scala.scalajs.js.Dynamic
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -38,16 +39,20 @@ import scala.concurrent.Future
   }
 
   def loadAllCinemas() = {
+    def isLondon(s: Cinema) = if (s.name startsWith "London - ") "London cinemas" else "All other cinemas"
+
+    def group(cinemas: Seq[Cinema]) = cinemas.groupBy(_.chain).mapValues(_.groupBy(isLondon))
+
     for {
-      cinemas <- Client[CinemaService].getCinemasGrouped().call()
-    } yield setState(_.copy(allCinemas = Loaded(cinemas)))
+      cinemas <- Client[Cinemas].getCinemas().call()
+    } yield setState(_.copy(allCinemas = Loaded(group(cinemas))))
   }
 
   def loadNearbyCinemas(): Future[Unit] = {
     setState(_.copy(nearbyCinemas = Loading))
     for {
       userLocation <- Geolocation.getCurrentPosition()
-      nearbyCinemas <- Client[CinemaService].getNearbyCinemas(userLocation).call()
+      nearbyCinemas <- Client[NearbyCinemas].getNearbyCinemas(userLocation).call()
     } yield setState(_.copy(nearbyCinemas = Loaded(nearbyCinemas)))
   }
 

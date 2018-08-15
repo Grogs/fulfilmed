@@ -13,13 +13,16 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class CineworldService(
-                          underlying: CineworldIntegrationService,
-                          postcodeService: PostcodeIoIntegrationService
+    underlying: CineworldIntegrationService,
+    postcodeService: PostcodeIoIntegrationService
 ) extends LazyLogging {
 
   implicit val formats = DefaultFormats
 
-  def retrieveCinemas(): Future[Seq[Cinema]] =
+  def retrieveCinemas(): Future[Seq[Cinema]] = {
+
+    logger.info("Retrieving Cineworld cinemas")
+
     for {
       rawCinemas <- underlying.retrieveCinemas()
       postcodes = rawCinemas.map(_.postcode)
@@ -27,6 +30,7 @@ class CineworldService(
     } yield {
       rawCinemas.map(raw => CineworldTransformer.toCinema(raw, coordinates.get(raw.postcode)))
     }
+  }
 
   def retrieveMoviesAndPerformances(cinemaId: String, date: LocalDate): Future[Map[Film, Seq[Performance]]] = {
 

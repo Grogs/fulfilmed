@@ -1,5 +1,6 @@
 package me.gregd.cineworld.wiring
 
+import com.softwaremill.macwire.Module
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.numeric.Positive
 import eu.timepit.refined.string.Url
@@ -23,6 +24,3 @@ case class DatabaseConfig(url: String)
 case class ChainConfig(enabled: Seq[String])
 
 case class TmdbRateLimit(duration: FiniteDuration, count: Int Refined Positive)
-
-
-

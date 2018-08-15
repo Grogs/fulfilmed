@@ -10,7 +10,7 @@ import scala.concurrent.Future
 
 class CompositeListingService(movieDao: MovieService, cineworld: CineworldService, vue: VueService, clock: Clock) {
 
-  def getMoviesAndPerformances(cinemaId: String, date: LocalDate): Future[Map[Movie, Seq[Performance]]] = {
+  def getMoviesAndPerformances(cinemaId: String, date: LocalDate): Future[Seq[(Movie, Seq[Performance])]] = {
     //Relying on IDs not conflicting
     val cineworldResults = cineworld.retrieveMoviesAndPerformances(cinemaId, date)
     val vueResults = vue.retrieveMoviesAndPerformances(cinemaId, date)
@@ -18,7 +18,7 @@ class CompositeListingService(movieDao: MovieService, cineworld: CineworldServic
     (cineworldResults fallbackTo vueResults).flatMap( res =>
       Future.traverse(res){ case (film, performances) =>
         movieDao.toMovie(film).map(_ -> performances)
-      }.map(_.toMap)
+      }.map(_.toSeq)
     )
   }
 

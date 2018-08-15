@@ -1,6 +1,7 @@
 package me.gregd.cineworld.domain.repository
 import java.time.LocalDate
 
+import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.domain.model.{Cinema, Movie, Performance}
 import me.gregd.cineworld.wiring.DatabaseConfig
 import io.circe.generic.auto._
@@ -13,22 +14,20 @@ import slick.jdbc.SQLiteProfile.api._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class SlickListingsRepository(databaseConfig: DatabaseConfig) extends ListingsRepository {
+class SlickListingsRepository(db: SQLiteProfile.backend.DatabaseDef) extends ListingsRepository with LazyLogging {
 
-  val db: SQLiteProfile.backend.DatabaseDef = Database.forURL(databaseConfig.url, executor = AsyncExecutor("test1", numThreads=1, queueSize=1000))
-
-  override def fetch(cinemaId: String, date: LocalDate): Future[Map[Movie, Seq[Performance]]] = {
+  override def fetch(cinemaId: String, date: LocalDate): Future[Seq[(Movie, Seq[Performance])]] = {
     val select = sql"select listings from listings where cinema_id = $cinemaId and date = ${date.toEpochDay}".as[String]
 
-    def deserialize(json: String) = decode[Seq[(Movie, Seq[Performance])]](json).map(_.toMap).toTry.get
+    def deserialize(json: String) = decode[Seq[(Movie, Seq[Performance])]](json).toTry.get
 
     db.run(
       select.head.map(deserialize)
     )
   }
 
-  override def persist(cinemaId: String, date: LocalDate)(listings: Map[Movie, Seq[Performance]]): Future[Unit] = {
-    val json = listings.toSeq.asJson.noSpaces
+  override def persist(cinemaId: String, date: LocalDate)(listings: Seq[(Movie, Seq[Performance])]): Future[Unit] = {
+    val json = listings.asJson.noSpaces
     val stmt = sqlu"insert or replace into listings values ($cinemaId, ${date.toEpochDay}, $json)"
     db.run(stmt).map(_ => ())
   }

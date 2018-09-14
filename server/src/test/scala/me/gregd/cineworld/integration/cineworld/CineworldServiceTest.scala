@@ -41,7 +41,7 @@ class CineworldServiceTest extends FunSuite with ScalaFutures with Matchers with
   test("retrieveMoviesAndPerformances") {
     val date = LocalDate.parse("2017-05-23")
     val showings = cineworld.retrieveMoviesAndPerformances("8112", date).futureValue
-    pprint.pprintln(showings, height = 100000, width = 200)
+//    pprint.pprintln(showings, height = 100000, width = 200)
     showings should contain allElementsOf expectedShowings
   }
 

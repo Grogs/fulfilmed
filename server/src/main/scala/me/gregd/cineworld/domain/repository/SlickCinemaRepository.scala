@@ -4,24 +4,27 @@ import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.syntax._
 import me.gregd.cineworld.domain.model.Cinema
-import slick.jdbc.SQLiteProfile
-import slick.jdbc.SQLiteProfile.api._
+import slick.jdbc.PostgresProfile
+import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class SlickCinemaRepository(db: SQLiteProfile.backend.DatabaseDef) extends CinemaRepository {
+class SlickCinemaRepository(db: PostgresProfile.backend.DatabaseDef) extends CinemaRepository {
 
-  def create(): Future[Int] = {
-    db.run(sqlu"""
+  def create(): Future[Unit] = {
+    def createTable = db.run(sqlu"""
            create table if not exists cinemas (
             json varchar not null,
             primary key (json)
-          )
+           );
     """)
-    db.run(sqlu"""
+
+    def insertDefaultEmptyValue = db.run(sqlu"""
       insert into cinemas(json) select '' where not exists (select json from cinemas)
     """)
+
+    createTable.flatMap(_ => insertDefaultEmptyValue).map(_ => ())
   }
 
   override def fetchAll(): Future[Seq[Cinema]] = {

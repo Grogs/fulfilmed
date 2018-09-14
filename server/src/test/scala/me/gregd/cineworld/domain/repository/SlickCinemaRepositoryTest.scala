@@ -1,32 +1,34 @@
 package me.gregd.cineworld.domain.repository
 
+import docker.Postgres
 import me.gregd.cineworld.domain.model.{Cinema, Coordinates}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSuite, Matchers}
-import slick.jdbc.SQLiteProfile.api._
+import slick.jdbc.PostgresProfile.api._
 
-class SlickCinemaRepositoryTest extends FunSuite with ScalaFutures with IntegrationPatience with Matchers {
+class SlickCinemaRepositoryTest extends FunSuite with Postgres with ScalaFutures with IntegrationPatience with Matchers {
 
-  val db = Database.forURL("jdbc:sqlite::memory:SlickCinemaRepositoryTest")
-  val repo = new SlickCinemaRepository(db)
+  lazy val db = Database.forURL(postgresUrl)
 
   test("create") {
+    val repo = new SlickCinemaRepository(db)
     repo.create().futureValue
   }
 
   test("persist and fetch") {
-    repo.create().futureValue
+    val repo = new SlickCinemaRepository(db)
 
     val input = List(
       Cinema("1", "cineworld", "Blah", None),
       Cinema("2", "vue", "Blah Blah", Some(Coordinates(1d, 2d)))
     )
 
-    repo.persist(input).futureValue
+    val eventualAssertion = for {
+      _ <- repo.create()
+      _ <- repo.persist(input)
+      output <- repo.fetchAll()
+    } yield input shouldEqual output
 
-    val output = repo.fetchAll().futureValue
-
-    input shouldEqual output
+    eventualAssertion.futureValue
   }
-
 }

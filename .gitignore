@@ -16,3 +16,4 @@ project/boot/
 ### Gradle ###
 build
 .gradle
+/:memory:*

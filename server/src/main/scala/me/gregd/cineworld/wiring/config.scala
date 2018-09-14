@@ -20,7 +20,9 @@ case class CineworldConfig(baseUrl: String Refined Url)
 case class VueConfig(baseUrl: String Refined Url)
 case class PostcodesIoConfig(baseUrl: String Refined Url)
 case class MoviesConfig(cacheTimeout: FiniteDuration)
-case class DatabaseConfig(url: String)
+case class DatabaseConfig(url: String, listingsTableName: ListingsTableName)
 case class ChainConfig(enabled: Seq[String])
 
 case class TmdbRateLimit(duration: FiniteDuration, count: Int Refined Positive)
+
+case class ListingsTableName(value: String) extends AnyVal

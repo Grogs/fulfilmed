@@ -2,6 +2,7 @@ package me.gregd.cineworld.domain.repository
 
 import docker.Postgres
 import me.gregd.cineworld.domain.model.{Cinema, Coordinates}
+import me.gregd.cineworld.wiring.DatabaseInitialisation
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSuite, Matchers}
 import slick.jdbc.PostgresProfile.api._
@@ -10,12 +11,8 @@ class SlickCinemaRepositoryTest extends FunSuite with Postgres with ScalaFutures
 
   lazy val db = Database.forURL(postgresUrl)
 
-  test("create") {
-    val repo = new SlickCinemaRepository(db)
-    repo.create().futureValue
-  }
-
   test("persist and fetch") {
+    DatabaseInitialisation.createCinemas(db).futureValue
     val repo = new SlickCinemaRepository(db)
 
     val input = List(
@@ -24,7 +21,6 @@ class SlickCinemaRepositoryTest extends FunSuite with Postgres with ScalaFutures
     )
 
     val eventualAssertion = for {
-      _ <- repo.create()
       _ <- repo.persist(input)
       output <- repo.fetchAll()
     } yield input shouldEqual output

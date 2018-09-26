@@ -24,9 +24,12 @@ class CineworldIntegrationService(ws: WSClient, implicit val cache: ScalaCache[A
 
   private def curlCinemas(): Future[String] = memoize(1.day) {
     val today = clock.today().toString
-    ws.url(s"${config.baseUrl}/uk/data-api-service/v1/quickbook/10108/cinemas/with-event/until/$today?attr=&lang=en_GB")
-      .get()
-      .map(_.body)
+    val url = s"${config.baseUrl}/uk/data-api-service/v1/quickbook/10108/cinemas/with-event/until/$today?attr=&lang=en_GB"
+    for {
+      resp <- ws.url(url).get()
+      body = resp.body
+      _ = if (body.length < 300) logger.warn(s"Response for $url is suspiciously short!")
+    } yield body
   }
 
   private def curl7DayListings(cinema: String, date: LocalDate): Future[String] = memoize(6.hours) {
@@ -51,12 +54,13 @@ class CineworldIntegrationService(ws: WSClient, implicit val cache: ScalaCache[A
       val json = parse(r)
       logger.debug(s"Retrieved cinemas response:\n$r")
       val cinemas = json \ "body" \ "cinemas"
+      if (cinemas.isEmpty) logger.error(s"No cinemas found. Response was:\n$r")
       cinemas.as[Seq[CinemaResp]]
     }
   }
 
   def retrieveListings(cinema: String, date: LocalDate): Future[ListingsBody] = {
-    curl7DayListings(cinema, date).map{r =>
+    curl7DayListings(cinema, date).map { r =>
       val films = parse(r) \ "body"
       films.as[ListingsBody]
     }

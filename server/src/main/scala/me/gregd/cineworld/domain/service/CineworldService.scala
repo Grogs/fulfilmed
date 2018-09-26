@@ -25,6 +25,7 @@ class CineworldService(
 
     for {
       rawCinemas <- underlying.retrieveCinemas()
+      _ = logger.info(s"Retrieved ${rawCinemas.length} cinemas")
       postcodes = rawCinemas.map(_.postcode)
       coordinates <- postcodeService.lookup(postcodes)
     } yield {

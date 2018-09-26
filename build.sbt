@@ -5,6 +5,7 @@ lazy val commonSettings = Seq(
 )
 
 resolvers += Resolver.sonatypeRepo("releases")
+resolvers += Resolver.jcenterRepo
 
 addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3")
 
@@ -44,6 +45,7 @@ lazy val server = project.settings(
   pipelineStages in Assets := Seq(scalaJSPipeline),
   devCommands in scalaJSPipeline ++= Seq("test", "testOnly"),
   WebKeys.packagePrefix in Assets := "public/",
+  resolvers += Resolver.jcenterRepo,
   libraryDependencies ++= Seq(
     "org.scala-lang" % "scala-library" % "2.12.4",
     "org.scala-lang" % "scala-compiler" % "2.12.4",
@@ -72,6 +74,7 @@ lazy val server = project.settings(
     "com.github.pathikrit" %% "better-files" % "3.2.0",
     "com.typesafe.slick" %% "slick" % "3.2.3",
     "com.typesafe.slick" %% "slick-hikaricp" % "3.2.3",
+    "io.github.nafg" %% "slick-migration-api" % "0.4.2",
     "org.postgresql" % "postgresql" % "42.2.4",
     "org.xerial" % "sqlite-jdbc" % "3.23.1",
     "org.flywaydb" % "flyway-core" % "5.1.4",

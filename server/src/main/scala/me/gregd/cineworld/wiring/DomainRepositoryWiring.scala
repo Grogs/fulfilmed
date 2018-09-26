@@ -5,14 +5,16 @@ import me.gregd.cineworld.domain.repository.{SlickCinemaRepository, SlickListing
 import slick.jdbc.PostgresProfile
 import slick.jdbc.PostgresProfile.api._
 
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+
 @Module
 class DomainRepositoryWiring(databaseConfig: DatabaseConfig) {
   import databaseConfig.listingsTableName
 
-  lazy val db: PostgresProfile.backend.DatabaseDef = Database.forURL(databaseConfig.url)
+  lazy val db: PostgresProfile.backend.DatabaseDef = Database.forURL(databaseConfig.url, databaseConfig.username.orNull, databaseConfig.password.orNull)
   lazy val cinemaRepository = wire[SlickCinemaRepository]
   lazy val listingsRepository = wire[SlickListingsRepository]
 
-  cinemaRepository.create()
-  listingsRepository.create()
+  Await.result(DatabaseInitialisation.migrate(db, listingsTableName), Duration.Inf)
 }

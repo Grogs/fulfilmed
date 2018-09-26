@@ -4,16 +4,17 @@ import java.time.LocalDate
 
 import docker.Postgres
 import me.gregd.cineworld.domain.model.{Movie, Performance}
-import me.gregd.cineworld.wiring.ListingsTableName
+import me.gregd.cineworld.wiring.{DatabaseInitialisation, ListingsTableName}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSuite, Matchers}
+import slick.jdbc
+import slick.jdbc.PostgresProfile
 import slick.jdbc.PostgresProfile.api._
 
 import scala.util.Random
 
 class SlickListingsRepositoryTest extends FunSuite with Postgres with ScalaFutures with IntegrationPatience with Matchers {
 
-  def randomTableName() = ListingsTableName("listings-" + Random.nextLong())
 
   val exampleMovies = Seq(
     Movie("Duck Duck Goose", Some("ho00005039"), None, None, None, None, None, None, None, Some("blah.jpg"), None, None) -> List(
@@ -23,20 +24,11 @@ class SlickListingsRepositoryTest extends FunSuite with Postgres with ScalaFutur
     )
   )
 
-  test("create") {
-    val db = Database.forURL(postgresUrl)
-    val repo = new SlickListingsRepository(db, randomTableName())
-    repo.create().futureValue
-  }
-
   test("persist") {
 
-    val db = Database.forURL(postgresUrl)
-    val repo = new SlickListingsRepository(db, randomTableName())
-
+    val repo = freshRepository()
 
     val eventualAssertion = for {
-      _ <- repo.create()
       _ <- repo.persist("test", LocalDate.now())(exampleMovies)
     } yield succeed
 
@@ -45,12 +37,9 @@ class SlickListingsRepositoryTest extends FunSuite with Postgres with ScalaFutur
 
   test("fetch") {
 
-    val db = Database.forURL(postgresUrl)
-    val repo = new SlickListingsRepository(db, randomTableName())
-
+    val repo = freshRepository()
 
     val eventualAssertion = for {
-      _ <- repo.create()
       _ <- repo.persist("test", LocalDate.now())(exampleMovies)
       output <- repo.fetch("test", LocalDate.now())
     } yield exampleMovies shouldEqual output
@@ -58,4 +47,14 @@ class SlickListingsRepositoryTest extends FunSuite with Postgres with ScalaFutur
     eventualAssertion.futureValue
   }
 
+  private def freshRepository() = {
+    type DB = jdbc.PostgresProfile.backend.DatabaseDef
+    def db: DB = Database.forURL(postgresUrl)
+
+    val tableName = ListingsTableName("listings_" + Random.alphanumeric.take(6).mkString)
+
+    DatabaseInitialisation.createListings(db, tableName).futureValue
+
+    new SlickListingsRepository(db, tableName)
+  }
 }

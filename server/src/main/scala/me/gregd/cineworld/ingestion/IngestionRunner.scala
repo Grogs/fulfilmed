@@ -6,14 +6,13 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.softwaremill.macwire.wire
 import com.typesafe.scalalogging.LazyLogging
-import me.gregd.cineworld.util.{Clock, NoOpCache, RealClock}
+import me.gregd.cineworld.util.{Clock, RealClock}
 import me.gregd.cineworld.wiring._
-import monix.execution.Scheduler
 import play.api.Mode
 import play.api.libs.ws.ahc.AhcWSClient
-import scalacache.ScalaCache
 
 import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 import scala.concurrent.duration.Duration.Inf
 
 object IngestionRunner extends LazyLogging {
@@ -30,6 +29,7 @@ object IngestionRunner extends LazyLogging {
   private val clock: Clock = RealClock
   private val mode = Mode.Prod
   private val wiring: Wiring = wire[Wiring]
+  Await.result(wiring.initialise(), Duration.Inf)
 
   private val ingestionService = wire[IngestionService]
 
@@ -41,7 +41,8 @@ object IngestionRunner extends LazyLogging {
 
     Await.result(res, Inf)
 
-    actorSystem.terminate()
     wsClient.close()
+    actorSystem.terminate()
+    System.exit(0)
   }
 }

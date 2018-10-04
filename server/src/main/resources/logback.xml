@@ -11,7 +11,7 @@
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%coloredLevel %logger{15} - %message%n%xException</pattern>
+            <pattern>%date{HH:mm:ss.SSS} %coloredLevel %logger{15} - %message%n%xException</pattern>
         </encoder>
     </appender>
 
@@ -29,7 +29,7 @@
     <logger name="com.gargoylesoftware.htmlunit.javascript" level="OFF" />
     <logger name="slick.jdbc" level="INFO" />
 
-    <logger name="me.gregd" level="info" />
+    <!--<logger name="me.gregd" level="info" />-->
 
     <root level="${log.level:-info}">
         <appender-ref ref="ASYNCFILE" />

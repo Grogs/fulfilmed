@@ -79,6 +79,7 @@ class MovieService(tmdb: TmdbIntegrationService, ratings: OmdbIntegrationService
             alternateTitles <- tmdb.alternateTitles(tmdbId)
             imdbId <- tmdb.fetchImdbId(tmdbId)
             ratingsResult <- imdbId.map(ratings.fetchRatings).getOrElse(Future.successful(RatingsResult(None, None, None, None)))
+            _ = logger.debug(s"Fetched data for '${tmdbMovie.title}'")
           } yield
             for {
               altTitle <- (tmdbMovie.title :: tmdbMovie.original_title :: alternateTitles).distinct
@@ -142,7 +143,23 @@ class MovieService(tmdb: TmdbIntegrationService, ratings: OmdbIntegrationService
     }
   }
 
-  private val textToStrip = List(" - Unlimited Screening", " (English subtitles)", ": Movies For Juniors", " - Movies For Juniors", " Movies For Juniors", "Take 2 - ", "3D - ", "2D - ", "Autism Friendly Screening: ", " for Juniors", " (English dubbed version)", " (Japanese with English subtitles)", " (Punjabi)", " (Hindi)", " Unlimited Screening")
-  private def cleanTitle(f: Film) = textToStrip.foldLeft(f.title)((res, r) => res.replace(r,""))
+  private val textToStrip = List(
+    " - Unlimited Screening",
+    " (English subtitles)",
+    ": Movies For Juniors",
+    " - Movies For Juniors",
+    " Movies For Juniors",
+    "Take 2 - ",
+    "3D - ",
+    "2D - ",
+    "Autism Friendly Screening: ",
+    " for Juniors",
+    " (English dubbed version)",
+    " (Japanese with English subtitles)",
+    " (Punjabi)",
+    " (Hindi)",
+    " Unlimited Screening"
+  )
+  private def cleanTitle(f: Film) = textToStrip.foldLeft(f.title)((res, r) => res.replace(r, ""))
 
 }

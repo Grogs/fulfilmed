@@ -1,6 +1,7 @@
 package me.gregd.cineworld.wiring
 
 import com.softwaremill.macwire.wire
+import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.util._
 import me.gregd.cineworld.web.{CinemaController, DebugController}
 import play.api.ApplicationLoader.Context
@@ -12,12 +13,16 @@ import play.filters.gzip.GzipFilterComponents
 import play.filters.hosts.AllowedHostsComponents
 import router.Routes
 
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+
 class PlayWiring(context: Context)
     extends BuiltInComponentsFromContext(context)
     with AhcWSComponents
     with controllers.AssetsComponents
     with AllowedHostsComponents
-    with GzipFilterComponents {
+    with GzipFilterComponents
+    with LazyLogging {
 
   lazy val defaults = new controllers.Default
   lazy val loggingFilter = wire[LoggingFilter]
@@ -38,10 +43,14 @@ class PlayWiring(context: Context)
 
     val wiring = wire[Wiring]
 
+    Await.result(wiring.initialise(), Duration.Inf)
+
     val inMemoryLog = InMemoryLog
 
     val debugController = wire[DebugController]
     val cinemaController = wire[CinemaController]
+
+    val prefix = ""
 
     wire[Routes]
   }

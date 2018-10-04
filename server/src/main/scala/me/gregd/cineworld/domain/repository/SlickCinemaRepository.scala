@@ -18,7 +18,7 @@ class SlickCinemaRepository(db: PostgresProfile.backend.DatabaseDef) extends Cin
   }
 
   override def fetchAll(): Future[Seq[Cinema]] = {
-    val select = sql"select json from cinemas where key = 1".as[String]
+    val select = sql"select json from cinemas where id = 1".as[String]
 
     def deserialize(json: String) = decode[Seq[Cinema]](json).toTry.get
 
@@ -30,7 +30,7 @@ class SlickCinemaRepository(db: PostgresProfile.backend.DatabaseDef) extends Cin
   override def persist(cinemas: Seq[Cinema]): Future[Unit] = {
     {
       val json = cinemas.asJson.noSpaces
-      val stmt = sqlu"update cinemas set json = $json where key = 1"
+      val stmt = sqlu"update cinemas set json = $json where id = 1"
       db.run(stmt).map(_ => ())
     }
   }

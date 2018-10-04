@@ -23,8 +23,8 @@ class CineworldIntegrationService(ws: WSClient, implicit val cache: ScalaCache[A
   implicit val a = Json.format[CinemaResp]
 
   private def curlCinemas(): Future[String] = memoize(1.day) {
-    val today = clock.today().toString
-    val url = s"${config.baseUrl}/uk/data-api-service/v1/quickbook/10108/cinemas/with-event/until/$today?attr=&lang=en_GB"
+    val tomorrow = clock.today().plusDays(1).toString
+    val url = s"${config.baseUrl}/uk/data-api-service/v1/quickbook/10108/cinemas/with-event/until/$tomorrow?attr=&lang=en_GB"
     for {
       resp <- ws.url(url).get()
       body = resp.body

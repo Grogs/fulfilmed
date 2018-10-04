@@ -12,7 +12,7 @@ import me.gregd.cineworld.integration.PostcodeIoIntegrationService
 import me.gregd.cineworld.integration.cineworld.CineworldIntegrationService
 import me.gregd.cineworld.integration.tmdb.TmdbIntegrationService
 import me.gregd.cineworld.util.{NoOpCache, RealClock}
-import me.gregd.cineworld.wiring.MoviesConfig
+import me.gregd.cineworld.config.MoviesConfig
 import monix.execution.Scheduler
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.time.{Millis, Span}

@@ -1,6 +1,7 @@
 package me.gregd.cineworld.wiring
 
 import com.softwaremill.macwire.{Module, wire}
+import me.gregd.cineworld.config._
 import me.gregd.cineworld.dao.ratings.OmdbIntegrationService
 import me.gregd.cineworld.integration.PostcodeIoIntegrationService
 import me.gregd.cineworld.integration.cineworld.CineworldIntegrationService

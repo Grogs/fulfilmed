@@ -2,6 +2,7 @@ package me.gregd.cineworld.wiring
 import com.softwaremill.macwire.Module
 import slick.jdbc.PostgresProfile.backend.DatabaseDef
 import slick.jdbc.PostgresProfile.backend.Database
+import me.gregd.cineworld.config._
 
 import scala.concurrent.Future
 

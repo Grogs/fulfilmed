@@ -2,7 +2,7 @@ package me.gregd.cineworld.dao.ratings
 
 
 import com.typesafe.scalalogging.LazyLogging
-import me.gregd.cineworld.wiring.OmdbConfig
+import me.gregd.cineworld.config.OmdbConfig
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
 

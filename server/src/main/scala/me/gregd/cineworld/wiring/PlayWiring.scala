@@ -2,6 +2,7 @@ package me.gregd.cineworld.wiring
 
 import com.softwaremill.macwire.wire
 import com.typesafe.scalalogging.LazyLogging
+import me.gregd.cineworld.config.Config
 import me.gregd.cineworld.util._
 import me.gregd.cineworld.web.{CinemaController, DebugController}
 import play.api.ApplicationLoader.Context

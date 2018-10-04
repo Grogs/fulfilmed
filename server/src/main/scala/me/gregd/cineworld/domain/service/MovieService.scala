@@ -6,7 +6,7 @@ import me.gregd.cineworld.dao.ratings.{OmdbIntegrationService, RatingsResult}
 import me.gregd.cineworld.domain.model.{Film, Movie}
 import me.gregd.cineworld.integration.tmdb.TmdbIntegrationService
 import me.gregd.cineworld.integration.tmdb.model.TmdbMovie
-import me.gregd.cineworld.wiring.MoviesConfig
+import me.gregd.cineworld.config.MoviesConfig
 import monix.execution.FutureUtils.extensions._
 import monix.execution.Scheduler.Implicits.global
 

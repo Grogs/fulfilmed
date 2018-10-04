@@ -6,6 +6,7 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.softwaremill.macwire.wire
 import com.typesafe.scalalogging.LazyLogging
+import me.gregd.cineworld.config.Config
 import me.gregd.cineworld.util.{Clock, RealClock}
 import me.gregd.cineworld.wiring._
 import play.api.Mode

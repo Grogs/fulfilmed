@@ -10,6 +10,7 @@ import akka.http.scaladsl.server.directives.DebuggingDirectives
 import akka.stream.ActorMaterializer
 import eu.timepit.refined.api.Refined
 import me.gregd.cineworld.wiring._
+import me.gregd.cineworld.config._
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -19,7 +20,6 @@ import eu.timepit.refined.auto._
 import eu.timepit.refined.numeric._
 import eu.timepit.refined._
 import eu.timepit.refined.string.Url
-import me.gregd.cineworld.wiring._
 
 import scala.io.Codec.UTF8
 

@@ -3,12 +3,12 @@ package me.gregd.cineworld.domain.repository
 import java.time.LocalDate
 
 import docker.Postgres
+import me.gregd.cineworld.config._
 import me.gregd.cineworld.domain.model.{Movie, Performance}
-import me.gregd.cineworld.wiring.{DatabaseInitialisation, ListingsTableName}
+import me.gregd.cineworld.wiring.DatabaseInitialisation
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSuite, Matchers}
 import slick.jdbc
-import slick.jdbc.PostgresProfile
 import slick.jdbc.PostgresProfile.api._
 
 import scala.util.Random

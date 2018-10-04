@@ -4,6 +4,7 @@ import com.typesafe.scalalogging.LazyLogging
 import slick.jdbc.PostgresProfile
 import slick.jdbc.PostgresProfile.api._
 import slick.migration.api._
+import me.gregd.cineworld.config._
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global

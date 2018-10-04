@@ -5,7 +5,7 @@ import me.gregd.cineworld.dao.ratings.{OmdbIntegrationService, RatingsResult}
 import scala.concurrent.Future
 import eu.timepit.refined.auto._
 import me.gregd.cineworld.util.NoOpCache
-import me.gregd.cineworld.wiring.OmdbConfig
+import me.gregd.cineworld.config.OmdbConfig
 
 object FakeOmdbService extends OmdbIntegrationService(null, NoOpCache.cache, OmdbConfig("http://dummy","")) {
 

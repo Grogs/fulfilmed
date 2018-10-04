@@ -1,7 +1,7 @@
 package me.gregd.cineworld.domain.service
 
 import me.gregd.cineworld.domain.model.Cinema
-import me.gregd.cineworld.wiring.ChainConfig
+import me.gregd.cineworld.config.ChainConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

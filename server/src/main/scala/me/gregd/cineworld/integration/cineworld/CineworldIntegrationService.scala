@@ -5,7 +5,7 @@ import java.time.LocalDate
 import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.integration.cinema.cineworld.{CinemaResp, ListingsBody, RawEvent, RawFilm}
 import me.gregd.cineworld.util.Clock
-import me.gregd.cineworld.wiring.CineworldConfig
+import me.gregd.cineworld.config.CineworldConfig
 import play.api.libs.json.Json
 import play.api.libs.ws._
 import scalacache.ScalaCache

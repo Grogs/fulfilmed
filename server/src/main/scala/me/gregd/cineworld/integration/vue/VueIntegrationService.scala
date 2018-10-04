@@ -3,7 +3,7 @@ package me.gregd.cineworld.integration.vue
 import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.integration.vue.cinemas.{VueCinema, VueCinemasResp}
 import me.gregd.cineworld.integration.vue.listings.VueListingsResp
-import me.gregd.cineworld.wiring.VueConfig
+import me.gregd.cineworld.config.VueConfig
 import org.json4s.native.JsonMethods._
 import org.json4s.{DefaultFormats, _}
 import play.api.http.HeaderNames.X_REQUESTED_WITH

@@ -5,8 +5,8 @@ import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.syntax._
+import me.gregd.cineworld.config.ListingsTableName
 import me.gregd.cineworld.domain.model.{Movie, Performance}
-import me.gregd.cineworld.wiring.{DatabaseInitialisation, ListingsTableName}
 import slick.jdbc.PostgresProfile
 import slick.jdbc.PostgresProfile.api._
 

@@ -3,6 +3,7 @@ package me.gregd.cineworld.wiring
 import com.softwaremill.macwire.{Module, wire}
 import me.gregd.cineworld.domain.service._
 import me.gregd.cineworld.util._
+import me.gregd.cineworld.config._
 
 @Module
 class DomainServiceWiring(clock: Clock, integrationWiring: IntegrationWiring, repositoryWiring: DomainRepositoryWiring,chainConfig: ChainConfig, moviesConfig: MoviesConfig) {

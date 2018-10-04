@@ -3,7 +3,7 @@ package me.gregd.cineworld.integration.tmdb
 import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.integration.tmdb.model._
 import me.gregd.cineworld.util.RateLimiter
-import me.gregd.cineworld.wiring.TmdbConfig
+import me.gregd.cineworld.config.TmdbConfig
 import monix.execution.Scheduler
 import play.api.libs.json.JsValue
 import play.api.libs.ws.{WSClient, WSResponse}

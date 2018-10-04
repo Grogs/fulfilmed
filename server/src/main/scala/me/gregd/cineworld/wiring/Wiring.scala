@@ -2,6 +2,7 @@ package me.gregd.cineworld.wiring
 
 import com.softwaremill.macwire._
 import com.typesafe.scalalogging.LazyLogging
+import me.gregd.cineworld.config.Config
 import me.gregd.cineworld.util.Clock
 import play.api.Mode
 import play.api.libs.ws.WSClient

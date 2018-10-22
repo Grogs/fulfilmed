@@ -1,10 +1,11 @@
-package me.gregd.cineworld.wiring
+package me.gregd.cineworld
 
 import com.softwaremill.macwire.wire
 import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.config.Config
 import me.gregd.cineworld.util._
 import me.gregd.cineworld.web.{CinemaController, DebugController}
+import me.gregd.cineworld.wiring.{CacheWiring, Wiring}
 import play.api.ApplicationLoader.Context
 import play.api.BuiltInComponentsFromContext
 import play.api.libs.ws.ahc.AhcWSComponents

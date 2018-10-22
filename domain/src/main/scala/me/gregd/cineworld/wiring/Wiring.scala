@@ -18,7 +18,6 @@ import scala.concurrent.Future
   val databaseWiring: DatabaseWiring = wire[DatabaseWiring]
   val domainRepositoryWiring: DomainRepositoryWiring = wire[DomainRepositoryWiring]
   val domainServiceWiring: DomainServiceWiring = wire[DomainServiceWiring]
-  val ingestionWiring: IngestionWiring = wire[IngestionWiring]
 
   def initialise(): Future[Unit] = {
     logger.info("Initialising")

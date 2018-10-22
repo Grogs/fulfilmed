@@ -1,5 +1,5 @@
 lazy val commonSettings = Seq(
-  organization := "me.gregd",
+  organization := "com.fulfilmed",
   git.baseVersion := "1.8",
   scalaVersion := "2.12.4",
 )
@@ -8,6 +8,20 @@ resolvers += Resolver.sonatypeRepo("releases")
 resolvers += Resolver.jcenterRepo
 
 addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3")
+
+run := {
+  (server/Compile/run).evaluated
+}
+
+Docker/publishLocal := {
+  (server/Docker/publishLocal).value
+  (ingestor/Docker/publishLocal).value
+}
+
+Docker/publish := {
+  (server/Docker/publish).value
+  (ingestor/Docker/publish).value
+}
 
 lazy val client = project.enablePlugins(ScalaJSBundlerPlugin, ScalaJSWeb, GitVersioning).settings(
   commonSettings,
@@ -31,24 +45,20 @@ lazy val client = project.enablePlugins(ScalaJSBundlerPlugin, ScalaJSWeb, GitVer
     "history" -> "4.7.2",
   ),
   emitSourceMaps in fullOptJS := true,
+  sources in (Compile,doc) := Seq.empty,
+  publishArtifact in (Compile, packageDoc) := false,
 ).dependsOn(sharedJs)
 
-
-lazy val server = project.settings(
+lazy val domain = project.settings(
   commonSettings,
-  name := "fulfilmed",
-  dockerRepository := Some("grogs"),
-  buildInfoKeys := Seq[BuildInfoKey](name, version, git.gitHeadCommit, git.gitHeadMessage),
-  buildInfoOptions ++= Seq(BuildInfoOption.BuildTime, BuildInfoOption.ToJson),
-  buildInfoPackage := "fulfilmed",
-  scalaJSProjects := Seq(client),
-  pipelineStages in Assets := Seq(scalaJSPipeline),
-  devCommands in scalaJSPipeline ++= Seq("test", "testOnly"),
-  WebKeys.packagePrefix in Assets := "public/",
+  name := "domain",
   resolvers += Resolver.jcenterRepo,
+  addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3"),
   libraryDependencies ++= Seq(
     "org.scala-lang" % "scala-library" % "2.12.4",
     "org.scala-lang" % "scala-compiler" % "2.12.4",
+    playCore,
+    ws,
     "info.debatty" % "java-string-similarity" % "1.0.1",
     "org.scalaj" %% "scalaj-http" % "2.3.0",
     "org.json4s" %% "json4s-native" % "3.5.3",
@@ -69,8 +79,6 @@ lazy val server = project.settings(
     "com.beachape" %% "enumeratum" % "1.5.12",
     "com.softwaremill.macwire" %% "macros" % "2.3.0",
     "com.softwaremill.macwire" %% "util" % "2.3.0",
-    ws,
-    filters,
     "com.github.pathikrit" %% "better-files" % "3.2.0",
     "com.typesafe.slick" %% "slick" % "3.2.3",
     "com.typesafe.slick" %% "slick-hikaricp" % "3.2.3",
@@ -85,15 +93,60 @@ lazy val server = project.settings(
     "com.typesafe.akka" %% "akka-http" % "10.0.11" % Test,
     "com.whisk" %% "docker-testkit-scalatest" % "0.9.5" % Test,
     "com.whisk" %% "docker-testkit-impl-docker-java" % "0.9.5" % Test,
+  )
+).enablePlugins(GitVersioning).dependsOn(sharedJvm)
+
+
+lazy val server = project.settings(
+  commonSettings,
+  name := "fulfilmed",
+  dockerRepository := Some("grogs"),
+  buildInfoKeys := Seq[BuildInfoKey](name, version, git.gitHeadCommit, git.gitHeadMessage),
+  buildInfoOptions ++= Seq(BuildInfoOption.BuildTime, BuildInfoOption.ToJson),
+  buildInfoPackage := "fulfilmed",
+  scalaJSProjects := Seq(client),
+  pipelineStages in Assets := Seq(scalaJSPipeline),
+  devCommands in scalaJSPipeline ++= Seq("test", "testOnly"),
+  WebKeys.packagePrefix in Assets := "public/",
+  resolvers += Resolver.jcenterRepo,
+  addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3"),
+  libraryDependencies ++= Seq(
+    "org.scala-lang" % "scala-library" % "2.12.4",
+    "org.scala-lang" % "scala-compiler" % "2.12.4",
+    "com.google.code.findbugs" % "jsr305" % "3.0.2",
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2",
+    "ch.qos.logback" % "logback-classic" % "1.2.3",
+    "com.vmunier" %% "scalajs-scripts" % "1.1.1",
+    "com.softwaremill.macwire" %% "macros" % "2.3.0",
+    "com.softwaremill.macwire" %% "util" % "2.3.0",
+    ws,
+    filters,
   ),
   libraryDependencies ++= Seq(
     "org.webjars" %% "webjars-play" % "2.6.3",
     "org.webjars" % "font-awesome" % "4.7.0",
   ),
-  compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value)
+  compile in Compile := ((compile in Compile) dependsOn scalaJSPipeline).value
+)
   .enablePlugins(PlayScala, GitVersioning, BuildInfoPlugin, DeployPlugin, WebScalaJSBundlerPlugin)
   .disablePlugins(PlayLayoutPlugin)
-  .dependsOn(sharedJvm)
+  .dependsOn(domain)
+
+lazy val ingestor = project.settings(
+  commonSettings,
+  name := "fulfilmed-ingestor",
+  dockerRepository := Some("grogs"),
+  libraryDependencies ++= Seq(
+    "org.scala-lang" % "scala-library" % "2.12.4",
+    "org.scala-lang" % "scala-compiler" % "2.12.4",
+    "com.google.code.findbugs" % "jsr305" % "3.0.2",
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2",
+    "ch.qos.logback" % "logback-classic" % "1.2.3",
+    "com.softwaremill.macwire" %% "macros" % "2.3.0",
+    "com.softwaremill.macwire" %% "util" % "2.3.0",
+    ws,
+  )
+).enablePlugins(GitVersioning, DeployPlugin, JavaAppPackaging).dependsOn(domain)
 
 lazy val shared = crossProject.crossType(CrossType.Pure).settings(
   libraryDependencies ++= Seq(
@@ -108,5 +161,3 @@ lazy val shared = crossProject.crossType(CrossType.Pure).settings(
 
 lazy val sharedJvm = shared.jvm
 lazy val sharedJs = shared.js
-
-onLoad in Global ~= (_ andThen ("project server" :: _))

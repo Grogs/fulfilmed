@@ -12,5 +12,5 @@ import scala.concurrent.Future
 
   lazy val db: DatabaseDef = Database.forURL(databaseConfig.url, databaseConfig.username.orNull, databaseConfig.password.orNull)
 
-  def initialise(): Future[Unit] = DatabaseInitialisation.migrate(db, databaseConfig.listingsTableName)
+  def initialise(): Future[Unit] = db.run(DatabaseInitialisation.migrate(databaseConfig.listingsTableName))
 }

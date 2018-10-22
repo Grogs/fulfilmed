@@ -4,7 +4,6 @@ import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.syntax._
 import me.gregd.cineworld.domain.model.Cinema
-import me.gregd.cineworld.wiring.DatabaseInitialisation
 import slick.jdbc.PostgresProfile
 import slick.jdbc.PostgresProfile.api._
 
@@ -13,12 +12,8 @@ import scala.concurrent.Future
 
 class SlickCinemaRepository(db: PostgresProfile.backend.DatabaseDef) extends CinemaRepository {
 
-  def create(): Future[Unit] = {
-    DatabaseInitialisation.createCinemas(db)
-  }
-
   override def fetchAll(): Future[Seq[Cinema]] = {
-    val select = sql"select json from cinemas where id = 1".as[String]
+    val select = sql"select json from cinemas".as[String]
 
     def deserialize(json: String) = decode[Seq[Cinema]](json).toTry.get
 
@@ -30,8 +25,16 @@ class SlickCinemaRepository(db: PostgresProfile.backend.DatabaseDef) extends Cin
   override def persist(cinemas: Seq[Cinema]): Future[Unit] = {
     {
       val json = cinemas.asJson.noSpaces
-      val stmt = sqlu"update cinemas set json = $json where id = 1"
-      db.run(stmt).map(_ => ())
+      val upserts = DBIO.sequence(cinemas.map{c =>
+        import c.{id, chain}
+        sqlu"""
+              insert into cinemas (id, chain, json)
+              values ($id, $chain, $json)
+              on conflict (id)
+              do update set (id, chain, json) = ($id, $chain, $json)
+        """
+      })
+      db.run(upserts).map(_ => ())
     }
   }
 }

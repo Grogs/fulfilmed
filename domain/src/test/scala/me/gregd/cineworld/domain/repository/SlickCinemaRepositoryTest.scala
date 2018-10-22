@@ -12,7 +12,7 @@ class SlickCinemaRepositoryTest extends FunSuite with Postgres with ScalaFutures
   lazy val db = Database.forURL(postgresUrl)
 
   test("persist and fetch") {
-    DatabaseInitialisation.createCinemas(db).futureValue
+    db.run(DatabaseInitialisation.createCinemas).futureValue
     val repo = new SlickCinemaRepository(db)
 
     val input = List(

@@ -53,7 +53,7 @@ class SlickListingsRepositoryTest extends FunSuite with Postgres with ScalaFutur
 
     val tableName = ListingsTableName("listings_" + Random.alphanumeric.take(6).mkString)
 
-    DatabaseInitialisation.createListings(db, tableName).futureValue
+    db.run(DatabaseInitialisation.createListings(tableName)).futureValue
 
     new SlickListingsRepository(db, tableName)
   }

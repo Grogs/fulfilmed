@@ -1,3 +1,4 @@
+import me.gregd.cineworld.PlayWiring
 import me.gregd.cineworld.wiring._
 import play.api.{Application, ApplicationLoader}
 

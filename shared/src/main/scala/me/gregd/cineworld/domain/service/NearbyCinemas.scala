@@ -4,9 +4,9 @@ import me.gregd.cineworld.domain.model.{Cinema, Coordinates}
 
 import scala.concurrent.Future
 
-trait NearbyCinemas {
+trait NearbyCinemas[F[_]] {
   type Chain = String
   type Grouping = String
 
-  def getNearbyCinemas(coordinates: Coordinates): Future[Seq[Cinema]]
+  def getNearbyCinemas(coordinates: Coordinates): F[Seq[Cinema]]
 }

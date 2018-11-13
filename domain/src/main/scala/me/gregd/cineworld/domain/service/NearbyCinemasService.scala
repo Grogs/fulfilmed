@@ -1,18 +1,19 @@
 package me.gregd.cineworld.domain.service
 
+import cats.effect.Async
+import cats.syntax.flatMap._
+import cats.syntax.functor._
 import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.domain.model.{Cinema, Coordinates}
 import me.gregd.cineworld.domain.repository.CinemaRepository
 import me.gregd.cineworld.util.RTree
 
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.math._
 
-class NearbyCinemasService(cinemaRepository: CinemaRepository) extends NearbyCinemas with LazyLogging {
+class NearbyCinemasService[F[_]: Async](cinemaRepository: CinemaRepository[F]) extends NearbyCinemas[F] with LazyLogging {
 
-  private lazy val tree: Future[RTree[Cinema]] =
-    cinemaRepository.fetchAll().map { cinemas =>
+  private lazy val tree: F[RTree[Cinema, F]] =
+    cinemaRepository.fetchAll().map{ cinemas =>
       val coordsAndCinemas = for {
         cinema <- cinemas
         coordinates <- cinema.coordinates
@@ -20,7 +21,7 @@ class NearbyCinemasService(cinemaRepository: CinemaRepository) extends NearbyCin
       new RTree(coordsAndCinemas)
     }
 
-  def getNearbyCinemas(coordinates: Coordinates): Future[Seq[Cinema]] = {
+  def getNearbyCinemas(coordinates: Coordinates): F[Seq[Cinema]] = {
     def distance(c: Cinema): Double = c.coordinates.map(c => haversine(coordinates, c)).getOrElse(Double.MaxValue)
     val maxDistance = 150
     val maxResults = 50

@@ -1,49 +1,59 @@
 package me.gregd.cineworld.web
 
-import autowire.Core.Request
 import com.typesafe.scalalogging.LazyLogging
-import io.circe.syntax._
-import io.circe.generic.auto._
-import me.gregd.cineworld.domain.service.{Cinemas, Listings, NearbyCinemas, NearbyCinemasService}
+import io.circe.{Decoder, HCursor, parser}
+import me.gregd.cineworld.domain.service._
+import monix.eval.Task
+import monix.execution.Scheduler
 import play.api.Environment
 import play.api.Mode._
-import play.api.mvc.{AbstractController, ControllerComponents}
+import play.api.mvc.{AbstractController, ControllerComponents, Result}
+import sloth.ServerFailure.{DeserializerError, HandlerError, PathNotFound}
+import sloth._
+import chameleon.ext.circe._
+import cats.syntax.either._
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.io.Source
+import io.circe.generic.auto._
 
-class CinemaController(env: Environment, cinemaService: Cinemas, listingsService: Listings, nearbyCinemasService: NearbyCinemasService, cc: ControllerComponents) extends AbstractController(cc) with LazyLogging {
+class CinemaController(env: Environment, cinemaService: Cinemas[Task], listingsService: ListingsService[Task], nearbyCinemasService: NearbyCinemas[Task], cc: ControllerComponents)
+    extends AbstractController(cc)
+    with LazyLogging {
 
-  val scriptPaths  = List(
+  val scriptPaths = List(
     "/assets/fulfilmed-scala-frontend-" + (env.mode match {
       case Dev | Test => "fastopt-bundle.js"
-      case Prod => "opt-bundle.js"
+      case Prod       => "opt-bundle.js"
     })
   )
 
-  object ApiServer extends autowire.Server[io.circe.Json, io.circe.Decoder, io.circe.Encoder] {
-    def read[Result: io.circe.Decoder](p: io.circe.Json) = p.as[Result].toTry.get
-    def write[Result: io.circe.Encoder](r: Result) = r.asJson
-  }
-
-  val cinemasServiceRouter = ApiServer.route[Cinemas](cinemaService)
-  val listingsServiceRouter = ApiServer.route[Listings](listingsService)
-  val nearbyCinemasServiceRouter = ApiServer.route[NearbyCinemas](nearbyCinemasService)
-
-  val router = cinemasServiceRouter orElse listingsServiceRouter orElse nearbyCinemasServiceRouter
+  val router = Router[String, Task]
+    .route[Cinemas[Task]](cinemaService)
+    .route[Listings[Task]](listingsService)
+    .route[NearbyCinemas[Task]](nearbyCinemasService)
 
 
   def api(pathRaw: String) = Action.async { implicit request =>
     logger.debug(s"API request: $pathRaw")
-    val path = pathRaw.split("/")
-    val body = request.body.asText.getOrElse("")
-    val args = io.circe.parser.parse(body).toTry.get.asObject.get.toMap
-    val req = Request(path, args)
+    val path = pathRaw.split("/").toList
 
-    val response = router(req)
+    val res: Either[Result, Task[Result]] =
+      for {
+      body <- request.body.asText.toRight(BadRequest("Empty request body"))
+      req = Request(path, body)
+      eventualJson <- router(req).toEither.leftMap{
+        case PathNotFound(_) => NotFound("Invalid path")
+        case HandlerError(ex) => InternalServerError(ex.getMessage)
+        case DeserializerError(ex) => InternalServerError(s"Failed to deserialise request body. Reason: ${ex.getMessage}")
+      }
+      eventualResult = eventualJson.map(json => Ok(json).as("application/json"))
+    } yield eventualResult
 
-    response.map(res =>
-      Ok(res.noSpaces)
+
+    res.fold(
+      error => Future.successful(error),
+      respTask => respTask.runAsync(Scheduler.global)
     )
   }
 
@@ -58,5 +68,4 @@ class CinemaController(env: Environment, cinemaService: Cinemas, listingsService
       IndexPage(scriptPaths).render
     ).as("text/html")
   )
-
 }

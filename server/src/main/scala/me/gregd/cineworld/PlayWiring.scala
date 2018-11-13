@@ -6,6 +6,7 @@ import me.gregd.cineworld.config.Config
 import me.gregd.cineworld.util._
 import me.gregd.cineworld.web.{CinemaController, DebugController}
 import me.gregd.cineworld.wiring.{CacheWiring, Wiring}
+import monix.eval.Task
 import play.api.ApplicationLoader.Context
 import play.api.BuiltInComponentsFromContext
 import play.api.libs.ws.ahc.AhcWSComponents
@@ -43,7 +44,7 @@ class PlayWiring(context: Context)
 
     val cache = new CacheWiring(mode).cache
 
-    val wiring = wire[Wiring]
+    val wiring = wire[Wiring[Task]]
 
     Await.result(wiring.initialise(), Duration.Inf)
 

@@ -7,7 +7,6 @@ import org.scalajs.dom.raw.Event
 import slinky.core._
 import slinky.core.annotations.react
 import slinky.web.html._
-import autowire._
 import me.gregd.cineworld.domain.model.Cinema
 import me.gregd.cineworld.frontend.util.{Loadable, Redirect, RouteProps}
 import me.gregd.cineworld.frontend.util.Loadable.{Loaded, Loading, Unloaded}
@@ -44,7 +43,7 @@ import scala.concurrent.Future
     def group(cinemas: Seq[Cinema]) = cinemas.groupBy(_.chain).mapValues(_.groupBy(isLondon))
 
     for {
-      cinemas <- Client[Cinemas].getCinemas().call()
+      cinemas <- Client.cinemas.getCinemas()
     } yield setState(_.copy(allCinemas = Loaded(group(cinemas))))
   }
 
@@ -52,7 +51,7 @@ import scala.concurrent.Future
     setState(_.copy(nearbyCinemas = Loading))
     for {
       userLocation <- Geolocation.getCurrentPosition()
-      nearbyCinemas <- Client[NearbyCinemas].getNearbyCinemas(userLocation).call()
+      nearbyCinemas <- Client.nearbyCinemas.getNearbyCinemas(userLocation)
     } yield setState(_.copy(nearbyCinemas = Loaded(nearbyCinemas)))
   }
 

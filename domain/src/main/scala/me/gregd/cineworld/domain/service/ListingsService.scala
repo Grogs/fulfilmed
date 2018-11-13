@@ -2,17 +2,16 @@ package me.gregd.cineworld.domain.service
 
 import java.time.LocalDate
 
+import cats.syntax.applicativeError._
 import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.domain.model.{Movie, Performance}
 import me.gregd.cineworld.domain.repository.ListingsRepository
 import me.gregd.cineworld.util.Clock
 
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
 
-class ListingsService(listingsRepository: ListingsRepository, clock: Clock) extends Listings with LazyLogging {
-  def getMoviesAndPerformancesFor(cinemaId: String, dateRaw: String): Future[Seq[(Movie, Seq[Performance])]] = {
-    listingsRepository.fetch(cinemaId, parse(dateRaw)).recover{ case e =>
+class ListingsService[F[_]: ApplicativeThrowable](listingsRepository: ListingsRepository[F], clock: Clock) extends Listings[F] with LazyLogging {
+  def getMoviesAndPerformancesFor(cinemaId: String, dateRaw: String): F[Seq[(Movie, Seq[Performance])]] = {
+    listingsRepository.fetch(cinemaId, parse(dateRaw)).handleError{ e  =>
       logger.error("Failed to retrieve listings", e)
       Nil
     }

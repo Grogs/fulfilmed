@@ -4,6 +4,6 @@ import me.gregd.cineworld.domain.model.{Cinema, Coordinates}
 
 import scala.concurrent.Future
 
-trait Cinemas {
-  def getCinemas(): Future[Seq[Cinema]]
+trait Cinemas[F[_]] {
+  def getCinemas(): F[Seq[Cinema]]
 }

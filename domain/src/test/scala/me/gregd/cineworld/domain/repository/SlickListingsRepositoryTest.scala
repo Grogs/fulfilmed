@@ -6,11 +6,14 @@ import docker.Postgres
 import me.gregd.cineworld.config._
 import me.gregd.cineworld.domain.model.{Movie, Performance}
 import me.gregd.cineworld.wiring.DatabaseInitialisation
+import monix.eval.Task
+import monix.execution.Scheduler.Implicits.global
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSuite, Matchers}
 import slick.jdbc
 import slick.jdbc.PostgresProfile.api._
 
+import scala.concurrent.duration.Duration.Inf
 import scala.util.Random
 
 class SlickListingsRepositoryTest extends FunSuite with Postgres with ScalaFutures with IntegrationPatience with Matchers {
@@ -32,7 +35,7 @@ class SlickListingsRepositoryTest extends FunSuite with Postgres with ScalaFutur
       _ <- repo.persist("test", LocalDate.now())(exampleMovies)
     } yield succeed
 
-    eventualAssertion.futureValue
+    eventualAssertion.runSyncUnsafe(Inf)
   }
 
   test("fetch") {
@@ -44,7 +47,7 @@ class SlickListingsRepositoryTest extends FunSuite with Postgres with ScalaFutur
       output <- repo.fetch("test", LocalDate.now())
     } yield exampleMovies shouldEqual output
 
-    eventualAssertion.futureValue
+    eventualAssertion.runSyncUnsafe(Inf)
   }
 
   private def freshRepository() = {
@@ -55,6 +58,6 @@ class SlickListingsRepositoryTest extends FunSuite with Postgres with ScalaFutur
 
     db.run(DatabaseInitialisation.createListings(tableName)).futureValue
 
-    new SlickListingsRepository(db, tableName)
+    new SlickListingsRepository[Task](db, tableName)
   }
 }

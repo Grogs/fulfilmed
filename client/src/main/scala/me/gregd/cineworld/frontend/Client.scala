@@ -1,21 +1,29 @@
 package me.gregd.cineworld.frontend
 
-import io.circe.{Decoder, Encoder, Json}
-import io.circe.syntax._
-import io.circe.parser._
+import me.gregd.cineworld.domain.service.{Cinemas, Listings, NearbyCinemas}
 import org.scalajs.dom
+import sloth.{ClientException, Request, RequestTransport}
 
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
+import cats.implicits._
+import io.circe.generic.auto._
+import chameleon.ext.circe._
 
-object Client extends autowire.Client[Json, Decoder, Encoder]{
-  override def doCall(req: Request): Future[Json] = {
+object Transport extends RequestTransport[String, Future]{
+  override def apply(req: Request[String]): Future[String] = {
     dom.ext.Ajax.post(
       url = "/api/" + req.path.mkString("/"),
-      data = req.args.asJson.noSpaces
-    ).map(_.responseText).map(parse(_).toTry.get)
+      data = req.payload
+    ).map(_.responseText)
   }
-  def read[Result: Decoder](p: Json) = p.as[Result].toTry.get
-  def write[Result: Encoder](r: Result) = r.asJson
+}
+
+object Client {
+  private val client = sloth.Client[String, Future, ClientException](Transport)
+
+  val listings = client.wire[Listings[Future]]
+  val cinemas = client.wire[Cinemas[Future]]
+  val nearbyCinemas = client.wire[NearbyCinemas[Future]]
 }

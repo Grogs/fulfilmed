@@ -3,9 +3,13 @@ package me.gregd.cineworld.domain.repository
 import docker.Postgres
 import me.gregd.cineworld.domain.model.{Cinema, Coordinates}
 import me.gregd.cineworld.wiring.DatabaseInitialisation
+import monix.eval.Task
+import monix.execution.Scheduler
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSuite, Matchers}
 import slick.jdbc.PostgresProfile.api._
+
+import scala.concurrent.duration.Duration
 
 class SlickCinemaRepositoryTest extends FunSuite with Postgres with ScalaFutures with IntegrationPatience with Matchers {
 
@@ -13,7 +17,7 @@ class SlickCinemaRepositoryTest extends FunSuite with Postgres with ScalaFutures
 
   test("persist and fetch") {
     db.run(DatabaseInitialisation.createCinemas).futureValue
-    val repo = new SlickCinemaRepository(db)
+    val repo = new SlickCinemaRepository[Task](db)
 
     val input = List(
       Cinema("1", "cineworld", "Blah", None),
@@ -25,6 +29,6 @@ class SlickCinemaRepositoryTest extends FunSuite with Postgres with ScalaFutures
       output <- repo.fetchAll()
     } yield input shouldEqual output
 
-    eventualAssertion.futureValue
+    eventualAssertion.runSyncUnsafe(Duration.Inf)(Scheduler.global, implicitly)
   }
 }

@@ -18,13 +18,9 @@ object DatabaseInitialisation extends LazyLogging {
         cinema_id text not null,
         date text not null,
         listings text not null,
+        modified TIMESTAMPTZ not null default now(),
         primary key (cinema_id, date)
       )
-    """,
-    sqlu"""
-        alter table cinemas
-        add column modified TIMESTAMPTZ not null 
-        default now()
     """
   )
 
@@ -34,13 +30,9 @@ object DatabaseInitialisation extends LazyLogging {
           id varchar,
           chain varchar not null,
           json varchar not null,
+          modified TIMESTAMPTZ not null default now(),
           primary key (id)
         )
-    """,
-    sqlu"""
-        alter table cinemas
-        add column modified TIMESTAMPTZ not null 
-        default now()
     """
   )
 

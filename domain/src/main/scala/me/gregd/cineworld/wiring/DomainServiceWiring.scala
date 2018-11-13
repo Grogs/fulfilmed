@@ -1,12 +1,13 @@
 package me.gregd.cineworld.wiring
 
+import cats.effect.Async
 import com.softwaremill.macwire.{Module, wire}
+import me.gregd.cineworld.config._
 import me.gregd.cineworld.domain.service._
 import me.gregd.cineworld.util._
-import me.gregd.cineworld.config._
 
 @Module
-class DomainServiceWiring(clock: Clock, integrationWiring: IntegrationWiring, repositoryWiring: DomainRepositoryWiring,chainConfig: ChainConfig, moviesConfig: MoviesConfig) {
+class DomainServiceWiring[F[_]: Async](clock: Clock, integrationWiring: IntegrationWiring, repositoryWiring: DomainRepositoryWiring[F],chainConfig: ChainConfig, moviesConfig: MoviesConfig) {
 
   lazy val cineworldService: CineworldService = wire[CineworldService]
 
@@ -16,10 +17,10 @@ class DomainServiceWiring(clock: Clock, integrationWiring: IntegrationWiring, re
 
   lazy val cinemaService: CinemasService = wire[CinemasService]
 
-  lazy val nearbyCinemasService: NearbyCinemasService= wire[NearbyCinemasService]
+  lazy val nearbyCinemasService: NearbyCinemasService[F] = wire[NearbyCinemasService[F]]
 
   lazy val listingService: CompositeListingService = wire[CompositeListingService]
 
-  lazy val defaultListingsService = wire[ListingsService]
+  lazy val defaultListingsService = wire[ListingsService[F]]
 
 }

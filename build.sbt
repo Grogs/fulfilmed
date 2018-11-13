@@ -6,6 +6,7 @@ lazy val commonSettings = Seq(
 
 resolvers += Resolver.sonatypeRepo("releases")
 resolvers += Resolver.jcenterRepo
+resolvers += "jitpack" at "https://jitpack.io"
 
 addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3")
 
@@ -31,11 +32,15 @@ lazy val client = project.enablePlugins(ScalaJSBundlerPlugin, ScalaJSWeb, GitVer
   scalaJSStage in Test := FastOptStage,
   scalacOptions += "-P:scalajs:sjsDefinedByDefault",
   addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M11" cross CrossVersion.full),
+  resolvers += "jitpack" at "https://jitpack.io",
   libraryDependencies ++= Seq(
     "org.scala-js" %%% "scalajs-dom" % "0.9.4",
     "me.shadaj" %%% "slinky-core" % "0.3.2",                 // core React functionality, no React DOM
     "me.shadaj" %%% "slinky-web" % "0.3.2",                  // React DOM, HTML and SVG tags
     "me.shadaj" %%% "slinky-hot" % "0.3.2",                  // Hot loading, requires react-proxy package
+    "com.github.cornerman.sloth" %%% "sloth" % "master-SNAPSHOT",
+    "com.lihaoyi" %%% "autowire" % "0.2.6",
+    "com.lihaoyi" %%% "scalatags" % "0.6.7",
   ),
   npmDependencies in Compile ++= Seq(
     "react" -> "16.2.0",
@@ -93,6 +98,7 @@ lazy val domain = project.settings(
     "com.typesafe.akka" %% "akka-http" % "10.0.11" % Test,
     "com.whisk" %% "docker-testkit-scalatest" % "0.9.5" % Test,
     "com.whisk" %% "docker-testkit-impl-docker-java" % "0.9.5" % Test,
+    "io.monix" %% "monix" % "3.0.0-RC1",
   )
 ).enablePlugins(GitVersioning).dependsOn(sharedJvm)
 
@@ -109,6 +115,7 @@ lazy val server = project.settings(
   devCommands in scalaJSPipeline ++= Seq("test", "testOnly"),
   WebKeys.packagePrefix in Assets := "public/",
   resolvers += Resolver.jcenterRepo,
+  resolvers += "jitpack" at "https://jitpack.io",
   addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3"),
   libraryDependencies ++= Seq(
     "org.scala-lang" % "scala-library" % "2.12.4",
@@ -119,6 +126,9 @@ lazy val server = project.settings(
     "com.vmunier" %% "scalajs-scripts" % "1.1.1",
     "com.softwaremill.macwire" %% "macros" % "2.3.0",
     "com.softwaremill.macwire" %% "util" % "2.3.0",
+    "com.github.cornerman.sloth" %%% "sloth" % "master-SNAPSHOT",
+    "com.lihaoyi" %%% "scalatags" % "0.6.7",
+    "com.lihaoyi" %%% "autowire" % "0.2.6",
     ws,
     filters,
   ),
@@ -153,8 +163,6 @@ lazy val shared = crossProject.crossType(CrossType.Pure).settings(
     "io.circe" %%% "circe-core" % "0.9.3",
     "io.circe" %%% "circe-generic" % "0.9.3",
     "io.circe" %%% "circe-parser" % "0.9.3",
-    "com.lihaoyi" %%% "autowire" % "0.2.6",
-    "com.lihaoyi" %%% "scalatags" % "0.6.7",
   ),
   commonSettings,
 ).jsConfigure(_ enablePlugins ScalaJSWeb).enablePlugins(GitVersioning)

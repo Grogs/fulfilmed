@@ -53,7 +53,7 @@ import scala.util.{Failure, Success}
   }
 
   private def reloadListings() = {
-    Client[Listings].getMoviesAndPerformancesFor(currentCinema(), currentDate()).call().onComplete{
+    Client.listings.getMoviesAndPerformancesFor(currentCinema(), currentDate()).onComplete{
       case Success(movies) =>
         setState(_.copy(films = Loaded(movies)))
       case Failure(ex) =>

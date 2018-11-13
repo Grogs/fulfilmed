@@ -4,6 +4,6 @@ import me.gregd.cineworld.domain.model.{Movie, Performance}
 
 import scala.concurrent.Future
 
-trait Listings {
-  def getMoviesAndPerformancesFor(cinemaId: String, date: String): Future[Seq[(Movie, Seq[Performance])]]
+trait Listings[F[_]] {
+  def getMoviesAndPerformancesFor(cinemaId: String, date: String): F[Seq[(Movie, Seq[Performance])]]
 }

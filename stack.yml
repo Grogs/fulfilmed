@@ -3,6 +3,10 @@ services:
   db:
     image: postgres
     restart: always
+    networks:
+      default:
+        aliases:
+          - db
   ingestor:
     image: grogs/fulfilmed-ingestor:${TAG?}
     environment:

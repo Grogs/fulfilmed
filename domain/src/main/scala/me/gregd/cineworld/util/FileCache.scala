@@ -85,14 +85,6 @@ class FileCache(prefix: String) extends Cache[Array[Byte]] {
     } yield value
   }
 
-  private def lock[V](channel: AsynchronousFileChannel) = {
-    val lock = Promise[FileLock]()
-
-    channel.lock((), completionHandler(lock))
-
-    lock.future
-  }
-
   private def read(channel: AsynchronousFileChannel, buffer: ByteBuffer): Future[Integer] = {
     val completion = Promise[Integer]()
 

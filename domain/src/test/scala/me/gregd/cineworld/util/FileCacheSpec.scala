@@ -50,7 +50,6 @@ class FileCacheSpec extends FunSuite with Matchers with ScalaFutures with Eventu
 
     val write = System.currentTimeMillis()
     cache.put("someKey", 42, Option(300.millis)).futureValue shouldBe (())
-    val written = System.currentTimeMillis()
 
     files.size shouldBe 1
 

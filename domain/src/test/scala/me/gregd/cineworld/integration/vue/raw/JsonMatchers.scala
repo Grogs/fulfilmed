@@ -1,4 +1,4 @@
-package me.gregd.cineworld.dao.cinema.vue.raw
+package me.gregd.cineworld.integration.vue.raw
 
 import org.scalatest.matchers.{BeMatcher, MatchResult}
 import play.api.libs.json.Json

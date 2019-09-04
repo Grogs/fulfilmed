@@ -1,4 +1,4 @@
-package me.gregd.cineworld.dao.cinema.vue
+package me.gregd.cineworld.integration.vue
 
 import org.scalatest.{FunSuite, Matchers}
 

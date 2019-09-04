@@ -2,11 +2,10 @@ package me.gregd.cineworld.domain.service
 
 import com.typesafe.scalalogging.LazyLogging
 import info.debatty.java.stringsimilarity.SorensenDice
-import me.gregd.cineworld.dao.ratings.{OmdbIntegrationService, RatingsResult}
 import me.gregd.cineworld.domain.model.{Film, Movie}
-import me.gregd.cineworld.integration.tmdb.TmdbIntegrationService
-import me.gregd.cineworld.integration.tmdb.model.TmdbMovie
+import me.gregd.cineworld.integration.tmdb.{TmdbIntegrationService, TmdbMovie}
 import me.gregd.cineworld.config.MoviesConfig
+import me.gregd.cineworld.integration.omdb.{OmdbIntegrationService, RatingsResult}
 import monix.execution.FutureUtils.extensions._
 import monix.execution.Scheduler.Implicits.global
 
@@ -36,7 +35,7 @@ class MovieService(tmdb: TmdbIntegrationService, ratings: OmdbIntegrationService
 
   }
 
-  private var cachedMovies: Future[Seq[Movie]] = Future.failed(new UninitializedError)
+  private var cachedMovies: Future[Seq[Movie]] = Future.failed(new IllegalStateException("Unitialized"))
   private var lastCached: Long = 0
 
   def refresh(): Future[Unit] = {
@@ -123,13 +122,6 @@ class MovieService(tmdb: TmdbIntegrationService, ratings: OmdbIntegrationService
       }
     } else
       None
-  }
-
-  private def sequence[A, B](ot: Option[(A, B)]): (Option[A], Option[B]) = {
-    ot match {
-      case None         => None -> None
-      case Some((a, b)) => Option(a) -> Option(b)
-    }
   }
 
   private def collapse[T](fsfsT: Future[Seq[Future[Seq[T]]]]): Future[Seq[T]] =

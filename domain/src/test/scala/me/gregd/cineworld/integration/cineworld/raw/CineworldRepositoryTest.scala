@@ -1,4 +1,4 @@
-package me.gregd.cineworld.dao.cinema.cineworld.raw
+package me.gregd.cineworld.integration.cineworld.raw
 
 import java.time.LocalDate
 
@@ -11,10 +11,10 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSuite, Matchers}
 import play.api.libs.ws.ahc.AhcWSClient
 import stub.Stubs
+import util.WSClient
 
-class CineworldRepositoryTest extends FunSuite with ScalaFutures with IntegrationPatience with Matchers {
+class CineworldRepositoryTest extends FunSuite with ScalaFutures with IntegrationPatience with Matchers with WSClient {
 
-  val wsClient = AhcWSClient()(ActorMaterializer()(ActorSystem()))
   val cineworld = new CineworldIntegrationService(wsClient, NoOpCache.cache, Stubs.cineworld.config, RealClock)
 
   test("retrieveCinemas") {

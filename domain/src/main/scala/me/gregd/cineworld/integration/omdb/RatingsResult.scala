@@ -1,4 +1,4 @@
-package me.gregd.cineworld.dao.ratings
+package me.gregd.cineworld.integration.omdb
 
 import play.api.libs.json.Json
 

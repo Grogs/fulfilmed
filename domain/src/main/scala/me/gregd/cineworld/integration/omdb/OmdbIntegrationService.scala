@@ -1,5 +1,4 @@
-package me.gregd.cineworld.dao.ratings
-
+package me.gregd.cineworld.integration.omdb
 
 import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.config.OmdbConfig

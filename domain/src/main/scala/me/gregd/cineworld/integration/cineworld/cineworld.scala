@@ -1,7 +1,7 @@
-package me.gregd.cineworld.integration.cinema
+package me.gregd.cineworld.integration
 
 package object cineworld {
-  private val Postcode = ".*, ([A-Z]{1,2}[0-9]{1}[A-Z0-9]? [0-9][A-Z]{2})(?:, .*)?$".r
+  private val Postcode = ".*, ([A-Z]{1,2}[0-9][A-Z0-9]? [0-9][A-Z]{2})(?:, .*)?$".r
   case class CinemaResp(id: String, displayName: String, address: String) {
     val postcode: String = {
       val Postcode(res) = address

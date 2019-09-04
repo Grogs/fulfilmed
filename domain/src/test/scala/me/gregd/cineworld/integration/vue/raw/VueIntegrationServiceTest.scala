@@ -1,4 +1,4 @@
-package me.gregd.cineworld.dao.cinema.vue.raw
+package me.gregd.cineworld.integration.vue.raw
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
@@ -9,10 +9,10 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSuite, Matchers}
 import play.api.libs.ws.ahc.AhcWSClient
 import stub.Stubs
+import util.WSClient
 
-class VueIntegrationServiceTest extends FunSuite with ScalaFutures with IntegrationPatience with Matchers with JsonMatchers {
+class VueIntegrationServiceTest extends FunSuite with ScalaFutures with IntegrationPatience with Matchers with JsonMatchers with WSClient {
 
-  val wsClient = AhcWSClient()(ActorMaterializer()(ActorSystem()))
   val vue = new VueIntegrationService(wsClient, NoOpCache.cache, Stubs.vue.config)
 
   test("curlCinemas") {
@@ -36,7 +36,7 @@ class VueIntegrationServiceTest extends FunSuite with ScalaFutures with Integrat
   }
 
   test("retrieveLocation") {
-    val location = vue.retrieveLocation(VueCinema("Bury The Rock", "", "", "", "", "", false)).futureValue
+    val location = vue.retrieveLocation(VueCinema("Bury The Rock", "", "", "", "", "", hidden = false)).futureValue
     location shouldBe Option((53.594033d,-2.296314d))
   }
 

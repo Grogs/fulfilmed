@@ -32,9 +32,8 @@ case class TaskRateLimiter(duration: FiniteDuration, maxInvocations: Int) {
         permits -= 1
         f
       } else {
-        Task.async[Unit] { (sched, cb) =>
+        Task.async[Unit] { cb =>
           queue.add(() => { cb.onSuccess(()) })
-          Cancelable.empty
         }.flatMap(_ => f)
       }
     }

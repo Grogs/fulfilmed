@@ -1,4 +1,4 @@
-package me.gregd.cineworld.dao.cinema.vue
+package me.gregd.cineworld.integration.vue
 
 import java.time.LocalDate
 
@@ -13,12 +13,12 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSuite, Matchers}
 import play.api.libs.ws.ahc.AhcWSClient
 import stub.Stubs
+import util.WSClient
 
-class VueServiceTest extends FunSuite with ScalaFutures with IntegrationPatience with Matchers {
+class VueServiceTest extends FunSuite with ScalaFutures with IntegrationPatience with Matchers with WSClient {
 
   val date: LocalDate = LocalDate.parse("2017-05-23")
   val clock = FixedClock(date)
-  val wsClient = AhcWSClient()(ActorMaterializer()(ActorSystem()))
   val tmdb = new TmdbIntegrationService(wsClient, NoOpCache.cache, Scheduler.global, Stubs.tmdb.config)
   val repo = new VueIntegrationService(wsClient, NoOpCache.cache, Stubs.vue.config)
   val dao = new VueService(repo, clock)

@@ -3,9 +3,8 @@ package me.gregd.cineworld.domain.service
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalTime}
 
-import me.gregd.cineworld.dao.cinema.vue.ImageUrl
 import me.gregd.cineworld.domain.model.{Cinema, Coordinates, Film, Performance}
-import me.gregd.cineworld.integration.vue.VueIntegrationService
+import me.gregd.cineworld.integration.vue.{ImageUrl, VueIntegrationService}
 import me.gregd.cineworld.integration.vue.listings.Showings
 import me.gregd.cineworld.util.Clock
 

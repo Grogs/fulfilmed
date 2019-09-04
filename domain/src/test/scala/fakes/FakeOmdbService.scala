@@ -1,6 +1,6 @@
 package fakes
 
-import me.gregd.cineworld.dao.ratings.{OmdbIntegrationService, RatingsResult}
+import me.gregd.cineworld.integration.omdb.{OmdbIntegrationService, RatingsResult}
 
 import scala.concurrent.Future
 import eu.timepit.refined.auto._

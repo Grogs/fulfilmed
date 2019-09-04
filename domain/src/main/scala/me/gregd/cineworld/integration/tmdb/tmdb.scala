@@ -1,8 +1,8 @@
-package me.gregd.cineworld.integration.tmdb
+package me.gregd.cineworld.integration
 
 import play.api.libs.json.Json
 
-package object model {
+package object tmdb {
   case class ImdbIdAndAltTitles(imdbId: Option[String], alternateTitles: List[String])
 
   import play.api.libs.json.OFormat

@@ -1,7 +1,6 @@
 package me.gregd.cineworld.integration.tmdb
 
 import com.typesafe.scalalogging.LazyLogging
-import me.gregd.cineworld.integration.tmdb.model._
 import me.gregd.cineworld.util.RateLimiter
 import me.gregd.cineworld.config.TmdbConfig
 import monix.execution.Scheduler

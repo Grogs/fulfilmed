@@ -2,7 +2,7 @@ package me.gregd.cineworld.web
 
 import com.typesafe.scalalogging.LazyLogging
 import fulfilmed.BuildInfo
-import me.gregd.cineworld.dao.ratings.OmdbIntegrationService
+import me.gregd.cineworld.integration.omdb.OmdbIntegrationService
 import me.gregd.cineworld.domain.model.{Cinema, Coordinates, Movie}
 import me.gregd.cineworld.domain.service.MovieService
 import me.gregd.cineworld.integration.tmdb.TmdbIntegrationService

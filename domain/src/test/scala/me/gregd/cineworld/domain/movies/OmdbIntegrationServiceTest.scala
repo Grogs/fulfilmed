@@ -2,16 +2,16 @@ package me.gregd.cineworld.domain.movies
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import me.gregd.cineworld.dao.ratings.{OmdbIntegrationService, RatingsResult}
+import me.gregd.cineworld.integration.omdb.{OmdbIntegrationService, RatingsResult}
 import me.gregd.cineworld.util.NoOpCache
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSuite, Matchers}
 import play.api.libs.ws.ahc.AhcWSClient
 import stub.Stubs
+import util.WSClient
 
-class OmdbIntegrationServiceTest extends FunSuite  with Matchers with ScalaFutures with IntegrationPatience {
+class OmdbIntegrationServiceTest extends FunSuite  with Matchers with ScalaFutures with IntegrationPatience with WSClient {
 
-  val wsClient = AhcWSClient()(ActorMaterializer()(ActorSystem()))
   val ratings = new OmdbIntegrationService(wsClient, NoOpCache.cache, Stubs.omdb.config)
 
   test("get known ratings") {

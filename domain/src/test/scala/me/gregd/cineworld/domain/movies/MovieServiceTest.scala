@@ -1,10 +1,9 @@
 package me.gregd.cineworld.domain.movies
 
-import me.gregd.cineworld.dao.ratings.{OmdbIntegrationService, RatingsResult}
+import me.gregd.cineworld.integration.omdb.{OmdbIntegrationService, RatingsResult}
 import me.gregd.cineworld.domain.model.{Film, Movie}
 import me.gregd.cineworld.domain.service.MovieService
-import me.gregd.cineworld.integration.tmdb.TmdbIntegrationService
-import me.gregd.cineworld.integration.tmdb.model.TmdbMovie
+import me.gregd.cineworld.integration.tmdb.{TmdbIntegrationService, TmdbMovie}
 import me.gregd.cineworld.config.MoviesConfig
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures

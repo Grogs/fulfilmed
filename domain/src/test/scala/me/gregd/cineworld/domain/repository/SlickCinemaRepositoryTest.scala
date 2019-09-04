@@ -1,6 +1,6 @@
 package me.gregd.cineworld.domain.repository
 
-import docker.Postgres
+import docker.DockerPostgresService
 import me.gregd.cineworld.domain.model.{Cinema, Coordinates}
 import me.gregd.cineworld.wiring.DatabaseInitialisation
 import monix.eval.Task
@@ -11,24 +11,34 @@ import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.duration.Duration
 
-class SlickCinemaRepositoryTest extends FunSuite with Postgres with ScalaFutures with IntegrationPatience with Matchers {
+class SlickCinemaRepositoryTest
+    extends FunSuite
+    with ScalaFutures
+    with IntegrationPatience
+    with Matchers {
 
-  lazy val db = Database.forURL(postgresUrl)
+  val postgres = DockerPostgresService.postgres.map(Database.forURL(_))
 
   test("persist and fetch") {
-    db.run(DatabaseInitialisation.createCinemas).futureValue
-    val repo = new SlickCinemaRepository[Task](db)
+    postgres
+      .use { db =>
+        Task {
 
-    val input = List(
-      Cinema("1", "cineworld", "Blah", None),
-      Cinema("2", "vue", "Blah Blah", Some(Coordinates(1d, 2d)))
-    )
+          db.run(DatabaseInitialisation.createCinemas).futureValue
 
-    val eventualAssertion = for {
-      _ <- repo.persist(input)
-      output <- repo.fetchAll()
-    } yield input shouldEqual output
+          val repo = new SlickCinemaRepository[Task](db)
 
-    eventualAssertion.runSyncUnsafe(Duration.Inf)(Scheduler.global, implicitly)
+          val input = List(
+            Cinema("1", "cineworld", "Blah", None),
+            Cinema("2", "vue", "Blah Blah", Some(Coordinates(1d, 2d)))
+          )
+
+          for {
+            _ <- repo.persist(input)
+            output <- repo.fetchAll()
+          } yield input shouldEqual output
+        }
+      }
+      .runSyncUnsafe(Duration.Inf)(Scheduler.global, implicitly)
   }
 }

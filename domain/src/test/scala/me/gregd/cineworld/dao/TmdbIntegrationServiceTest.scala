@@ -9,10 +9,10 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSuite, Matchers}
 import play.api.libs.ws.ahc.AhcWSClient
 import stub.Stubs
+import util.WSClient
 
-class TmdbIntegrationServiceTest extends FunSuite with Matchers with ScalaFutures with IntegrationPatience {
+class TmdbIntegrationServiceTest extends FunSuite with Matchers with ScalaFutures with IntegrationPatience with WSClient {
 
-  val wsClient = AhcWSClient()(ActorMaterializer()(ActorSystem()))
   val tmdb = new TmdbIntegrationService(wsClient, NoOpCache.cache, Scheduler.global, Stubs.tmdb.config)
 
   test("fetch imdb id") {

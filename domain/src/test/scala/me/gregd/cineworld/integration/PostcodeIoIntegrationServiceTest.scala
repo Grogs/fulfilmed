@@ -7,11 +7,9 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.{FunSuite, Matchers}
 import play.api.libs.ws.ahc.AhcWSClient
 import stub.Stubs
+import util.WSClient
 
-class PostcodeIoIntegrationServiceTest extends FunSuite with ScalaFutures with IntegrationPatience with Matchers {
-  private val actorSystem = ActorSystem()
-
-  val wsClient = AhcWSClient()(ActorMaterializer()(actorSystem))
+class PostcodeIoIntegrationServiceTest extends FunSuite with ScalaFutures with IntegrationPatience with Matchers with WSClient {
 
   val postcodeService = new PostcodeIoIntegrationService(Stubs.postcodesio.config, wsClient)
 

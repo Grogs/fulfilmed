@@ -14,7 +14,6 @@ class CacheWiring(mode: Mode) {
 
   lazy val cache: ScalaCache[Array[Byte]] = {
     val home = System.getProperty("user.home")
-    val tmp = System.getProperty("java.io.tmpdir")
 
     def fileBasedCache(location: String) = ScalaCache(new FileCache(location))
 
@@ -22,7 +21,7 @@ class CacheWiring(mode: Mode) {
       case Test =>
         NoOpCache.cache
       case Dev =>
-        val file = new File(s"$home/.fulmfilmed-cache")
+        val file = new File(s"$home/.fulfilmed-cache")
         file.mkdir()
         val path = file.toPath.toString
         fileBasedCache(path)

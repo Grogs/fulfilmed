@@ -5,6 +5,7 @@ import me.gregd.cineworld.frontend.components.Sort.Sort
 import me.gregd.cineworld.frontend.styles.FilmsStyle
 import me.gregd.cineworld.frontend.util.Loadable
 import me.gregd.cineworld.frontend.util.Loadable.{Loaded, Loading, Unloaded}
+
 import slinky.core.StatelessComponent
 import slinky.core.annotations.react
 import slinky.web.html._

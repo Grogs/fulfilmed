@@ -1,4 +1,4 @@
-resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
+resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
 
 addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.6.11")
 
@@ -17,3 +17,5 @@ addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.3.3")
 addSbtPlugin("ch.epfl.scala" % "sbt-scalajs-bundler" % "0.12.0")
 
 addSbtPlugin("ch.epfl.scala" % "sbt-web-scalajs-bundler" % "0.12.0")
+
+addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "0.6.1")

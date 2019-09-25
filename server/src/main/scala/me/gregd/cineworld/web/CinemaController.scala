@@ -53,7 +53,7 @@ class CinemaController(env: Environment, cinemaService: Cinemas[Task], listingsS
 
     res.fold(
       error => Future.successful(error),
-      respTask => respTask.runAsync(Scheduler.global)
+      respTask => respTask.runToFuture(Scheduler.global)
     )
   }
 

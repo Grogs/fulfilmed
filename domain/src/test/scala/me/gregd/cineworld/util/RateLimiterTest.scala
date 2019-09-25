@@ -1,16 +1,17 @@
 package me.gregd.cineworld.util
 
+import com.typesafe.scalalogging.StrictLogging
 import org.scalatest.{FunSuite, Matchers}
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 
-class RateLimiterTest extends FunSuite with Matchers {
+class RateLimiterTest extends FunSuite with Matchers with StrictLogging {
 
   test("rate limit 100 per second") {
     val start = System.currentTimeMillis()
 
-    def task(i: Int) = Future.successful(println(i + ": " + (System.currentTimeMillis() - start)))
+    def task(i: Int) = Future.successful(logger.debug(i + ": " + (System.currentTimeMillis() - start)))
 
     val rateLimit = RateLimiter(100.millis, 5)
 

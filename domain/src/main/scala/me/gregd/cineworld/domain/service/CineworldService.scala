@@ -7,7 +7,6 @@ import me.gregd.cineworld.domain.model.{Cinema, Film, Performance}
 import me.gregd.cineworld.domain.transformer.CineworldTransformer
 import me.gregd.cineworld.integration.PostcodeIoIntegrationService
 import me.gregd.cineworld.integration.cineworld.CineworldIntegrationService
-import org.json4s._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -16,8 +15,6 @@ class CineworldService(
     underlying: CineworldIntegrationService,
     postcodeService: PostcodeIoIntegrationService
 ) extends LazyLogging {
-
-  implicit val formats = DefaultFormats
 
   def retrieveCinemas(): Future[Seq[Cinema]] = {
 

@@ -1,14 +1,11 @@
+import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
+
 lazy val commonSettings = Seq(
   organization := "com.fulfilmed",
   git.baseVersion := "1.8",
   scalaVersion := "2.12.8",
+  testOptions in Test += Tests.Argument("-oT")
 )
-
-resolvers += Resolver.sonatypeRepo("releases")
-resolvers += Resolver.jcenterRepo
-resolvers += "jitpack" at "https://jitpack.io"
-
-addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3")
 
 run := {
   (server/Compile/run).evaluated
@@ -35,13 +32,13 @@ lazy val client = project.enablePlugins(ScalaJSBundlerPlugin, ScalaJSWeb, GitVer
   addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M11" cross CrossVersion.full),
   resolvers += "jitpack" at "https://jitpack.io",
   libraryDependencies ++= Seq(
-    "org.scala-js" %%% "scalajs-dom" % "0.9.4",
+    "org.scala-js" %%% "scalajs-dom" % "0.9.7",
     "me.shadaj" %%% "slinky-core" % "0.6.2",                 // core React functionality, no React DOM
     "me.shadaj" %%% "slinky-web" % "0.6.2",                  // React DOM, HTML and SVG tags
     "me.shadaj" %%% "slinky-hot" % "0.6.2",                  // Hot loading, requires react-proxy package
     "com.github.cornerman.sloth" %%% "sloth" % "0.1.0",
     "com.lihaoyi" %%% "autowire" % "0.2.6",
-    "com.lihaoyi" %%% "scalatags" % "0.6.7",
+    "com.lihaoyi" %%% "scalatags" % "0.7.0",
   ),
   npmDependencies in Compile ++= Seq(
     "react" -> "16.2.0",
@@ -66,15 +63,12 @@ lazy val domain = project.settings(
     playCore,
     ws,
     "info.debatty" % "java-string-similarity" % "1.0.1",
-    "org.scalaj" %% "scalaj-http" % "2.3.0",
-    "org.json4s" %% "json4s-native" % "3.5.3",
-    "org.json4s" %% "json4s-jackson" % "3.5.3",
     "com.google.code.findbugs" % "jsr305" % "3.0.2",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
     "ch.qos.logback" % "logback-classic" % "1.2.3",
-    "com.lihaoyi" %% "scalatags" % "0.6.8",
+    "com.lihaoyi" %% "scalatags" % "0.7.0",
     "org.typelevel" %% "cats-core" % "2.0.0-RC2",
-    "org.typelevel" %% "cats-effect" % "2.0.0-M3",
+    "org.typelevel" %% "cats-effect" % "2.0.0-RC2",
     "net.andimiller" %% "whales" % "0.13.0",
     "com.vmunier" %% "scalajs-scripts" % "1.1.1",
     "com.github.cb372" %% "scalacache-memcached" % "0.10.0",
@@ -118,18 +112,18 @@ lazy val server = project.settings(
   WebKeys.packagePrefix in Assets := "public/",
   resolvers += Resolver.jcenterRepo,
   resolvers += "jitpack" at "https://jitpack.io",
-  addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.3"),
+  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"),
   libraryDependencies ++= Seq(
     "org.scala-lang" % "scala-library" % "2.12.4",
     "org.scala-lang" % "scala-compiler" % "2.12.4",
     "com.google.code.findbugs" % "jsr305" % "3.0.2",
-    "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2",
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
     "ch.qos.logback" % "logback-classic" % "1.2.3",
     "com.vmunier" %% "scalajs-scripts" % "1.1.1",
     "com.softwaremill.macwire" %% "macros" % "2.3.3",
     "com.softwaremill.macwire" %% "util" % "2.3.3",
-    "com.github.cornerman.sloth" %%% "sloth" % "master-SNAPSHOT",
-    "com.lihaoyi" %%% "scalatags" % "0.6.7",
+    "com.github.cornerman.sloth" %%% "sloth" % "0.1.0",
+    "com.lihaoyi" %%% "scalatags" % "0.7.0",
     "com.lihaoyi" %%% "autowire" % "0.2.6",
     ws,
     filters,
@@ -166,7 +160,7 @@ lazy val ingestor = project.settings(
 ).enablePlugins(GitVersioning, DeployPlugin, JavaAppPackaging).dependsOn(domain).configs(IntegrationTest)
 
 
-lazy val shared = crossProject.crossType(CrossType.Pure).settings(
+lazy val shared = crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure).settings(
   libraryDependencies ++= Seq(
     "io.circe" %%% "circe-core" % "0.11.1",
     "io.circe" %%% "circe-generic" % "0.11.1",

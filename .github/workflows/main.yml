@@ -10,5 +10,9 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - uses: olafurpg/setup-scala@v2
+    - name: Resolve dependencies
+      run: sbt update
     - name: Compile
+      run: sbt compile
+    - name: Test
       run: sbt test

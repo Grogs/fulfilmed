@@ -12,8 +12,9 @@ object Main {
     ReactDOM.render(
       Router(History.createBrowserHistory())(
         Switch(
-          Route("/index", IndexPage),
-          Route("/films/:cinemaId/:date", FilmsPage),
+          Route("/", IndexPage, exact = Some(true)),
+          Route("/index", IndexPage, exact = Some(true)),
+          Route("/films/:cinemaId/:date", FilmsPage, exact = Some(true)),
         )
       ),
       document.getElementById("content")

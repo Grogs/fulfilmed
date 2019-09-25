@@ -1,19 +1,18 @@
 package me.gregd.cineworld.frontend.components
 
 import autowire._
+import io.circe.generic.auto._
 import me.gregd.cineworld.frontend.Client
 import me.gregd.cineworld.frontend.components.Sort.{NextShowing, Sort}
 import me.gregd.cineworld.frontend.styles.FilmsStyle
 import me.gregd.cineworld.frontend.util.Loadable.{Loaded, Loading, Unloaded}
 import me.gregd.cineworld.frontend.util.{Loadable, Redirect, RouteProps}
 import org.scalajs.dom.Event
-import org.scalajs.dom.html.Input
-import slinky.core.{AttrPair, Component}
+import org.scalajs.dom.html.Select
+import slinky.core.{AttrPair, Component, SyntheticEvent}
 import slinky.core.annotations.react
 import slinky.web.html._
-import autowire._
 import me.gregd.cineworld.domain.model.{Movie, Performance}
-import me.gregd.cineworld.web.service.ListingsService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js.Dynamic
@@ -28,7 +27,7 @@ import scala.util.{Failure, Success}
   type Props = RouteProps
 
   case class State(
-      films: Loadable[Map[Movie, Seq[Performance]]],
+      films: Loadable[Seq[(Movie, Seq[Performance])]],
       selectedSort: Sort = NextShowing,
       redirect: Option[String] = None
   ) {
@@ -52,7 +51,7 @@ import scala.util.{Failure, Success}
   }
 
   private def reloadListings() = {
-    Client[ListingsService].getMoviesAndPerformancesFor(currentCinema(), currentDate()).call().onComplete{
+    Client.listings.getMoviesAndPerformancesFor(currentCinema(), currentDate()).onComplete{
       case Success(movies) =>
         setState(_.copy(films = Loaded(movies)))
       case Failure(ex) =>
@@ -71,14 +70,14 @@ import scala.util.{Failure, Success}
   def currentCinema() = props.`match`.params("cinemaId")
   def currentDate() = props.`match`.params("date")
 
-  def updateSort(event: Event): Unit = {
-    val key = event.target.asInstanceOf[Input].value
+  def updateSort(event: SyntheticEvent[Select, Event]): Unit = {
+    val key = event.target.value
     val sort = sorts.find(_.key == key).get
     setState(_.sortBy(sort))
   }
 
-  def updateDate(event: Event) = {
-    val key = event.target.asInstanceOf[Input].value
+  def updateDate(event: SyntheticEvent[Select, Event]) = {
+    val key = event.target.value
     val date = dates.find(_.key == key).get
     setState(_.copy(films = Loading, redirect = Some(key)))
     forceUpdate()

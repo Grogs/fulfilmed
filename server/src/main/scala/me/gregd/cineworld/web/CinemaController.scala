@@ -1,55 +1,59 @@
 package me.gregd.cineworld.web
 
-import autowire.Core.Request
 import com.typesafe.scalalogging.LazyLogging
-import me.gregd.cineworld.domain.model.{Coordinates, Movie, Performance}
-import me.gregd.cineworld.web.service.{CinemaService, ListingsService}
+import io.circe.{Decoder, HCursor, parser}
+import me.gregd.cineworld.domain.service._
+import monix.eval.Task
+import monix.execution.Scheduler
 import play.api.Environment
 import play.api.Mode._
-import play.api.libs.json.Json
-import play.api.mvc.{AbstractController, ControllerComponents}
-import upickle.Js
-import upickle.Js.Obj
-import upickle.default.{Reader, Writer}
+import play.api.mvc.{AbstractController, ControllerComponents, Result}
+import sloth.ServerFailure.{DeserializerError, HandlerError, PathNotFound}
+import sloth._
+import chameleon.ext.circe._
+import cats.syntax.either._
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.io.Source
+import io.circe.generic.auto._
 
-class CinemaController(env: Environment, cinemaService: CinemaService, listingsService: ListingsService, cc: ControllerComponents) extends AbstractController(cc) with LazyLogging {
+class CinemaController(env: Environment, cinemaService: Cinemas[Task], listingsService: ListingsService[Task], nearbyCinemasService: NearbyCinemas[Task], cc: ControllerComponents)
+    extends AbstractController(cc)
+    with LazyLogging {
 
-  implicit val coordinatesFormat = Json.format[Coordinates]
-  implicit val performanceFormat = Json.format[Performance]
-  implicit val movieFormat = Json.format[Movie]
-
-  val scriptPaths  = List(
+  val scriptPaths = List(
     "/assets/fulfilmed-scala-frontend-" + (env.mode match {
       case Dev | Test => "fastopt-bundle.js"
-      case Prod => "opt-bundle.js"
+      case Prod       => "opt-bundle.js"
     })
   )
 
-  object ApiServer extends autowire.Server[Js.Value, Reader, Writer] {
-    def read[Result: Reader](p: Js.Value) = upickle.default.readJs[Result](p)
-    def write[Result: Writer](r: Result) = upickle.default.writeJs(r)
-  }
-
-  val cinemasServiceRouter = ApiServer.route[CinemaService](cinemaService)
-  val listingsServiceRouter = ApiServer.route[ListingsService](listingsService)
-
-  val router = cinemasServiceRouter orElse listingsServiceRouter
+  val router = Router[String, Task]
+    .route[Cinemas[Task]](cinemaService)
+    .route[Listings[Task]](listingsService)
+    .route[NearbyCinemas[Task]](nearbyCinemasService)
 
 
   def api(pathRaw: String) = Action.async { implicit request =>
     logger.debug(s"API request: $pathRaw")
-    val path = pathRaw.split("/")
-    val body = request.body.asText.getOrElse("")
-    val args = upickle.json.read(body).asInstanceOf[Obj].value.toMap
-    val req = Request(path, args)
+    val path = pathRaw.split("/").toList
 
-    val response = router(req)
+    val res: Either[Result, Task[Result]] =
+      for {
+      body <- request.body.asText.toRight(BadRequest("Empty request body"))
+      req = Request(path, body)
+      eventualJson <- router(req).toEither.leftMap{
+        case PathNotFound(_) => NotFound("Invalid path")
+        case HandlerError(ex) => InternalServerError(ex.getMessage)
+        case DeserializerError(ex) => InternalServerError(s"Failed to deserialise request body. Reason: ${ex.getMessage}")
+      }
+      eventualResult = eventualJson.map(json => Ok(json).as("application/json"))
+    } yield eventualResult
 
-    response.map(res =>
-      Ok(upickle.json.write(res))
+
+    res.fold(
+      error => Future.successful(error),
+      respTask => respTask.runAsync(Scheduler.global)
     )
   }
 
@@ -64,5 +68,4 @@ class CinemaController(env: Environment, cinemaService: CinemaService, listingsS
       IndexPage(scriptPaths).render
     ).as("text/html")
   )
-
 }

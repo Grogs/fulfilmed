@@ -1,0 +1,30 @@
+version: '3.4'
+services:
+  db:
+    image: postgres
+    restart: always
+    networks:
+      default:
+        aliases:
+          - db
+  ingestor:
+    image: grogs/fulfilmed-ingestor:${TAG?}
+    environment:
+      - OMDB_API_KEY=${OMDB_API_KEY?}
+      - TMDB_API_KEY=${TMDB_API_KEY?}
+      - DATABASE_LOCATION=jdbc:postgresql://db:5432/
+  web:
+    image: grogs/fulfilmed:${TAG?}
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 5s
+    ports:
+    - target: 9000
+      published: 9999
+      mode: ingress
+    environment:
+    - OMDB_API_KEY=${OMDB_API_KEY?}
+    - TMDB_API_KEY=${TMDB_API_KEY?}
+    - DATABASE_LOCATION=jdbc:postgresql://db:5432/

@@ -56,7 +56,7 @@ object Switch extends ExternalComponentNoProps {
 }
 
 @react object Route extends ExternalComponent {
-  case class Props(path: String, component: ReactComponentClass, exact: Option[Boolean] = None)
+  case class Props(path: String, component: ReactComponentClass[_], exact: Option[Boolean] = None)
   override val component = ReactRouterDOM.Route
 }
 

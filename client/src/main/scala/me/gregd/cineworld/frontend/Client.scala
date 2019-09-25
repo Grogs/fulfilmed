@@ -1,20 +1,29 @@
 package me.gregd.cineworld.frontend
 
+import me.gregd.cineworld.domain.service.{Cinemas, Listings, NearbyCinemas}
 import org.scalajs.dom
-import upickle.Js
-import upickle.default._
+import sloth.{ClientException, Request, RequestTransport}
 
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
+import cats.implicits._
+import io.circe.generic.auto._
+import chameleon.ext.circe._
 
-object Client extends autowire.Client[Js.Value, Reader, Writer]{
-  override def doCall(req: Request): Future[Js.Value] = {
+object Transport extends RequestTransport[String, Future]{
+  override def apply(req: Request[String]): Future[String] = {
     dom.ext.Ajax.post(
       url = "/api/" + req.path.mkString("/"),
-      data = upickle.json.write(Js.Obj(req.args.toSeq:_*))
-    ).map(_.responseText).map(upickle.json.read _)
+      data = req.payload
+    ).map(_.responseText)
   }
-  def read[Result: Reader](p: Js.Value) = readJs[Result](p)
-  def write[Result: Writer](r: Result) = writeJs(r)
+}
+
+object Client {
+  private val client = sloth.Client[String, Future, ClientException](Transport)
+
+  val listings = client.wire[Listings[Future]]
+  val cinemas = client.wire[Cinemas[Future]]
+  val nearbyCinemas = client.wire[NearbyCinemas[Future]]
 }

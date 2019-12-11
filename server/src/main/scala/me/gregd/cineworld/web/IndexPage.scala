@@ -7,9 +7,9 @@ object IndexPage {
     html(
       head(
         titleElem("Fulfilmed"),
-        link(rel:="stylesheet", href:="/assets/lib/font-awesome/css/font-awesome.min.css"),
-        link(rel:="stylesheet", href:="/styles/index.css"),
-        link(rel:="stylesheet", href:="/styles/films.css"),
+        link(rel := "stylesheet", href := "/assets/lib/font-awesome/css/font-awesome.min.css"),
+        link(rel := "stylesheet", href := "/styles/index.css"),
+        link(rel := "stylesheet", href := "/styles/films.css"),
       ),
       body(
         style := "margin: 0; background-color: #111;",

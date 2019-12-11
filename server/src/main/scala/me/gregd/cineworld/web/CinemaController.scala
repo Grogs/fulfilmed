@@ -33,23 +33,21 @@ class CinemaController(env: Environment, cinemaService: Cinemas[Task], listingsS
     .route[Listings[Task]](listingsService)
     .route[NearbyCinemas[Task]](nearbyCinemasService)
 
-
   def api(pathRaw: String) = Action.async { implicit request =>
     logger.debug(s"API request: $pathRaw")
     val path = pathRaw.split("/").toList
 
     val res: Either[Result, Task[Result]] =
       for {
-      body <- request.body.asText.toRight(BadRequest("Empty request body"))
-      req = Request(path, body)
-      eventualJson <- router(req).toEither.leftMap{
-        case PathNotFound(_) => NotFound("Invalid path")
-        case HandlerError(ex) => InternalServerError(ex.getMessage)
-        case DeserializerError(ex) => InternalServerError(s"Failed to deserialise request body. Reason: ${ex.getMessage}")
-      }
-      eventualResult = eventualJson.map(json => Ok(json).as("application/json"))
-    } yield eventualResult
-
+        body <- request.body.asText.toRight(BadRequest("Empty request body"))
+        req = Request(path, body)
+        eventualJson <- router(req).toEither.leftMap {
+          case PathNotFound(_)       => NotFound("Invalid path")
+          case HandlerError(ex)      => InternalServerError(ex.getMessage)
+          case DeserializerError(ex) => InternalServerError(s"Failed to deserialise request body. Reason: ${ex.getMessage}")
+        }
+        eventualResult = eventualJson.map(json => Ok(json).as("application/json"))
+      } yield eventualResult
 
     res.fold(
       error => Future.successful(error),

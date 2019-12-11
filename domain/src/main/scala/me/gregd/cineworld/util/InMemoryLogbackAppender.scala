@@ -18,8 +18,8 @@ object Level extends Enum[Level] {
   val values = findValues
 
   case object Error extends Level
-  case object Warn extends Level
-  case object Info extends Level
+  case object Warn  extends Level
+  case object Info  extends Level
   case object Debug extends Level
 }
 
@@ -46,16 +46,15 @@ object InMemoryLog extends InMemoryLog {
   LoggerFactory.getLogger("ROOT").asInstanceOf[Logger].addAppender(inMemoryAppender)
 }
 
-
 class InMemoryLogbackAppender(log: InMemoryLog) extends AppenderBase[ILoggingEvent] {
 
   override def append(event: ILoggingEvent): Unit = {
     println(s"Received event $event")
     val entry = for {
       level <- Level.withNameInsensitiveOption(event.getLevel.levelStr)
-      logger = event.getLoggerName
-      thread = event.getThreadName
-      msg = event.getFormattedMessage
+      logger     = event.getLoggerName
+      thread     = event.getThreadName
+      msg        = event.getFormattedMessage
       stacktrace = Option(event.getCallerData).toSeq.flatten.map(data => StackFrame(data.getClassName, data.getMethodName, data.getLineNumber))
     } yield LogEntry(level, logger, thread, msg, stacktrace)
 

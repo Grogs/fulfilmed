@@ -8,10 +8,9 @@ import me.gregd.cineworld.domain.model.{Movie, Performance}
 import me.gregd.cineworld.domain.repository.ListingsRepository
 import me.gregd.cineworld.util.Clock
 
-
 class ListingsService[F[_]: ApplicativeThrowable](listingsRepository: ListingsRepository[F], clock: Clock) extends Listings[F] with LazyLogging {
   def getMoviesAndPerformancesFor(cinemaId: String, dateRaw: String): F[Seq[(Movie, Seq[Performance])]] = {
-    listingsRepository.fetch(cinemaId, parse(dateRaw)).handleError{ e  =>
+    listingsRepository.fetch(cinemaId, parse(dateRaw)).handleError { e =>
       logger.error("Failed to retrieve listings", e)
       Nil
     }

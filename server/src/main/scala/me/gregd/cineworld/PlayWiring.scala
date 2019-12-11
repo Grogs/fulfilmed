@@ -27,7 +27,7 @@ class PlayWiring(context: Context)
     with GzipFilterComponents
     with LazyLogging {
 
-  lazy val defaults = new controllers.Default
+  lazy val defaults      = new controllers.Default
   lazy val loggingFilter = wire[LoggingFilter]
 
   lazy val routes = {
@@ -50,7 +50,7 @@ class PlayWiring(context: Context)
 
     val inMemoryLog = InMemoryLog
 
-    val debugController = wire[DebugController]
+    val debugController  = wire[DebugController]
     val cinemaController = wire[CinemaController]
 
     val prefix = ""

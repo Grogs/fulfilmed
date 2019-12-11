@@ -33,13 +33,12 @@ class VueService(underlying: VueIntegrationService, clock: Clock) {
 
   def retrieveMoviesAndPerformances(cinemaId: String, date: LocalDate): Future[Map[Film, List[Performance]]] = {
     underlying.retrieveListings(cinemaId).map { raw =>
-
       val converted = for {
         f <- raw.films
-        image = ImageUrl.resolve(f.image_poster)
-        film = Film(f.id, f.title, image)
-        urlBuilder = (sessionId: String) => s"https://www.myvue.com/book-tickets/summary/$cinemaId/${film.id}/$sessionId"
-        showings = f.showings
+        image        = ImageUrl.resolve(f.image_poster)
+        film         = Film(f.id, f.title, image)
+        urlBuilder   = (sessionId: String) => s"https://www.myvue.com/book-tickets/summary/$cinemaId/${film.id}/$sessionId"
+        showings     = f.showings
         performances = filterAndBuild(date, showings, urlBuilder)
         if performances.nonEmpty
       } yield film -> performances

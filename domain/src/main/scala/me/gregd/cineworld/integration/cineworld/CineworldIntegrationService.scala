@@ -23,11 +23,11 @@ class CineworldIntegrationService(ws: WSClient, implicit val cache: ScalaCache[A
 
   private def curlCinemas(): Future[String] = memoize(1.day) {
     val tomorrow = clock.today().plusDays(1).toString
-    val url = s"${config.baseUrl}/uk/data-api-service/v1/quickbook/10108/cinemas/with-event/until/$tomorrow?attr=&lang=en_GB"
+    val url      = s"${config.baseUrl}/uk/data-api-service/v1/quickbook/10108/cinemas/with-event/until/$tomorrow?attr=&lang=en_GB"
     for {
       resp <- ws.url(url).get()
       body = resp.body
-      _ = if (body.length < 300) logger.warn(s"Response for $url is suspiciously short!")
+      _    = if (body.length < 300) logger.warn(s"Response for $url is suspiciously short!")
     } yield body
   }
 

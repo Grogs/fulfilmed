@@ -21,7 +21,7 @@ class RTree[T, F[_]: Async](items: Seq[(Coordinates, T)]) {
   }
 
   def nearest(coordinates: Coordinates, maxDistance: Double, maxCount: Int): F[List[T]] = {
-    val point = toPoint(coordinates)
+    val point         = toPoint(coordinates)
     val searchResults = tree.nearest(point, maxDistance, maxCount).toList
     for {
       results <- toAsync(searchResults)
@@ -31,12 +31,12 @@ class RTree[T, F[_]: Async](items: Seq[(Coordinates, T)]) {
   private def toPoint(coordinates: Coordinates) = Geometries.pointGeographic(coordinates.lat, coordinates.long)
 
   private def toAsync[T](obs: Observable[T]): F[T] = {
-    Async[F].async[T]( cb =>
-      obs.subscribe(
-        result => cb(Right(result)),
-        error => cb(Left(error))
-      )
-    )
+    Async[F].async[T](
+      cb =>
+        obs.subscribe(
+          result => cb(Right(result)),
+          error => cb(Left(error))
+      ))
   }
 
 }

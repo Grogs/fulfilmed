@@ -6,6 +6,6 @@ import me.gregd.cineworld.domain.repository.{SlickCinemaRepository, SlickListing
 
 @Module
 class DomainRepositoryWiring[F[_]: Async](databaseWiring: DatabaseWiring) {
-  lazy val cinemaRepository = wire[SlickCinemaRepository[F]]
+  lazy val cinemaRepository   = wire[SlickCinemaRepository[F]]
   lazy val listingsRepository = wire[SlickListingsRepository[F]]
 }

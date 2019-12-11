@@ -16,28 +16,24 @@ import scala.concurrent.duration._
 import io.circe._
 import io.circe.generic.auto._
 
-class VueIntegrationService(ws: WSClient,
-                            implicit val cache: ScalaCache[Array[Byte]],
-                            config: VueConfig)
-    extends LazyLogging {
+class VueIntegrationService(ws: WSClient, implicit val cache: ScalaCache[Array[Byte]], config: VueConfig) extends LazyLogging {
 
-  private val base = config.baseUrl
+  private val base    = config.baseUrl
   private val latLong = "http://maps.apple.com/\\?q=([-0-9.]+),([-0-9.]+)".r
 
   def retrieveCinemas(): Future[Seq[VueCinema]] = {
     curlCinemas().map(
-      resp =>
-        parser.decode[VueCinemasResp](resp).toTry.get.venues.flatMap(_.cinemas)
+      resp => parser.decode[VueCinemasResp](resp).toTry.get.venues.flatMap(_.cinemas)
     )
   }
 
   def retrieveLocation(
-    vueCinema: VueCinema
+      vueCinema: VueCinema
   ): Future[Option[(Double, Double)]] = {
     val name = vueCinema.name.toLowerCase.replace(' ', '-')
     curlLocation(name).map { html =>
       latLong.findFirstMatchIn(html).map { res =>
-        val lat = res.group(1).toDouble
+        val lat  = res.group(1).toDouble
         val long = res.group(2).toDouble
         lat -> long
       }

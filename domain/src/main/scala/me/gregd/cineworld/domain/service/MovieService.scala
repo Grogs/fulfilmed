@@ -22,7 +22,7 @@ class MovieService(tmdb: TmdbIntegrationService, ratings: OmdbIntegrationService
 
     for {
       movieOpt <- find(title)
-      movie = movieOpt.getOrElse(Movie(film.title))
+      movie  = movieOpt.getOrElse(Movie(film.title))
       format = split(film.title)._1
       poster = movie.posterUrl orElse Option(film.poster_url).filter(!_.isEmpty)
     } yield
@@ -36,7 +36,7 @@ class MovieService(tmdb: TmdbIntegrationService, ratings: OmdbIntegrationService
   }
 
   private var cachedMovies: Future[Seq[Movie]] = Future.failed(new IllegalStateException("Unitialized"))
-  private var lastCached: Long = 0
+  private var lastCached: Long                 = 0
 
   def refresh(): Future[Unit] = {
     logger.info(s"refreshing movies cache, old value:\n$cachedMovies")
@@ -76,8 +76,8 @@ class MovieService(tmdb: TmdbIntegrationService, ratings: OmdbIntegrationService
         } yield
           for {
             alternateTitles <- tmdb.alternateTitles(tmdbId)
-            imdbId <- tmdb.fetchImdbId(tmdbId)
-            ratingsResult <- imdbId.map(ratings.fetchRatings).getOrElse(Future.successful(RatingsResult(None, None, None, None)))
+            imdbId          <- tmdb.fetchImdbId(tmdbId)
+            ratingsResult   <- imdbId.map(ratings.fetchRatings).getOrElse(Future.successful(RatingsResult(None, None, None, None)))
             _ = logger.debug(s"Fetched data for '${tmdbMovie.title}'")
           } yield
             for {
@@ -110,7 +110,7 @@ class MovieService(tmdb: TmdbIntegrationService, ratings: OmdbIntegrationService
 
   def find(title: String): Future[Option[Movie]] = for (allMovies <- allMoviesCached()) yield {
     if (allMovies.nonEmpty) {
-      val matc = allMovies.maxBy(m => compareFunc(title, m.title))
+      val matc   = allMovies.maxBy(m => compareFunc(title, m.title))
       val weight = compareFunc(title, matc.title)
       val accept = weight > minWeight
       logger.debug(s"Best match for $title was  ${matc.title} ($weight) - ${if (accept) "ACCEPTED" else "REJECTED"}")

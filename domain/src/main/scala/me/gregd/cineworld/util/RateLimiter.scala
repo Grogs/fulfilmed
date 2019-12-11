@@ -10,7 +10,7 @@ import scala.concurrent.{Future, Promise}
 case class RateLimiter(duration: FiniteDuration, maxInvocations: Int) {
 
   @volatile var permits: Int = maxInvocations
-  val queue = new ConcurrentLinkedQueue[() => Any]()
+  val queue                  = new ConcurrentLinkedQueue[() => Any]()
 
   global.scheduleAtFixedRate(duration, duration) {
     this synchronized {

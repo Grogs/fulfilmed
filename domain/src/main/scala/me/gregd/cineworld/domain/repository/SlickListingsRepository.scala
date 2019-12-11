@@ -15,17 +15,17 @@ import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class SlickListingsRepository[F[_]:  Async](db: PostgresProfile.backend.DatabaseDef, tableName: ListingsTableName) extends ListingsRepository[F] with LazyLogging {
+class SlickListingsRepository[F[_]: Async](db: PostgresProfile.backend.DatabaseDef, tableName: ListingsTableName) extends ListingsRepository[F] with LazyLogging {
 
   private val table = tableName.value
 
   override def fetch(cinemaId: String, date: LocalDate): F[Seq[(Movie, Seq[Performance])]] = {
-      db.run(select(table, cinemaId, date)).toAsync.map(deserialize)
+    db.run(select(table, cinemaId, date)).toAsync.map(deserialize)
   }
 
   override def persist(cinemaId: String, date: LocalDate)(listings: Seq[(Movie, Seq[Performance])]): F[Unit] = {
     val json = listings.asJson.noSpaces
-      db.run(insertOrUpdate(table, cinemaId, date, json)).toAsync.map(_ => ())
+    db.run(insertOrUpdate(table, cinemaId, date, json)).toAsync.map(_ => ())
   }
 
   implicit class FutureToAsync[T](f: => Future[T]) {
@@ -37,11 +37,13 @@ class SlickListingsRepository[F[_]:  Async](db: PostgresProfile.backend.Database
 }
 
 object SlickListingsRepository {
-  def select(table: String, cinemaId: String, date: LocalDate) = sql"select listings from #$table where cinema_id = $cinemaId and date = ${date.toEpochDay.toString}"
-    .as[String]
-    .head
+  def select(table: String, cinemaId: String, date: LocalDate) =
+    sql"select listings from #$table where cinema_id = $cinemaId and date = ${date.toEpochDay.toString}"
+      .as[String]
+      .head
 
-  def insertOrUpdate(table: String, cinemaId: String, date: LocalDate, json: String) = sqlu"insert into #$table values ($cinemaId, ${date.toEpochDay}, $json) on conflict (cinema_id, date) do update set listings = $json"
+  def insertOrUpdate(table: String, cinemaId: String, date: LocalDate, json: String) =
+    sqlu"insert into #$table values ($cinemaId, ${date.toEpochDay}, $json) on conflict (cinema_id, date) do update set listings = $json"
 
   def deserialize(json: String) = decode[Seq[(Movie, Seq[Performance])]](json).toTry.get
 }

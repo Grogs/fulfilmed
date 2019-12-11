@@ -17,14 +17,15 @@ import scalacache.serialization.Codec
 class FileCache(prefix: String) extends Cache[Array[Byte]] {
 
   private val scheduler = Executors.newScheduledThreadPool(2)
-  private val ec = ExecutionContext.fromExecutor(scheduler)
+  private val ec        = ExecutionContext.fromExecutor(scheduler)
 
   override def get[V](key: String)(implicit codec: Codec[V, Array[Byte]]): Future[Option[V]] = {
-    Future(AsynchronousFileChannel.open(path(key), READ))(ec).flatMap{
-      channel =>
+    Future(AsynchronousFileChannel.open(path(key), READ))(ec)
+      .flatMap { channel =>
         readFile(codec, channel)
           .map(Option.apply)
-    }.recover { case _: NoSuchFileException => None }
+      }
+      .recover { case _: NoSuchFileException => None }
   }
 
   /**
@@ -45,20 +46,19 @@ class FileCache(prefix: String) extends Cache[Array[Byte]] {
     res
   }
 
-
   override def remove(key: String): Future[Unit] = {
-    Future(Files.delete(path(key)))(ec).recover{ case _ => () }
+    Future(Files.delete(path(key)))(ec).recover { case _ => () }
   }
 
   override def removeAll(): Future[Unit] = {
     val completion = Promise[Unit]()
 
     def deleteAll = {
-      Files.list(Paths.get(prefix)).forEach(
-        asJavaConsumer(item =>
-          Files.delete(item)
+      Files
+        .list(Paths.get(prefix))
+        .forEach(
+          asJavaConsumer(item => Files.delete(item))
         )
-      )
     }
 
     val deleteAndComplete = runnable {
@@ -93,13 +93,12 @@ class FileCache(prefix: String) extends Cache[Array[Byte]] {
     completion.future
   }
 
-
   private def writeFile[V](key: String, value: V, codec: Codec[V, Array[Byte]]) = {
     val completion = Promise[Integer]()
-    val channel = AsynchronousFileChannel.open(path(key), CREATE, WRITE)
-    val bytes = codec.serialize(value)
-    val buffer = ByteBuffer.wrap(bytes)
-    val handler = completionHandler(completion)
+    val channel    = AsynchronousFileChannel.open(path(key), CREATE, WRITE)
+    val bytes      = codec.serialize(value)
+    val buffer     = ByteBuffer.wrap(bytes)
+    val handler    = completionHandler(completion)
     channel.write(buffer, 0, (), handler)
     completion.future.map { _ =>
       channel.close()

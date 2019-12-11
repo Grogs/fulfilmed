@@ -7,15 +7,8 @@ import cats.syntax.flatMap._
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import me.gregd.cineworld.domain.model.{Cinema, Movie, Performance}
-import me.gregd.cineworld.domain.repository.{
-  CinemaRepository,
-  ListingsRepository
-}
-import me.gregd.cineworld.domain.service.{
-  CinemasService,
-  CompositeListingService,
-  MovieService
-}
+import me.gregd.cineworld.domain.repository.{CinemaRepository, ListingsRepository}
+import me.gregd.cineworld.domain.service.{CinemasService, CompositeListingService, MovieService}
 import me.gregd.cineworld.util.TaskRateLimiter
 import monix.eval.Task
 
@@ -33,31 +26,29 @@ class IngestionService(cinemaService: CinemasService,
 
   private val rateLimiter = TaskRateLimiter(2.seconds, 10)
 
-  case class Listings(cinemaId: String,
-                      date: LocalDate,
-                      listings: Seq[(Movie, Seq[Performance])])
+  case class Listings(cinemaId: String, date: LocalDate, listings: Seq[(Movie, Seq[Performance])])
 
   def refresh(dates: Seq[LocalDate]): Task[Unit] = {
     for {
-      _ <- Task.deferFuture(movieService.refresh())
+      _       <- Task.deferFuture(movieService.refresh())
       cinemas <- cinemaService.getCinemas()
-      _ <- logger.info(s"Retrieved ${cinemas.size} cinemas")
-      _ <- cinemaRepository.persist(cinemas)
+      _       <- logger.info(s"Retrieved ${cinemas.size} cinemas")
+      _       <- cinemaRepository.persist(cinemas)
       permutations = combinations(cinemas, dates)
       allListings <- fetchListings(permutations)
-      _ <- persistListings(allListings)
+      _           <- persistListings(allListings)
     } yield ()
   }
 
   private def combinations(cinemas: Seq[Cinema], dates: Seq[LocalDate]) = {
     for {
       cinema <- cinemas
-      date <- dates
+      date   <- dates
     } yield cinema.id -> date
   }
 
   private def fetchListings(
-    permutations: Seq[(String, LocalDate)]
+      permutations: Seq[(String, LocalDate)]
   ): Task[Seq[Listings]] = {
     Task.wanderUnordered(permutations) {
       case (id, date) =>

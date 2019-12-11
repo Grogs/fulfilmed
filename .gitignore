@@ -12,6 +12,11 @@ src_managed/
 project/boot/
 .history
 .cache
+build.properties
+
+## Metals
+.metals/
+.bloop/
 
 ### Gradle ###
 build

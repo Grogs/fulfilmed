@@ -9,7 +9,7 @@ class CinemasService(cineworld: CineworldService, vue: VueService, config: Chain
   private def cinemasFor(chain: String) = chain match {
     case "vue"       => vue.retrieveCinemas()
     case "cineworld" => cineworld.retrieveCinemas()
-    case _ => throw new IllegalArgumentException(s"$chain is not a valid cinema chain")
+    case _           => throw new IllegalArgumentException(s"$chain is not a valid cinema chain")
   }
 
   def getCinemas(): Task[Seq[Cinema]] = Task.traverse(config.enabled)(chain => Task.deferFuture(cinemasFor(chain))).map(_.flatten)

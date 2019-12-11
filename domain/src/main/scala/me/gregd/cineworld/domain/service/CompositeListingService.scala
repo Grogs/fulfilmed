@@ -18,13 +18,18 @@ class CompositeListingService(movieDao: MovieService, cineworld: CineworldServic
       vue.retrieveMoviesAndPerformances(cinemaId, date)
     )
 
-    (cineworldResults onErrorFallbackTo vueResults).flatMap( res =>
-      Task.traverse(res){ case (film, performances) =>
-        Task.deferFuture(
-          movieDao.toMovie(film)
-        ).map(_ -> performances)
-      }.map(_.toSeq)
-    )
+    (cineworldResults onErrorFallbackTo vueResults).flatMap(
+      res =>
+        Task
+          .traverse(res) {
+            case (film, performances) =>
+              Task
+                .deferFuture(
+                  movieDao.toMovie(film)
+                )
+                .map(_ -> performances)
+          }
+          .map(_.toSeq))
   }
 
 }

@@ -14,8 +14,6 @@ class PostcodeIoIntegrationService(config: PostcodesIoConfig, wSClient: WSClient
 
     case class Request(postcodes: Seq[String])
 
-
-
     case class Result(postcode: String, latitude: Option[Double], longitude: Option[Double])
     case class Response(query: String, result: Option[Result])
     case class BulkResponse(status: Int, result: Seq[Response])
@@ -35,8 +33,8 @@ class PostcodeIoIntegrationService(config: PostcodesIoConfig, wSClient: WSClient
         val res =
           for {
             Response(_, Some(Result(postcode, lat, long))) <- resp.json.as[BulkResponse].result
-            latitude <- lat
-            longitude <- long
+            latitude                                       <- lat
+            longitude                                      <- long
           } yield postcode -> Coordinates(latitude, longitude)
         res.toMap
       }

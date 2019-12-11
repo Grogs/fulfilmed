@@ -11,7 +11,7 @@ import scala.concurrent.duration._
 case class TaskRateLimiter(duration: FiniteDuration, maxInvocations: Int) {
 
   @volatile var permits: Int = maxInvocations
-  val queue = new ConcurrentLinkedQueue[() => Any]()
+  val queue                  = new ConcurrentLinkedQueue[() => Any]()
 
   global.scheduleAtFixedRate(duration, duration) {
     this synchronized {
@@ -32,9 +32,11 @@ case class TaskRateLimiter(duration: FiniteDuration, maxInvocations: Int) {
         permits -= 1
         f
       } else {
-        Task.async[Unit] { cb =>
-          queue.add(() => { cb.onSuccess(()) })
-        }.flatMap(_ => f)
+        Task
+          .async[Unit] { cb =>
+            queue.add(() => { cb.onSuccess(()) })
+          }
+          .flatMap(_ => f)
       }
     }
 }

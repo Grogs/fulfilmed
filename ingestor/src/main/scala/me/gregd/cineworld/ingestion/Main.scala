@@ -27,10 +27,10 @@ object Main extends LazyLogging {
   }
 
   private val wiring: Wiring[Task] = {
-    val actorSystem = ActorSystem()
-    val wsClient = AhcWSClient()(ActorMaterializer()(actorSystem))
+    val actorSystem  = ActorSystem()
+    val wsClient     = AhcWSClient()(ActorMaterializer()(actorSystem))
     val clock: Clock = RealClock
-    val mode = Mode.Prod
+    val mode         = Mode.Prod
     wire[Wiring[Task]]
   }
 

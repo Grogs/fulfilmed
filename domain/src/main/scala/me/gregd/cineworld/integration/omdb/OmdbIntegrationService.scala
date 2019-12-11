@@ -20,13 +20,14 @@ class OmdbIntegrationService(ws: WSClient, implicit val cache: ScalaCache[Array[
     for {
       body <- curlFromRemote(imdbId)
       json = Json.parse(body)
-    } yield RatingsResult(
-      imdbRating(json),
-      imdbVotes(json),
-      metascore(json),
-      rottenTomatoes(json)
-    )
-  }.recover{
+    } yield
+      RatingsResult(
+        imdbRating(json),
+        imdbVotes(json),
+        metascore(json),
+        rottenTomatoes(json)
+      )
+  }.recover {
     case ex =>
       logger.error(s"Failed to receive ratings for $imdbId", ex)
       RatingsResult(None, None, None, None)
@@ -47,7 +48,7 @@ class OmdbIntegrationService(ws: WSClient, implicit val cache: ScalaCache[Array[
   private def rottenTomatoes(json: JsValue) =
     for {
       ratings <- (json \ "Ratings").asOpt[List[OmdbRatings]]
-      rt <- ratings.find(_.Source == "Rotten Tomatoes").map(_.Value)
+      rt      <- ratings.find(_.Source == "Rotten Tomatoes").map(_.Value)
     } yield rt
 
   case class OmdbRatings(Source: String, Value: String)

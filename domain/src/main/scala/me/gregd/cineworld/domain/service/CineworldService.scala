@@ -22,7 +22,7 @@ class CineworldService(
 
     for {
       rawCinemas <- underlying.retrieveCinemas()
-      _ = logger.info(s"Retrieved ${rawCinemas.length} cinemas")
+      _         = logger.info(s"Retrieved ${rawCinemas.length} cinemas")
       postcodes = rawCinemas.map(_.postcode)
       coordinates <- postcodeService.lookup(postcodes)
     } yield {
@@ -38,7 +38,7 @@ class CineworldService(
 
       val res = for {
         raw <- listingsBody.films
-        film = CineworldTransformer.toFilm(raw)
+        film         = CineworldTransformer.toFilm(raw)
         performances = performancesById(raw.id).map(CineworldTransformer.toPerformances)
       } yield film -> performances
 

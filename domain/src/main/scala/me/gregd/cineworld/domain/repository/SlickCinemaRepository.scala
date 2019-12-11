@@ -15,14 +15,14 @@ class SlickCinemaRepository[F[_]: Async](db: PostgresProfile.backend.DatabaseDef
 
   override def fetchAll(): F[Seq[Cinema]] = {
     def deserialize(json: String) = decode[Seq[Cinema]](json).toTry.get
-    val select = sql"select json from cinemas".as[String].head
+    val select                    = sql"select json from cinemas".as[String].head
     db.run(select).toAsync.map(deserialize)
   }
 
   override def persist(cinemas: Seq[Cinema]): F[Unit] = {
     {
       val json = cinemas.asJson.noSpaces
-      val upserts = DBIO.sequence(cinemas.map{c =>
+      val upserts = DBIO.sequence(cinemas.map { c =>
         import c.{chain, id}
         sqlu"""
               insert into cinemas (id, chain, json)

@@ -5,12 +5,18 @@ import java.sql.DriverManager
 import cats.effect.Resource
 import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
-import net.andimiller.whales.syntax._
-import net.andimiller.whales.{Binding, Docker}
+import com.dimafeng.testcontainers.PostgreSQLContainer
+import org.testcontainers.utility.DockerImageName
 
 import scala.concurrent.duration._
 
 object DockerPostgresService {
+  def container: Resource[Task, PostgreSQLContainer] = {
+    val create = Task(PostgreSQLContainer(DockerImageName.parse("postgres:latest")))
+    val acquire = create.flatMap(c => Task(c.start()).map(_ => c))
+    Resource.make(acquire)(container => Task(container.stop()))
+  }
+
   private def checkConnection(url: String) =
     Task
       .evalAsync {
@@ -21,24 +27,4 @@ object DockerPostgresService {
       }
       .delayExecution(200.millis)
       .onErrorRestart(maxRetries = 50)
-
-  val postgres: Resource[Task, String] = for {
-    docker <- Docker[Task]
-    user = "someuser"
-    pass = "somepass"
-    postgres <- docker(
-      "postgres",
-      "11.5",
-      env = Map(
-        "POSTGRES_USER" -> user,
-        "POSTGRES_PASSWORD" -> pass,
-        "PGPORT" -> 5432.toString
-      ),
-      bindings = Map(5432.tcp -> Binding(hostname = Some("127.0.0.1")))
-    )
-    (_, port) = postgres.ports(5432.tcp).head
-    url = s"jdbc:postgresql://localhost:$port/?user=$user&password=$pass"
-    _ <- Resource.liftF(checkConnection(url))
-  } yield url
-
 }

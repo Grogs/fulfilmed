@@ -22,7 +22,7 @@ class SlickListingsRepositoryTest
     with ParallelTestExecution
     with Matchers {
 
-  val postgres = DockerPostgresService.postgres.map(Database.forURL(_))
+  val postgres = DockerPostgresService.container.map(c => Database.forURL(c.jdbcUrl, c.username, c.password))
 
   val exampleMovies = Seq(
     Movie(

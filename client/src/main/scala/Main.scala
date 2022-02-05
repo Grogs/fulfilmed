@@ -1,13 +1,11 @@
-package me.gregd.cineworld.frontend
-
-import me.gregd.cineworld.frontend.components.{FilmsPage, IndexPage}
-import me.gregd.cineworld.frontend.util._
-import org.scalajs.dom._
+import me.gregd.cineworld.frontend.util.{History, Route, Router, Switch}
+import me.gregd.cineworld.frontend.components.{IndexPage, FilmsPage}
+import org.scalajs.dom.document
 import slinky.web.ReactDOM
 
 object Main {
 
-  def main(): Unit = {
+  def main(args: Array[String]): Unit = {
 
     ReactDOM.render(
       Router(History.createBrowserHistory())(

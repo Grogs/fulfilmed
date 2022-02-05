@@ -55,7 +55,7 @@ class VueService(underlying: VueIntegrationService, clock: Clock) {
       s <- showings
       if date == LocalDate.parse(s.date_time)
       t <- s.times
-      time = LocalTime.parse(t.time, timeFormat)
+      time = LocalTime.parse(t.time.toLowerCase, timeFormat)
       if !isStale(time)
     } yield Performance(t.time, available = true, t.screen_type, urlBuilder(t.session_id), Option(s.date_time))
 

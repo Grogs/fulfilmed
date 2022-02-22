@@ -2,18 +2,18 @@ package me.gregd.cineworld.domain.service
 
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalTime}
-
 import me.gregd.cineworld.domain.model.{Cinema, Coordinates, Film, Performance}
 import me.gregd.cineworld.integration.vue.{ImageUrl, VueIntegrationService}
 import me.gregd.cineworld.integration.vue.listings.Showings
 import me.gregd.cineworld.util.Clock
 
+import java.util.Locale
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class VueService(underlying: VueIntegrationService, clock: Clock) {
 
-  private val timeFormat = DateTimeFormatter ofPattern "h:m a"
+  private val timeFormat = DateTimeFormatter.ofPattern("h:m a", Locale.UK)
 
   def retrieveCinemas(): Future[Seq[Cinema]] = {
     val res = underlying

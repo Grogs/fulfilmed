@@ -1,11 +1,10 @@
 package me.gregd.cineworld.frontend.components
 
-import me.gregd.cineworld.domain.model.{Movie, Performance}
+import me.gregd.cineworld.domain.model.{Movie, MovieListing, Performance}
 import me.gregd.cineworld.frontend.components.Sort.Sort
 import me.gregd.cineworld.frontend.styles.FilmsStyle
 import me.gregd.cineworld.frontend.util.Loadable
 import me.gregd.cineworld.frontend.util.Loadable.{Loaded, Loading, Unloaded}
-
 import slinky.core.StatelessComponent
 import slinky.core.annotations.react
 import slinky.web.html._
@@ -14,9 +13,10 @@ import scala.scalajs.js.Dynamic
 
 @react class FilmsList extends StatelessComponent {
 
-  case class Props(listings: Loadable[Seq[(Movie, Seq[Performance])]], sort: Sort)
+  case class Props(listings: Loadable[Seq[MovieListing]], sort: Sort)
 
-  val filmCard = (m: Movie, pl: Seq[Performance]) => {
+  val filmCard = (listing: MovieListing) => {
+    val MovieListing(m, pl) = listing
     def tmdbLink(m: Movie) = m.tmdbRating.map(div(className := FilmsStyle.tmdb)(_))
 
     def rtLink(m: Movie) = m.rottenTomatoes.map(
@@ -83,7 +83,7 @@ import scala.scalajs.js.Dynamic
           icon("fa-frown-o", "No movies found!")
         } else {
           div(className := FilmsStyle.filmListContainer)(
-            for (m <- listings.sorted(props.sort.ordering)) yield filmCard.tupled(m)
+            for (m <- listings.sorted(props.sort.ordering)) yield filmCard(m)
           )
         }
     }

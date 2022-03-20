@@ -1,5 +1,6 @@
 package me.gregd.cineworld.integration
 
+import cats.effect.IO
 import me.gregd.cineworld.domain.model.Coordinates
 import me.gregd.cineworld.config.PostcodesIoConfig
 import play.api.libs.json.Json
@@ -24,11 +25,13 @@ class PostcodeIoIntegrationService(config: PostcodesIoConfig, wSClient: WSClient
     implicit val b = Json.format[BulkResponse]
   }
 
-  def lookup(postcodes: Seq[String]): Future[Map[String, Coordinates]] = {
+  def lookup(postcodes: Seq[String]): IO[Map[String, Coordinates]] = {
     import model._
-    wSClient
-      .url(s"${config.baseUrl}/postcodes")
-      .post(Json.toJson(Request(postcodes)))
+    IO.fromFuture(
+        IO(
+          wSClient
+            .url(s"${config.baseUrl}/postcodes")
+            .post(Json.toJson(Request(postcodes)))))
       .map { resp =>
         val res =
           for {

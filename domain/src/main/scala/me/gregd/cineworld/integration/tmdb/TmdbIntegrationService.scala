@@ -1,56 +1,61 @@
 package me.gregd.cineworld.integration.tmdb
 
+import cats.effect.IO
+import cats.implicits.{catsSyntaxParallelTraverse1, catsSyntaxTuple2Parallel}
 import com.typesafe.scalalogging.LazyLogging
-import me.gregd.cineworld.util.RateLimiter
 import me.gregd.cineworld.config.TmdbConfig
-import monix.execution.Scheduler
+import org.typelevel.log4cats.slf4j.Slf4jLogger
 import play.api.libs.json.JsValue
 import play.api.libs.ws.{WSClient, WSResponse}
-import scalacache.ScalaCache
+import scalacache.Cache
 import scalacache.memoization._
+import upperbound.Limiter
+import upperbound.syntax.rate.rateOps
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class TmdbIntegrationService(ws: WSClient, implicit val cache: ScalaCache[Array[Byte]], scheduler: Scheduler, config: TmdbConfig) extends LazyLogging {
+class TmdbIntegrationService(ws: WSClient,
+                             implicit val tmdbMovieCache: Cache[IO, String, Vector[TmdbMovie]],
+                             implicit val alternateTitleCache: Cache[IO, String, ImdbIdAndAltTitles],
+                             config: TmdbConfig) extends TmdbService {
+  private val logger = Slf4jLogger.getLogger[IO]
 
   private lazy val key = config.apiKey
 
-  private lazy val limiter = RateLimiter(config.rateLimit.duration, config.rateLimit.count.value)
+  private lazy val rateLimiter =
+    Limiter.start[IO](config.rateLimit.count.value every config.rateLimit.duration).allocated.unsafeRunSync()(cats.effect.unsafe.IORuntime.global)._1 //todo resource leak
 
   private lazy val baseUrl = config.baseUrl
 
-  val baseImageUrl: String = "http://image.tmdb.org/t/p/w300"
+  override val baseImageUrl: String = "http://image.tmdb.org/t/p/w300"
 
-  def fetchMovies(): Future[Vector[TmdbMovie]] =
-    Future.sequence(Seq(fetchNowPlaying(), fetchUpcoming())).map(_.flatten.toVector)
+  override def fetchMovies(): IO[Vector[TmdbMovie]] =
+    (fetchNowPlaying(), fetchUpcoming()).parMapN(_ ++ _)
 
-  def fetchNowPlaying(): Future[Seq[TmdbMovie]] =
-    Future.traverse(1 to 6)(fetchNowPlayingPage).map(_.flatten)
-
-  def fetchUpcoming(): Future[Seq[TmdbMovie]] =
-    Future.traverse(1 to 2)(fetchUpcomingPage).map(_.flatten)
-
-  def fetchImdbId(tmdbId: String): Future[Option[String]] = {
+  override def fetchImdbId(tmdbId: String): IO[Option[String]] =
     fetchImdbIdAndAlternateTitles(tmdbId).map(_.imdbId)
-  }
 
-  def alternateTitles(tmdbId: String): Future[List[String]] = {
+  override def alternateTitles(tmdbId: String): IO[Vector[String]] =
     fetchImdbIdAndAlternateTitles(tmdbId).map(_.alternateTitles)
-  }
 
-  private def fetchImdbIdAndAlternateTitles(tmdbId: String): Future[ImdbIdAndAltTitles] = memoize(1.day) {
+  private def fetchNowPlaying(): IO[Vector[TmdbMovie]] =
+    (1 to 6).toList.parTraverse(fetchNowPlayingPage).map(_.flatten.toVector)
+
+  private def fetchUpcoming(): IO[Vector[TmdbMovie]] =
+    (1 to 2).toList.parTraverse(fetchUpcomingPage).map(_.flatten.toVector)
+
+  private def fetchImdbIdAndAlternateTitles(tmdbId: String): IO[ImdbIdAndAltTitles] = {
 
     def extractImdbId(res: JsValue) = (res \ "imdb_id").asOpt[String]
 
     def extractAlternateTitles(r: JsValue) =
       (r \ "alternative_titles" \ "titles")
-        .as[Seq[TmdbTitle]]
+        .as[Vector[TmdbTitle]]
         .collect {
           case TmdbTitle("GB" | "US", title) => title
         }
-        .toList
 
     curlMovieAndAlternateTitles(tmdbId).map { res =>
       val json = res.json
@@ -61,28 +66,38 @@ class TmdbIntegrationService(ws: WSClient, implicit val cache: ScalaCache[Array[
     }
   }
 
-  private def curlMovieAndAlternateTitles(tmdbId: String): Future[WSResponse] =
-    limiter {
-      val url = s"$baseUrl/3/movie/$tmdbId?append_to_response=alternative_titles&api_key=$key"
-      ws.url(url).get()
+  private def curlMovieAndAlternateTitles(tmdbId: String): IO[WSResponse] =
+    rateLimiter.submit {
+      IO.fromFuture(IO {
+        val url = s"$baseUrl/3/movie/$tmdbId?append_to_response=alternative_titles&api_key=$key"
+        ws.url(url).get()
+      })
     }
 
-  private def fetchNowPlayingPage(page: Int): Future[Vector[TmdbMovie]] = memoize(1.day) {
-    limiter {
+  private def fetchNowPlayingPage(page: Int): IO[Vector[TmdbMovie]] = {
+    rateLimiter.submit {
       val url = s"$baseUrl/3/movie/now_playing?api_key=$key&language=en-US&page=$page&region=GB"
-      logger.info(s"Fetching now playing page $page")
-      ws.url(url)
-        .get()
-        .map(_.json.as[NowShowingResponse].results)
+      logger.info(s"Fetching now playing page $page") >>
+        IO.fromFuture(
+          IO(
+            ws.url(url)
+              .get()
+              .map(_.json.as[NowShowingResponse].results)
+          )
+        )
     }
   }
-  private def fetchUpcomingPage(page: Int): Future[Vector[TmdbMovie]] = memoize(1.day) {
-    limiter {
+  private def fetchUpcomingPage(page: Int): IO[Vector[TmdbMovie]] = {
+    rateLimiter.submit {
       val url = s"$baseUrl/3/movie/now_playing?api_key=$key&language=en-US&page=$page&region=GB"
-      logger.info(s"Fetching upcoming movies page $page")
-      ws.url(url)
-        .get()
-        .map(_.json.as[NowShowingResponse].results)
+      logger.info(s"Fetching upcoming movies page $page") >>
+        IO.fromFuture(
+          IO(
+            ws.url(url)
+              .get()
+              .map(_.json.as[NowShowingResponse].results)
+          )
+        )
     }
   }
 }

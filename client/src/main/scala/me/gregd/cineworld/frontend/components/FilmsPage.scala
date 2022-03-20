@@ -1,35 +1,39 @@
 package me.gregd.cineworld.frontend.components
 
 import autowire._
+import cats.effect.IO
+import cats.effect.unsafe.IORuntime
 import io.circe.generic.auto._
 import me.gregd.cineworld.frontend.Client
 import me.gregd.cineworld.frontend.components.Sort.{NextShowing, Sort}
 import me.gregd.cineworld.frontend.styles.FilmsStyle
 import me.gregd.cineworld.frontend.util.Loadable.{Loaded, Loading, Unloaded}
-import me.gregd.cineworld.frontend.util.{Loadable, Redirect, RouteProps}
+import me.gregd.cineworld.frontend.util.{Loadable, RouteProps}
 import org.scalajs.dom.Event
 import org.scalajs.dom.html.Select
 import slinky.core.{AttrPair, Component, SyntheticEvent}
 import slinky.core.annotations.react
 import slinky.web.html._
-import me.gregd.cineworld.domain.model.{Movie, Performance}
+import me.gregd.cineworld.domain.model.{Movie, MovieListing, Performance}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.scalajs.js.Dynamic
 import org.scalajs.dom.window.console
+import slinky.reactrouter.Redirect
 
+import scala.scalajs.js
 import scala.util.{Failure, Success}
 
 @react class FilmsPage extends Component {
 
   private implicit def toselectApplied(pair: AttrPair[_value_attr.type]) = pair.asInstanceOf[AttrPair[select.tag.type]]
 
-  type Props = RouteProps
+  case class Props(`match`: Match)
 
   case class State(
-      films: Loadable[Seq[(Movie, Seq[Performance])]],
-      selectedSort: Sort = NextShowing,
-      redirect: Option[String] = None
+                    films: Loadable[Seq[MovieListing]],
+                    selectedSort: Sort = NextShowing,
+                    redirect: Option[String] = None
   ) {
     def sortBy(sort: Sort): State = copy(selectedSort = sort)
   }
@@ -51,18 +55,18 @@ import scala.util.{Failure, Success}
   }
 
   private def reloadListings() = {
-    Client.listings.getMoviesAndPerformancesFor(currentCinema(), currentDate()).onComplete{
-      case Success(movies) =>
-        setState(_.copy(films = Loaded(movies)))
-      case Failure(ex) =>
+    Client.listings.getMoviesAndPerformancesFor(currentCinema(), currentDate()).attempt.flatMap{
+      case Right(movies) =>
+        IO(setState(_.copy(films = Loaded(movies.listings))))
+      case Left(ex) =>
         val typ = ex.getClass.getSimpleName
         val msg = ex.getMessage
-        console.error(s"Fetching movies failed with a $typ: $msg")
-        setState(_.copy(films = Unloaded))
-    }
+        IO(console.error(s"Fetching movies failed with a $typ: $msg")) >>
+        IO(setState(_.copy(films = Unloaded)))
+    }.unsafeRunAndForget()(IORuntime.global)
   }
 
-  override def componentDidUpdate(prevProps: RouteProps, prevState: State): Unit = {
+  override def componentDidUpdate(prevProps: Props, prevState: State): Unit = {
     console.log("Updated")
     if (state.films == Loading) reloadListings()
   }
@@ -139,3 +143,5 @@ import scala.util.{Failure, Success}
 
   }
 }
+
+case class Match(params: js.Dictionary[String])

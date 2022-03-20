@@ -1,50 +1,55 @@
 package me.gregd.cineworld.domain.movies
 
-import me.gregd.cineworld.integration.omdb.{OmdbIntegrationService, RatingsResult}
+import cats.effect.IO
+import cats.effect.unsafe.implicits.global
+import me.gregd.cineworld.integration.omdb.{OmdbIntegrationService, OmdbService, RatingsResult}
 import me.gregd.cineworld.domain.model.{Film, Movie}
 import me.gregd.cineworld.domain.service.MovieService
-import me.gregd.cineworld.integration.tmdb.{TmdbIntegrationService, TmdbMovie}
+import me.gregd.cineworld.integration.tmdb.{TmdbIntegrationService, TmdbMovie, TmdbService}
 import me.gregd.cineworld.config.MoviesConfig
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.time.{Millis, Span}
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.matchers.should.Matchers
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class MovieServiceTest extends FunSuite with ScalaFutures with Matchers with MockFactory {
+class MovieServiceTest extends AnyFunSuite with ScalaFutures with Matchers with MockFactory {
 
   implicit val defaultPatienceConfig = PatienceConfig(Span(2500, Millis))
 
-  val tmdb = stub[TmdbIntegrationService]
-  val ratings = stub[OmdbIntegrationService]
+  val tmdb = new TmdbService {
+    val baseImageUrl: String = "http://image.tmdb.org/t/p/w300"
+    def fetchMovies()        = IO.pure(Vector(someTmdbMovie))
+    def fetchImdbId(tmdbId: String) = tmdbId match {
+      case "263115" => IO.pure(Some("tt3315342"))
+      case _        => IO.pure(None)
+    }
+    def alternateTitles(tmdbId: String) = IO.pure(Vector.empty)
+  }
+  val ratings = new OmdbService {
+    def fetchRatings(imdbId: String) = IO.pure(RatingsResult(Some(7.1), Some(59166), None, None))
+  }
 
-  (tmdb.fetchMovies _).when().returns(Future.successful(Vector(someTmdbMovie)))
-  (tmdb.fetchImdbId _).when(*).onCall{(id: String) => id match {
-    case "263115" => Future.successful(Some("tt3315342"))
-    case _ => Future.successful(None)
-  }}
-  (tmdb.alternateTitles _).when(*).returns(Future.successful(Nil))
-
-  (ratings.fetchRatings _).when(*).returns(Future.successful(RatingsResult(Some(7.1), Some(59166), None, None)))
-
-  val movieDao = new MovieService(tmdb, ratings, MoviesConfig(1.second))
+  val movieService = new MovieService(tmdb, ratings, MoviesConfig(1.second))
+  movieService.refresh.unsafeRunSync()
 
   test("unknown film can be converted to movie") {
-    val film = Film("1", "Test", "")
-    val movie = movieDao.toMovie(film).futureValue
+    val film  = Film("1", "Test", "")
+    val movie = movieService.toMovie(film).unsafeRunSync()
     movie shouldBe Movie("Test", Some("1"), Some("default"))
   }
 
   test("known film can be converted to movie") {
-    val film = Film("2", "Logan", "")
-    val movie = movieDao.toMovie(film).futureValue
+    val film  = Film("2", "Logan", "")
+    val movie = movieService.toMovie(film).unsafeRunSync()
     movie shouldBe someMovie
   }
 
   test("allMovies") {
-    val movies = movieDao.allMoviesCached().futureValue
+    val movies = movieService.allMoviesCached().unsafeRunSync()
     movies shouldEqual Vector(someMovie.copy(cineworldId = None, format = None))
   }
 

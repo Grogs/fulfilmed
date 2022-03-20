@@ -1,9 +1,9 @@
 package me.gregd.cineworld.integration.cineworld
 
 import java.time.LocalDate
-
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
+import cats.effect.unsafe.implicits.global
 import fakes.FakeOmdbService
 import me.gregd.cineworld.domain._
 import me.gregd.cineworld.domain.model._
@@ -13,34 +13,34 @@ import me.gregd.cineworld.integration.cineworld.CineworldIntegrationService
 import me.gregd.cineworld.integration.tmdb.TmdbIntegrationService
 import me.gregd.cineworld.util.{NoOpCache, RealClock}
 import me.gregd.cineworld.config.MoviesConfig
-import monix.execution.Scheduler
+import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.time.{Millis, Span}
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.matchers.should.Matchers
 import play.api.libs.ws.ahc.AhcWSClient
 import stub.Stubs
 import util.WSClient
 
 import scala.concurrent.duration._
 
-class CineworldServiceTest extends FunSuite with ScalaFutures with Matchers with Eventually with WSClient {
+class CineworldServiceTest extends AnyFunSuite with ScalaFutures with Matchers with WSClient {
 
   implicit val defaultPatienceConfig = PatienceConfig(Span(3000, Millis))
 
-  val tmdb = new TmdbIntegrationService(wsClient, NoOpCache.cache, Scheduler.global, Stubs.tmdb.config)
+  val tmdb = new TmdbIntegrationService(wsClient, new NoOpCache, new NoOpCache, Stubs.tmdb.config)
   val movieDao = new MovieService(tmdb, FakeOmdbService, MoviesConfig(1.second))
-  val cineworldRaw = new CineworldIntegrationService(wsClient, NoOpCache.cache, Stubs.cineworld.config, RealClock)
+  val cineworldRaw = new CineworldIntegrationService(wsClient, new NoOpCache, Stubs.cineworld.config, RealClock)
   val postcodeService = new PostcodeIoIntegrationService(Stubs.postcodesio.config, wsClient)
   val cineworld = new CineworldService(cineworldRaw, postcodeService)
 
   test("retrieveCinemas") {
-    val cinemas = cineworld.retrieveCinemas().futureValue.take(3)
+    val cinemas = cineworld.retrieveCinemas().unsafeRunSync().take(3)
     cinemas shouldEqual expectedCinemas
   }
 
   test("retrieveMoviesAndPerformances") {
     val date = LocalDate.parse("2017-05-23")
-    val showings = cineworld.retrieveMoviesAndPerformances("8112", date).futureValue
+    val showings = cineworld.retrieveMoviesAndPerformances("8112", date).unsafeRunSync()
 //    pprint.pprintln(showings, height = 100000, width = 200)
     showings should contain allElementsOf expectedShowings
   }

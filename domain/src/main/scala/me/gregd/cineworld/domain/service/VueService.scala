@@ -1,5 +1,7 @@
 package me.gregd.cineworld.domain.service
 
+import cats.effect.IO
+
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalTime}
 import me.gregd.cineworld.domain.model.{Cinema, Coordinates, Film, Performance}
@@ -15,23 +17,23 @@ class VueService(underlying: VueIntegrationService, clock: Clock) {
 
   private val timeFormat = DateTimeFormatter.ofPattern("h:m a", Locale.UK)
 
-  def retrieveCinemas(): Future[Seq[Cinema]] = {
-    val res = underlying
+  def retrieveCinemas(): IO[List[Cinema]] = {
+    import cats.implicits._
+    underlying
       .retrieveCinemas()
-      .map(raw =>
-        for { c <- raw } yield {
-          underlying
-            .retrieveLocation(c)
-            .map(loc => {
-              val coordinatesOpt = loc.map { case (lat, long) => Coordinates(lat, long) }
-              Cinema(c.id, "Vue", c.search_term, coordinatesOpt)
+      .flatMap(
+        _.traverse(
+          vueCinema =>
+            underlying
+              .retrieveLocation(vueCinema)
+              .map { loc =>
+                val coordinatesOpt = loc.map { case (lat, long) => Coordinates(lat, long) }
+                Cinema(vueCinema.id, "Vue", vueCinema.search_term, coordinatesOpt)
             })
-      })
-
-    res.map(Future.sequence(_)).flatten
+      )
   }
 
-  def retrieveMoviesAndPerformances(cinemaId: String, date: LocalDate): Future[Map[Film, List[Performance]]] = {
+  def retrieveMoviesAndPerformances(cinemaId: String, date: LocalDate): IO[Map[Film, List[Performance]]] = {
     underlying.retrieveListings(cinemaId).map { raw =>
       val converted = for {
         f <- raw.films

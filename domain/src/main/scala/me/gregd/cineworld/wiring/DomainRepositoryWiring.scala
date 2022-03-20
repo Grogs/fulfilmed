@@ -1,11 +1,11 @@
 package me.gregd.cineworld.wiring
 
-import cats.effect.Async
+import cats.effect.{Async, IO}
 import com.softwaremill.macwire.{Module, wire}
-import me.gregd.cineworld.domain.repository.{SlickCinemaRepository, SlickListingsRepository}
+import me.gregd.cineworld.domain.repository.{CinemaRepository, ListingsRepository, SlickCinemaRepository, SlickListingsRepository}
 
 @Module
-class DomainRepositoryWiring[F[_]: Async](databaseWiring: DatabaseWiring) {
-  lazy val cinemaRepository   = wire[SlickCinemaRepository[F]]
-  lazy val listingsRepository = wire[SlickListingsRepository[F]]
+class DomainRepositoryWiring(databaseWiring: DatabaseWiring) {
+  lazy val cinemaRepository: CinemaRepository = wire[SlickCinemaRepository]
+  lazy val listingsRepository: ListingsRepository = wire[SlickListingsRepository]
 }

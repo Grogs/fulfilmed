@@ -1,25 +1,24 @@
 package me.gregd.cineworld.util
 
+import cats.effect.{IO, Sync}
+import scalacache.logging.Logger
+
 import scala.concurrent.Future
 import scala.concurrent.duration.Duration
-import scalacache.ScalaCache
 import scalacache.serialization.Codec
 
-object NoOpCache extends scalacache.Cache[Array[Byte]] {
-  val cache = ScalaCache(this)
+class NoOpCache[V] extends scalacache.AbstractCache[IO,String,V] {
+  protected def F: Sync[IO] = implicitly
 
-  def get[V](key: String)(implicit codec: Codec[V, Array[Byte]]): Future[Option[V]] =
-    Future.successful(None)
+  protected def doGet(key: String): IO[Option[V]] = IO.pure(None)
 
-  def put[V](key: String, value: V, ttl: Option[Duration])(implicit codec: Codec[V, Array[Byte]]): Future[Unit] =
-    Future.successful(())
+  protected def doPut(key: String, value: V, ttl: Option[Duration]): IO[Unit] = IO.unit
 
-  def remove(key: String): Future[Unit] =
-    Future.successful(())
+  protected def doRemove(key: String): IO[Unit] = IO.unit
 
-  def removeAll(): Future[Unit] =
-    Future.successful(())
+  protected def doRemoveAll: IO[Unit] = IO.unit
 
-  def close(): Unit =
-    ()
+  def close: IO[Unit] = IO.unit
+
+  override protected final val logger = Logger.getLogger(getClass.getName)
 }

@@ -1,91 +1,100 @@
 package me.gregd.cineworld.util
 
-import java.nio.file.Files
+import cats.effect.IO
+import cats.implicits.toTraverseOps
 
+import java.nio.file.Files
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
-import org.scalatest.{BeforeAndAfterEach, FunSuite, Matchers}
+import org.scalatest.BeforeAndAfterEach
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
-import scalacache.AnyRefBinaryCodec
 import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
+import cats.effect.unsafe.implicits.global
+import fs2.io.file.Path
 
-class FileCacheSpec extends FunSuite with Matchers with ScalaFutures with Eventually with IntegrationPatience with BeforeAndAfterEach {
+import scala.language.postfixOps
 
-  val cacheDir = Files.createTempDirectory("FileCacheSpec").toAbsolutePath
-  val cache = new FileCache(cacheDir.toString)
-  def files = Files.list(cacheDir).iterator().asScala.toList
+class FileCacheSpec extends AnyFunSuite with Matchers with Eventually with IntegrationPatience with BeforeAndAfterEach {
+
+  val cacheDir = Files.createTempDirectory("FileCacheSpec")
+  val cache = new FileCache[Int](cacheDir.toString)
+  val files = fs2.io.file.Files[IO].list(Path.fromNioPath(cacheDir)).compile.toList
 
   override def afterEach(): Unit = {
-    val remove = cache.removeAll()
     super.afterEach()
-    remove.futureValue
+    cache.removeAll.unsafeRunSync()
   }
 
   test("remove") {
-    files shouldBe empty
-
-    cache.put("a", 1, None)
-    cache.put("b", 2, None)
-
-    eventually(timeout(1.second)) {
-      files.size shouldBe 2
+    for {
+      initialFiles <- files
+      _ <- cache.put("a")(1, None)
+      _ <- cache.put("b")(2, None)
+      filesAfterPut <- files
+      _ <- cache.remove("c")
+      filesAfterRemoveUnusedKey <- files
+      _ <- cache.remove("b")
+      filesAfterRemoveB <- files
+    } yield {
+      initialFiles shouldBe empty
+      filesAfterPut.size shouldBe 2
+      filesAfterRemoveUnusedKey.size shouldBe 2
+      filesAfterRemoveB.size shouldBe 1
     }
-
-    cache.remove("c").futureValue
-    files.size shouldBe 2
-    cache.remove("b").futureValue
-    files.size shouldBe 1
   }
 
   test("put without ttl") {
-    files shouldBe empty
-    cache.put("someKey", 1, None).futureValue shouldBe (())
-    files.size shouldBe 1
+    for {
+      initialFiles <- files
+      _ <- cache.put("someKey")(1, None)
+      filesAfterPut <- files
+    } yield {
+      initialFiles shouldBe empty
+      filesAfterPut.size shouldBe 1
+    }
   }
 
   test("put with ttl") {
-    files shouldBe empty
-
-    val write = System.currentTimeMillis()
-    cache.put("someKey", 42, Option(300.millis)).futureValue shouldBe (())
-
-    files.size shouldBe 1
-
-    eventually(timeout(1.second)) {
-      files.size shouldBe 0
-      val timeLived = System.currentTimeMillis() - write
-      timeLived shouldBe >(300L)
-      timeLived shouldBe <(600L)
+    for {
+      initialFiles <- files
+      _ <- cache.put("someKey")(42, Option(300.millis))
+      filesAfterPut <- files
+      filesAfterTtlElapsed <- IO.sleep(301.millis) >> files
+    } yield {
+      initialFiles shouldBe empty
+      filesAfterPut.size shouldBe 1
+      filesAfterTtlElapsed shouldBe empty
     }
   }
 
   test("removeAll") {
-    files shouldBe empty
-
-    val inserts = Seq(
-      cache.put("a", 1, None),
-      cache.put("b", 2, None),
-      cache.put("c", 3, None),
-      cache.put("d", 4, None)
-    )
-
-    Future.sequence(inserts).futureValue
-
-    files.size shouldBe 4
-
-    cache.removeAll().futureValue
-
-    files.size shouldBe 0
+    for {
+      initialFiles <- files
+      _ <- cache.put("a")(1, None)
+      _ <- cache.put("b")(2, None)
+      _ <- cache.put("c")(3, None)
+      _ <- cache.put("d")(4, None)
+      filesAfterPuts <- files
+      _ <- cache.removeAll
+      filesAfterRemoveAll <- files
+    } yield {
+      initialFiles shouldBe empty
+      filesAfterPuts.size shouldBe 4
+      filesAfterRemoveAll shouldBe empty
+    }
   }
 
   test("get") {
-    cache.get[Int]("someKey").futureValue shouldBe None
-
-    cache.put("someKey", 42, None).futureValue
-
-    cache.get[Int]("someKey").futureValue shouldBe Some(42)
-    cache.get[String]("someKey").failed.futureValue shouldBe a[Throwable]
+    for {
+      getBeforePut <- cache.get("someKey")
+      _ <- cache.put("someKey")(42, None)
+      getAfterPut <- cache.get("someKey")
+    } yield {
+      getBeforePut shouldBe None
+      getAfterPut shouldBe Some(42)
+    }
   }
 }

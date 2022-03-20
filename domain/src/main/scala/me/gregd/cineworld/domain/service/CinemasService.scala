@@ -2,9 +2,12 @@ package me.gregd.cineworld.domain.service
 
 import me.gregd.cineworld.config.ChainConfig
 import me.gregd.cineworld.domain.model.Cinema
-import monix.eval.Task
+import cats.effect.IO
+import cats.syntax.traverse._
 
-class CinemasService(cineworld: CineworldService, vue: VueService, config: ChainConfig) extends Cinemas[Task] {
+import scala.concurrent.ExecutionContext
+
+class CinemasService(cineworld: CineworldService, vue: VueService, config: ChainConfig) extends Cinemas {
 
   private def cinemasFor(chain: String) = chain match {
     case "vue"       => vue.retrieveCinemas()
@@ -12,6 +15,6 @@ class CinemasService(cineworld: CineworldService, vue: VueService, config: Chain
     case _           => throw new IllegalArgumentException(s"$chain is not a valid cinema chain")
   }
 
-  def getCinemas(): Task[Seq[Cinema]] = Task.traverse(config.enabled)(chain => Task.deferFuture(cinemasFor(chain))).map(_.flatten)
+  def getCinemas: IO[List[Cinema]] = config.enabled.toList.traverse(chain => cinemasFor(chain)).map(_.flatten)
 
 }

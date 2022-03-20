@@ -1,5 +1,7 @@
 package me.gregd.cineworld.integration.omdb
 
+import cats.effect.IO
+import cats.implicits.catsSyntaxApplicativeError
 import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.config.OmdbConfig
 import play.api.libs.json.{JsValue, Json}
@@ -9,14 +11,14 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.Try
-import scalacache.ScalaCache
+import scalacache.Cache
 import scalacache.memoization._
 
-class OmdbIntegrationService(ws: WSClient, implicit val cache: ScalaCache[Array[Byte]], config: OmdbConfig) extends LazyLogging {
+class OmdbIntegrationService(ws: WSClient, implicit val cache: Cache[IO, String, String], config: OmdbConfig) extends LazyLogging with OmdbService {
 
   private implicit val formats = Json.reads[OmdbRatings]
 
-  def fetchRatings(imdbId: String): Future[RatingsResult] = {
+  override def fetchRatings(imdbId: String): IO[RatingsResult] = {
     for {
       body <- curlFromRemote(imdbId)
       json = Json.parse(body)
@@ -33,10 +35,12 @@ class OmdbIntegrationService(ws: WSClient, implicit val cache: ScalaCache[Array[
       RatingsResult(None, None, None, None)
   }
 
-  private def curlFromRemote(id: String): Future[String] = memoize(1.day) {
-    ws.url(s"${config.baseUrl}/?i=$id&apikey=${config.apiKey}")
-      .get()
-      .map(_.body)
+  private def curlFromRemote(id: String): IO[String] = memoizeF(Some(1.day)) {
+    IO.fromFuture(IO(
+      ws.url(s"${config.baseUrl}/?i=$id&apikey=${config.apiKey}")
+        .get()
+        .map(_.body)
+    ))
   }
 
   private def imdbRating(json: JsValue) = (json \ "imdbRating").asOpt[String].flatMap(s => Try(s.toDouble).toOption)

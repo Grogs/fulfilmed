@@ -17,7 +17,7 @@ object DeployPlugin extends AutoPlugin {
     deploy := {
       import scala.sys.process._
 
-      val image = (dockerAlias in Docker).value.versioned
+      val image = (dockerAlias in Docker).value //todo .versioned
       val app = "fulfilmed"
       val instances = (0 to 1).toList
 

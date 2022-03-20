@@ -1,21 +1,20 @@
 package me.gregd.cineworld.domain
 
 import java.time.LocalDate
-
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import me.gregd.cineworld.util.{FixedClock, NoOpCache}
 import me.gregd.cineworld.wiring._
-import monix.execution.Scheduler
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.time.{Millis, Span}
-import org.scalatest.{FunSuite, Matchers}
 import play.api.libs.ws.ahc.AhcWSClient
 import stub.Stubs
 
 import scala.concurrent.duration._
 
-class CinemasServiceTest extends FunSuite with ScalaFutures with Matchers {
+class CinemasServiceTest extends AnyFunSuite with ScalaFutures with Matchers {
 
   implicit val defaultPatienceConfig = PatienceConfig(Span(5000, Millis))
 

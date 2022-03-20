@@ -2,14 +2,16 @@ package me.gregd.cineworld.integration
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
+import cats.effect.unsafe.implicits.global
 import me.gregd.cineworld.domain.model.Coordinates
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 import play.api.libs.ws.ahc.AhcWSClient
 import stub.Stubs
 import util.WSClient
 
-class PostcodeIoIntegrationServiceTest extends FunSuite with ScalaFutures with IntegrationPatience with Matchers with WSClient {
+class PostcodeIoIntegrationServiceTest extends AnyFunSuite with ScalaFutures with IntegrationPatience with Matchers with WSClient {
 
   val postcodeService = new PostcodeIoIntegrationService(Stubs.postcodesio.config, wsClient)
 
@@ -25,7 +27,7 @@ class PostcodeIoIntegrationServiceTest extends FunSuite with ScalaFutures with I
       "GU11 1WG" -> Coordinates(51.2496276978637, -0.76918738639163)
     )
 
-    postcodeService.lookup(examplePostcodes).futureValue shouldBe expected
+    postcodeService.lookup(examplePostcodes).unsafeRunSync() shouldBe expected
   }
 
 }

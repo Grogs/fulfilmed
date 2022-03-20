@@ -1,7 +1,8 @@
 package me.gregd.cineworld.domain.service
 
-import java.time.LocalDate
+import cats.effect.IO
 
+import java.time.LocalDate
 import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.domain.model.{Cinema, Film, Performance}
 import me.gregd.cineworld.domain.transformer.CineworldTransformer
@@ -16,7 +17,7 @@ class CineworldService(
     postcodeService: PostcodeIoIntegrationService
 ) extends LazyLogging {
 
-  def retrieveCinemas(): Future[Seq[Cinema]] = {
+  def retrieveCinemas(): IO[List[Cinema]] = {
 
     logger.info("Retrieving Cineworld cinemas")
 
@@ -30,7 +31,7 @@ class CineworldService(
     }
   }
 
-  def retrieveMoviesAndPerformances(cinemaId: String, date: LocalDate): Future[Map[Film, Seq[Performance]]] = {
+  def retrieveMoviesAndPerformances(cinemaId: String, date: LocalDate): IO[Map[Film, List[Performance]]] = {
 
     underlying.retrieveListings(cinemaId, date).map { listingsBody =>
       logger.debug(s"Retrieving listings for $cinemaId:$date")

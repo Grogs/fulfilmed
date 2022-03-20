@@ -1,7 +1,11 @@
 package me.gregd.cineworld.config
 
 import eu.timepit.refined.pureconfig.refTypeConfigConvert
+import pureconfig.ConfigSource
 import pureconfig.error.ConfigReaderFailures
+import pureconfig.generic.auto._
+import pureconfig.generic._
+import pureconfig._
 
 case class Config(omdb: OmdbConfig,
                   tmdb: TmdbConfig,
@@ -13,5 +17,5 @@ case class Config(omdb: OmdbConfig,
                   chains: ChainConfig)
 
 object Config {
-  def load(): Either[ConfigReaderFailures, Config] = pureconfig.loadConfig[Config]
+  def load(): Either[ConfigReaderFailures, Config] = ConfigSource.default.load[Config]
 }

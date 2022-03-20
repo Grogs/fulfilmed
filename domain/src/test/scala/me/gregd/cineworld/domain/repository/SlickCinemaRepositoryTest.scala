@@ -1,32 +1,35 @@
 package me.gregd.cineworld.domain.repository
 
+import cats.effect.IO
+import cats.effect.unsafe.implicits.global
 import docker.DockerPostgresService
 import me.gregd.cineworld.domain.model.{Cinema, Coordinates}
 import me.gregd.cineworld.wiring.DatabaseInitialisation
-import monix.eval.Task
-import monix.execution.Scheduler
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.duration.Duration
 
 class SlickCinemaRepositoryTest
-    extends FunSuite
+    extends AnyFunSuite
     with ScalaFutures
     with IntegrationPatience
     with Matchers {
 
   val postgres = DockerPostgresService.container.map(c => Database.forURL(c.jdbcUrl, c.username, c.password))
 
+  val _ = Class.forName("org.postgresql.Driver")
+
   test("persist and fetch") {
     postgres
       .use { db =>
-        Task {
+        IO {
 
           db.run(DatabaseInitialisation.createCinemas).futureValue
 
-          val repo = new SlickCinemaRepository[Task](db)
+          val repo = new SlickCinemaRepository(db)
 
           val input = List(
             Cinema("1", "cineworld", "Blah", None),
@@ -39,6 +42,6 @@ class SlickCinemaRepositoryTest
           } yield input shouldEqual output
         }
       }
-      .runSyncUnsafe(Duration.Inf)(Scheduler.global, implicitly)
+      .unsafeRunSync()
   }
 }

@@ -3,8 +3,8 @@ package me.gregd.cineworld.web
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.{Decoder, HCursor, parser}
 import me.gregd.cineworld.domain.service._
-import monix.eval.Task
-import monix.execution.Scheduler
+import cats.effect.IO
+import cats.effect.unsafe.implicits.global
 import play.api.Environment
 import play.api.Mode._
 import play.api.mvc.{AbstractController, ControllerComponents, Result}
@@ -17,7 +17,7 @@ import scala.concurrent.Future
 import scala.io.Source
 import io.circe.generic.auto._
 
-class CinemaController(env: Environment, cinemaService: Cinemas[Task], listingsService: ListingsService[Task], nearbyCinemasService: NearbyCinemas[Task], cc: ControllerComponents)
+class CinemaController(env: Environment, cinemaService: Cinemas, listingsService: DefaultListingsService, nearbyCinemasService: NearbyCinemas, cc: ControllerComponents)
     extends AbstractController(cc)
     with LazyLogging {
 
@@ -28,16 +28,16 @@ class CinemaController(env: Environment, cinemaService: Cinemas[Task], listingsS
     })
   )
 
-  val router = Router[String, Task]
-    .route[Cinemas[Task]](cinemaService)
-    .route[Listings[Task]](listingsService)
-    .route[NearbyCinemas[Task]](nearbyCinemasService)
+  val router = Router[String, IO]
+    .route[Cinemas](cinemaService)
+    .route[ListingsService](listingsService)
+    .route[NearbyCinemas](nearbyCinemasService)
 
   def api(pathRaw: String) = Action.async { implicit request =>
     logger.debug(s"API request: $pathRaw")
     val path = pathRaw.split("/").toList
 
-    val res: Either[Result, Task[Result]] =
+    val res: Either[Result, IO[Result]] =
       for {
         body <- request.body.asText.toRight(BadRequest("Empty request body"))
         req = Request(path, body)
@@ -51,7 +51,7 @@ class CinemaController(env: Environment, cinemaService: Cinemas[Task], listingsS
 
     res.fold(
       error => Future.successful(error),
-      respTask => respTask.runToFuture(Scheduler.global)
+      respTask => respTask.unsafeToFuture()
     )
   }
 

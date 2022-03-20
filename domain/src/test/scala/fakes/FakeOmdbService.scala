@@ -1,5 +1,6 @@
 package fakes
 
+import cats.effect.IO
 import me.gregd.cineworld.integration.omdb.{OmdbIntegrationService, RatingsResult}
 
 import scala.concurrent.Future
@@ -7,7 +8,7 @@ import eu.timepit.refined.auto._
 import me.gregd.cineworld.util.NoOpCache
 import me.gregd.cineworld.config.OmdbConfig
 
-object FakeOmdbService extends OmdbIntegrationService(null, NoOpCache.cache, OmdbConfig("http://dummy","")) {
+object FakeOmdbService extends OmdbIntegrationService(null, new NoOpCache, OmdbConfig("http://dummy","")) {
 
   val someRatingAndVotes = RatingsResult(Some(6.9), Some(1337), None, None)
 
@@ -19,7 +20,7 @@ object FakeOmdbService extends OmdbIntegrationService(null, NoOpCache.cache, Omd
     "tt7777777" -> someRatingAndVotes
   ).withDefaultValue(RatingsResult(None, None, None, None))
 
-  override def fetchRatings(imdbId: String): Future[RatingsResult] = {
-    Future.successful(entries(imdbId))
+  override def fetchRatings(imdbId: String): IO[RatingsResult] = {
+    IO.pure(entries(imdbId))
   }
 }

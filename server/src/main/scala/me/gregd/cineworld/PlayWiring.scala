@@ -1,12 +1,13 @@
 package me.gregd.cineworld
 
+import cats.effect.IO
+import cats.effect.unsafe.implicits.global
 import com.softwaremill.macwire.wire
 import com.typesafe.scalalogging.LazyLogging
 import me.gregd.cineworld.config.Config
 import me.gregd.cineworld.util._
 import me.gregd.cineworld.web.{CinemaController, DebugController}
 import me.gregd.cineworld.wiring.{CacheWiring, Wiring}
-import monix.eval.Task
 import play.api.ApplicationLoader.Context
 import play.api.BuiltInComponentsFromContext
 import play.api.libs.ws.ahc.AhcWSComponents
@@ -44,9 +45,9 @@ class PlayWiring(context: Context)
 
     val cache = new CacheWiring(mode).cache
 
-    val wiring = wire[Wiring[Task]]
+    val wiring = wire[Wiring]
 
-    Await.result(wiring.initialise(), Duration.Inf)
+    wiring.initialise().unsafeRunSync()
 
     val inMemoryLog = InMemoryLog
 

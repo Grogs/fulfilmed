@@ -1,22 +1,28 @@
-import me.gregd.cineworld.frontend.util.{History, Route, Router, Switch}
-import me.gregd.cineworld.frontend.components.{IndexPage, FilmsPage}
-import org.scalajs.dom.document
+import cats.effect.{IO, IOApp}
+import slinky.reactrouter._
+import slinky.web.html._
+import me.gregd.cineworld.frontend.components.{FilmsPage, IndexPage}
+import org.scalajs.dom.{document, window}
+import slinky.core.ReactComponentClass
 import slinky.web.ReactDOM
+import slinky.history.History
 
-object Main {
+object Main extends IOApp.Simple {
 
-  def main(args: Array[String]): Unit = {
+  def run: IO[Unit] = {
 
-    ReactDOM.render(
-      Router(History.createBrowserHistory())(
-        Switch(
-          Route("/", IndexPage, exact = Some(true)),
-          Route("/index", IndexPage, exact = Some(true)),
-          Route("/films/:cinemaId/:date", FilmsPage, exact = Some(true)),
-        )
-      ),
-      document.getElementById("content")
-    )
+    IO{
+      ReactDOM.render(
+        Router(History.createBrowserHistory())(
+          Switch(
+            Route("/", IndexPage, exact = true),
+            Route("/index", IndexPage, exact = true),
+            Route("/films/:cinemaId/:date", FilmsPage, exact = true),
+          )
+        ),
+        document.getElementById("content")
+      )
+    } >> IO.never
 
   }
 

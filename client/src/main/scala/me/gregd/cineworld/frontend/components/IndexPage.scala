@@ -1,5 +1,7 @@
 package me.gregd.cineworld.frontend.components
 
+import cats.effect.IO
+import cats.effect.unsafe.IORuntime
 import me.gregd.cineworld.frontend.services.Geolocation
 import me.gregd.cineworld.frontend.Client
 import me.gregd.cineworld.frontend.styles.IndexStyle
@@ -8,12 +10,13 @@ import slinky.core._
 import slinky.core.annotations.react
 import slinky.web.html._
 import me.gregd.cineworld.domain.model.Cinema
-import me.gregd.cineworld.frontend.util.{Loadable, Redirect, RouteProps}
+import me.gregd.cineworld.frontend.util.Loadable
 import me.gregd.cineworld.frontend.util.Loadable.{Loaded, Loading, Unloaded}
 import org.scalajs.dom.html.Select
 import slinky.core.facade.ReactElement
 import slinky.core.SyntheticEvent
 import io.circe.generic.auto._
+import slinky.reactrouter.Redirect
 
 import scala.scalajs.js.Dynamic
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -21,7 +24,7 @@ import scala.concurrent.Future
 
 @react class IndexPage extends Component {
 
-  type Props = RouteProps
+  type Props = Unit
 
   case class State(allCinemas: Loadable[Map[String, Map[String, Seq[Cinema]]]],
                    nearbyCinemas: Loadable[Seq[Cinema]],
@@ -32,7 +35,7 @@ import scala.concurrent.Future
   override def componentDidMount(): Unit = {
     Geolocation
       .havePermission()
-      .foreach(permissionGranted => loadNearbyCinemas())
+      .foreach(permissionGranted => loadNearbyCinemas().unsafeRunAndForget()(IORuntime.global))
 
     loadAllCinemas()
   }
@@ -43,19 +46,20 @@ import scala.concurrent.Future
       else "All other cinemas"
 
     def group(cinemas: Seq[Cinema]) =
-      cinemas.groupBy(_.chain).mapValues(_.groupBy(isLondon))
+      cinemas.groupBy(_.chain).view.mapValues(_.groupBy(isLondon)).toMap
 
     for {
-      cinemas <- Client.cinemas.getCinemas()
+      cinemas <- Client.cinemas.getCinemas
     } yield setState(_.copy(allCinemas = Loaded(group(cinemas))))
   }
 
-  def loadNearbyCinemas(): Future[Unit] = {
-    setState(_.copy(nearbyCinemas = Loading))
+  def loadNearbyCinemas(): IO[Unit] = {
     for {
-      userLocation <- Geolocation.getCurrentPosition()
+      _ <- IO(setState(_.copy(nearbyCinemas = Loading)))
+      userLocation <- IO.fromFuture(IO(Geolocation.getCurrentPosition()))
       nearbyCinemas <- Client.nearbyCinemas.getNearbyCinemas(userLocation)
-    } yield setState(_.copy(nearbyCinemas = Loaded(nearbyCinemas)))
+      _ <- IO(setState(_.copy(nearbyCinemas = Loaded(nearbyCinemas))))
+    } yield ()
   }
 
   def render() = {
@@ -96,7 +100,7 @@ import scala.concurrent.Future
       case Unloaded =>
         button(
           className := IndexStyle.btn,
-          onClick := (() => loadNearbyCinemas())
+          onClick := (() => loadNearbyCinemas().unsafeRunAndForget()(IORuntime.global))
         )("Load Nearby Cinemas")
       case Loading =>
         val spinnerStyle =
@@ -120,7 +124,7 @@ import scala.concurrent.Future
 
     state.redirect match {
       case Some(cinemaId) =>
-        Redirect(s"/films/$cinemaId/today", push = Some(true))
+        Redirect(s"/films/$cinemaId/today", push = true)
       case None =>
         div(id := "indexPage")(
           div(className := IndexStyle.top)(

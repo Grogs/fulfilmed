@@ -22,6 +22,7 @@ import eu.timepit.refined._
 import eu.timepit.refined.string.Url
 
 import scala.io.Codec.UTF8
+import scala.language.postfixOps
 
 object Stubs {
 
@@ -51,6 +52,9 @@ object Stubs {
   }
 
   private lazy val serverBase = refineV[Url](s"http://127.0.0.1:${server.localAddress.getPort}").right.get
+
+
+  private lazy val http4sServerBase = refineV[Url](s"http://127.0.0.1:${server.localAddress.getPort}")
 
   object tmdb {
 

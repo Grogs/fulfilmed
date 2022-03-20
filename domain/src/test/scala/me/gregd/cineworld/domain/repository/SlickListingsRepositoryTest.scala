@@ -1,15 +1,17 @@
 package me.gregd.cineworld.domain.repository
 
-import java.time.LocalDate
+import cats.effect.IO
+import cats.effect.unsafe.implicits.global
 
+import java.time.LocalDate
 import docker.DockerPostgresService
 import me.gregd.cineworld.config._
-import me.gregd.cineworld.domain.model.{Movie, Performance}
+import me.gregd.cineworld.domain.model.{Movie, MovieListing, Performance}
 import me.gregd.cineworld.wiring.DatabaseInitialisation
-import monix.eval.Task
-import monix.execution.Scheduler.Implicits.global
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.{AsyncFunSuite, Matchers, ParallelTestExecution}
+import org.scalatest.ParallelTestExecution
+import org.scalatest.funsuite.AsyncFunSuite
+import org.scalatest.matchers.should.Matchers
 import slick.jdbc.PostgresProfile
 import slick.jdbc.PostgresProfile.api._
 
@@ -25,7 +27,7 @@ class SlickListingsRepositoryTest
   val postgres = DockerPostgresService.container.map(c => Database.forURL(c.jdbcUrl, c.username, c.password))
 
   val exampleMovies = Seq(
-    Movie(
+MovieListing(    Movie(
       "Duck Duck Goose",
       Some("ho00005039"),
       None,
@@ -38,7 +40,7 @@ class SlickListingsRepositoryTest
       Some("blah.jpg"),
       None,
       None
-    ) -> List(
+    ), List(
       Performance(
         "10:40",
         available = true,
@@ -61,7 +63,7 @@ class SlickListingsRepositoryTest
         Some("2018-04-12")
       )
     )
-  )
+)  )
 
   test("persist") {
     postgres.use { db =>
@@ -70,7 +72,7 @@ class SlickListingsRepositoryTest
       for {
         _ <- repo.persist("test", LocalDate.now())(exampleMovies)
       } yield succeed
-    }.runToFuture
+    }.unsafeToFuture()
   }
 
   test("fetch") {
@@ -81,7 +83,7 @@ class SlickListingsRepositoryTest
         _ <- repo.persist("test", LocalDate.now())(exampleMovies)
         output <- repo.fetch("test", LocalDate.now())
       } yield exampleMovies shouldEqual output
-    }.runToFuture
+    }.unsafeToFuture()
   }
 
   def freshRepository(db: PostgresProfile.backend.DatabaseDef) = {
@@ -89,6 +91,6 @@ class SlickListingsRepositoryTest
       "listings_" + Random.alphanumeric.take(6).mkString
     )
     db.run(DatabaseInitialisation.createListings(tableName)).futureValue
-    new SlickListingsRepository[Task](db, tableName)
+    new SlickListingsRepository(db, tableName)
   }
 }

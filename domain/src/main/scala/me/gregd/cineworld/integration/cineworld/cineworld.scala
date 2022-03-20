@@ -9,7 +9,7 @@ package object cineworld {
     }
   }
 
-  case class RawEvent(id: String, filmId: String, cinemaId: String, businessDay: String, eventDateTime: String, attributeIds: Seq[String], bookingLink: String, soldOut: Boolean)
-  case class RawFilm(id: String, name: String, posterLink: String, link: String, attributeIds: Seq[String])
-  case class ListingsBody(films: Seq[RawFilm], events: Seq[RawEvent])
+  case class RawEvent(id: String, filmId: String, cinemaId: String, businessDay: String, eventDateTime: String, attributeIds: List[String], bookingLink: String, soldOut: Boolean)
+  case class RawFilm(id: String, name: String, posterLink: String, link: String, attributeIds: List[String])
+  case class ListingsBody(films: List[RawFilm], events: List[RawEvent])
 }

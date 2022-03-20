@@ -7,9 +7,9 @@ import me.gregd.cineworld.domain.service._
 import me.gregd.cineworld.util._
 
 @Module
-class DomainServiceWiring[F[_]: Async](clock: Clock,
+class DomainServiceWiring(clock: Clock,
                                        integrationWiring: IntegrationWiring,
-                                       repositoryWiring: DomainRepositoryWiring[F],
+                                       repositoryWiring: DomainRepositoryWiring,
                                        chainConfig: ChainConfig,
                                        moviesConfig: MoviesConfig) {
 
@@ -21,10 +21,10 @@ class DomainServiceWiring[F[_]: Async](clock: Clock,
 
   lazy val cinemaService: CinemasService = wire[CinemasService]
 
-  lazy val nearbyCinemasService: NearbyCinemasService[F] = wire[NearbyCinemasService[F]]
+  lazy val nearbyCinemasService: NearbyCinemasService = wire[NearbyCinemasService]
 
   lazy val listingService: CompositeListingService = wire[CompositeListingService]
 
-  lazy val defaultListingsService = wire[ListingsService[F]]
+  lazy val defaultListingsService = wire[DefaultListingsService]
 
 }

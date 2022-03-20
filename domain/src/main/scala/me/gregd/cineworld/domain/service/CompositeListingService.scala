@@ -1,35 +1,27 @@
 package me.gregd.cineworld.domain.service
 
-import java.time.LocalDate
+import cats.effect.IO
+import cats.implicits.catsSyntaxApplicativeError
 
-import me.gregd.cineworld.domain.model.{Movie, Performance}
+import java.time.LocalDate
+import me.gregd.cineworld.domain.model.{Listings, Movie, MovieListing, Performance}
 import me.gregd.cineworld.util.Clock
-import monix.eval.Task
+import cats.syntax.monadError._
+import cats.syntax.traverse._
 
 class CompositeListingService(movieDao: MovieService, cineworld: CineworldService, vue: VueService, clock: Clock) {
 
-  def getMoviesAndPerformances(cinemaId: String, date: LocalDate): Task[Seq[(Movie, Seq[Performance])]] = {
+  def getMoviesAndPerformances(cinemaId: String, date: LocalDate): IO[Listings] = {
     //Relying on IDs not conflicting
-    val cineworldResults = Task.deferFuture(
-      cineworld.retrieveMoviesAndPerformances(cinemaId, date)
-    )
-
-    val vueResults = Task.deferFuture(
-      vue.retrieveMoviesAndPerformances(cinemaId, date)
-    )
-
-    (cineworldResults onErrorFallbackTo vueResults).flatMap(
-      res =>
-        Task
-          .traverse(res) {
-            case (film, performances) =>
-              Task
-                .deferFuture(
-                  movieDao.toMovie(film)
-                )
-                .map(_ -> performances)
-          }
-          .map(_.toSeq))
+    val cineworldResults = cineworld.retrieveMoviesAndPerformances(cinemaId, date)
+    val vueResults       = vue.retrieveMoviesAndPerformances(cinemaId, date)
+    import cats.implicits._
+    (cineworldResults orElse vueResults)
+      .flatMap(
+        _.toList.traverse {
+          case (film, performances) => movieDao.toMovie(film).map(MovieListing(_, performances))
+        }
+      ).map(Listings(cinemaId, date, _))
   }
 
 }

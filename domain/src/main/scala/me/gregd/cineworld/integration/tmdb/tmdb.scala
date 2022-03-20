@@ -3,7 +3,7 @@ package me.gregd.cineworld.integration
 import play.api.libs.json.Json
 
 package object tmdb {
-  case class ImdbIdAndAltTitles(imdbId: Option[String], alternateTitles: List[String])
+  case class ImdbIdAndAltTitles(imdbId: Option[String], alternateTitles: Vector[String])
 
   import play.api.libs.json.OFormat
 

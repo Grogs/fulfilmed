@@ -1,9 +1,10 @@
 package me.gregd.cineworld.domain.repository
+import cats.effect.IO
 import me.gregd.cineworld.domain.model.Cinema
 
-trait CinemaRepository[F[_]] {
+trait CinemaRepository {
 
-  def fetchAll(): F[Seq[Cinema]]
+  def fetchAll(): IO[Seq[Cinema]]
 
-  def persist(cinemas: Seq[Cinema]): F[Unit]
+  def persist(cinemas: Seq[Cinema]): IO[Unit]
 }

@@ -3,8 +3,11 @@ import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 lazy val commonSettings = Seq(
   organization := "com.fulfilmed",
   git.baseVersion := "1.8",
-  scalaVersion := "2.13.15",
-  Test / testOptions += Tests.Argument("-oT")
+  scalaVersion := "3.3.7",
+  Test / testOptions += Tests.Argument("-oT"),
+  scalacOptions ++= Seq(
+    "-Ykind-projector"  // Enable kind-projector syntax in Scala 3
+  )
 )
 
 run := {
@@ -52,8 +55,7 @@ lazy val client = project.enablePlugins(ScalaJSBundlerPlugin, ScalaJSWeb, GitVer
   ),
   fullOptJS / webpackEmitSourceMaps := true,
   Compile / doc / sources := Seq.empty,
-  Compile / packageDoc / publishArtifact := false,
-  scalacOptions += "-Ymacro-annotations"
+  Compile / packageDoc / publishArtifact := false
 ).dependsOn(sharedJs)
 
 lazy val domain = project.settings(

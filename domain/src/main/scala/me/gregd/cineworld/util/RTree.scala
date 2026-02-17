@@ -6,7 +6,7 @@ import com.github.davidmoten.rtree2.internal.EntryDefault
 import com.github.davidmoten.rtree2.{RTree => UnderlyingRTree}
 import me.gregd.cineworld.domain.model.Coordinates
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.{Future, Promise}
 import cats.syntax.functor._
 

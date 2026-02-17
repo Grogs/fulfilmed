@@ -12,7 +12,6 @@ import java.nio.channels.{AsynchronousFileChannel, CompletionHandler, FileLock}
 import java.nio.file.StandardOpenOption.{CREATE, READ, WRITE}
 import java.nio.file._
 import java.util.concurrent.{Executors, TimeUnit}
-import scala.compat.java8.FunctionConverters.asJavaConsumer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.concurrent.{ExecutionContext, Future, Promise}

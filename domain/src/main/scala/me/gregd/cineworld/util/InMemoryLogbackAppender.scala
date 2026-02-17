@@ -6,7 +6,7 @@ import ch.qos.logback.core.AppenderBase
 import enumeratum._
 import org.slf4j.LoggerFactory
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 case class LogEntry(level: Level, logger: String, thread: String, message: String, stacktrace: Seq[StackFrame])
 

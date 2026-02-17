@@ -3,8 +3,11 @@ import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 lazy val commonSettings = Seq(
   organization := "com.fulfilmed",
   git.baseVersion := "1.8",
-  scalaVersion := "2.13.8",
-  Test / testOptions += Tests.Argument("-oT")
+  scalaVersion := "3.8.1",
+  Test / testOptions += Tests.Argument("-oT"),
+  scalacOptions ++= Seq(
+    "-Ykind-projector"  // Enable kind-projector syntax in Scala 3
+  )
 )
 
 run := {
@@ -21,8 +24,9 @@ Docker/publish := {
   (ingestor/Docker/publish).value
 }
 
-val testcontainersScalaVersion = "0.39.12"
-val http4sVersion = "0.23.10"
+val testcontainersScalaVersion = "0.41.4"
+val http4sVersion = "0.23.28"
+val catsEffectVersion = "3.6.3"
 
 lazy val client = project.enablePlugins(ScalaJSBundlerPlugin, ScalaJSWeb, GitVersioning).settings(
   commonSettings,
@@ -33,15 +37,15 @@ lazy val client = project.enablePlugins(ScalaJSBundlerPlugin, ScalaJSWeb, GitVer
   Test / scalaJSStage := FastOptStage,
   resolvers += "jitpack" at "https://jitpack.io",
   libraryDependencies ++= Seq(
-    "org.scala-js" %%% "scalajs-dom" % "2.0.0",
-    "me.shadaj" %%% "slinky-core" % "0.7.0",                 // core React functionality, no React DOM
-    "me.shadaj" %%% "slinky-web" % "0.7.0",                  // React DOM, HTML and SVG tags
-    "me.shadaj" %%% "slinky-hot" % "0.7.0",                  // Hot loading, requires react-proxy package
-    "me.shadaj" %%% "slinky-react-router" % "0.7.0",
-    "com.github.cornerman.sloth" %%% "sloth" % "0.6.0",
+    "org.scala-js" %%% "scalajs-dom" % "2.8.0",
+    "me.shadaj" %%% "slinky-core" % "0.7.4",                 // core React functionality, no React DOM
+    "me.shadaj" %%% "slinky-web" % "0.7.4",                  // React DOM, HTML and SVG tags
+    "me.shadaj" %%% "slinky-hot" % "0.7.4",                  // Hot loading, requires react-proxy package
+    "me.shadaj" %%% "slinky-react-router" % "0.7.4",
+    "com.github.cornerman.sloth" %%% "sloth" % "0.7.2",
     "com.lihaoyi" %%% "autowire" % "0.3.3",
-    "com.lihaoyi" %%% "scalatags" % "0.11.1",
-    "io.github.cquiroz" %%% "scala-java-time" % "2.2.2",
+    "com.lihaoyi" %%% "scalatags" % "0.13.1",
+    "io.github.cquiroz" %%% "scala-java-time" % "2.6.0",
   ),
   Compile / npmDependencies ++= Seq(
     "react" -> "16.2.0",
@@ -52,51 +56,48 @@ lazy val client = project.enablePlugins(ScalaJSBundlerPlugin, ScalaJSWeb, GitVer
   ),
   fullOptJS / webpackEmitSourceMaps := true,
   Compile / doc / sources := Seq.empty,
-  Compile / packageDoc / publishArtifact := false,
-  scalacOptions += "-Ymacro-annotations"
+  Compile / packageDoc / publishArtifact := false
 ).dependsOn(sharedJs)
 
 lazy val domain = project.settings(
   commonSettings,
   name := "domain",
   resolvers += Resolver.jcenterRepo,
-  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"),
   libraryDependencies ++= Seq(
     playCore,
     ws,
-    "info.debatty" % "java-string-similarity" % "1.0.1",
+    "info.debatty" % "java-string-similarity" % "2.0.0",
     "com.google.code.findbugs" % "jsr305" % "3.0.2",
-    "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
-    "ch.qos.logback" % "logback-classic" % "1.2.3",
-    "com.lihaoyi" %% "scalatags" % "0.11.1",
-    "org.typelevel" %% "cats-core" % "2.7.0",
-    "org.typelevel" %% "log4cats-slf4j" % "2.2.0",
-    "ch.qos.logback" % "logback-classic" % "1.2.3",
-    "com.vmunier" %% "scalajs-scripts" % "1.2.0",
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
+    "ch.qos.logback" % "logback-classic" % "1.5.12",
+    "com.lihaoyi" %% "scalatags" % "0.13.1",
+    "org.typelevel" %% "cats-core" % "2.12.0",
+    "org.typelevel" %% "log4cats-slf4j" % "2.7.0",
+    "com.vmunier" %% "scalajs-scripts" % "1.3.0",
     "com.github.cb372" %% "scalacache-caffeine" % "1.0.0-M6",
-    "com.github.davidmoten" % "rtree2" % "0.9.1",
-    "com.github.pureconfig" %% "pureconfig" % "0.17.1",
-    "com.github.pureconfig" %% "pureconfig-enumeratum" % "0.17.1",
-    "eu.timepit" %% "refined" % "0.9.28",
-    "eu.timepit" %% "refined-pureconfig" % "0.9.28",
-    "com.beachape" %% "enumeratum" % "1.7.0",
-    "com.softwaremill.macwire" %% "macros" % "2.5.6",
-    "com.softwaremill.macwire" %% "util" % "2.5.6",
-    "com.github.pathikrit" %% "better-files" % "3.9.1",
-    "com.typesafe.slick" %% "slick" % "3.3.3",
-    "com.typesafe.slick" %% "slick-hikaricp" % "3.3.3",
-    "io.github.nafg.slick-migration-api" %% "slick-migration-api" % "0.8.2",
-    "org.postgresql" % "postgresql" % "42.2.4",
-    "org.xerial" % "sqlite-jdbc" % "3.23.1",
-    "org.flywaydb" % "flyway-core" % "5.1.4",
-    "com.github.cb372" %% "cats-retry" % "3.1.0",
+    "com.github.davidmoten" % "rtree2" % "0.9.3",
+    "com.github.pureconfig" %% "pureconfig" % "0.17.8",
+    "com.github.pureconfig" %% "pureconfig-enumeratum" % "0.17.8",
+    "eu.timepit" %% "refined" % "0.11.2",
+    "eu.timepit" %% "refined-pureconfig" % "0.11.2",
+    "com.beachape" %% "enumeratum" % "1.7.5",
+    "com.softwaremill.macwire" %% "macros" % "2.5.9",
+    "com.softwaremill.macwire" %% "util" % "2.5.9",
+    "com.github.pathikrit" %% "better-files" % "3.9.2",
+    "com.typesafe.slick" %% "slick" % "3.5.2",
+    "com.typesafe.slick" %% "slick-hikaricp" % "3.5.2",
+    "io.github.nafg.slick-migration-api" %% "slick-migration-api" % "0.10.0",
+    "org.postgresql" % "postgresql" % "42.7.4",
+    "org.xerial" % "sqlite-jdbc" % "3.47.1.0",
+    "org.flywaydb" % "flyway-core" % "11.0.1",
+    "com.github.cb372" %% "cats-retry" % "3.1.3",
     "org.systemfw" %% "upperbound" % "0.4.0-M2",
-    "co.fs2" %% "fs2-io" % "3.2.5",
-    "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
-    "org.scalatest" %% "scalatest" % "3.1.4" % Test,
-    "com.lihaoyi" %% "pprint" % "0.7.2" % Test,
-    "org.scalamock" %% "scalamock" % "5.2.0" % Test,
-    "com.typesafe.akka" %% "akka-http" % "10.2.9" % Test,
+    "co.fs2" %% "fs2-io" % "3.11.0",
+    "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.1" % Test,
+    "org.scalatest" %% "scalatest" % "3.2.19" % Test,
+    "com.lihaoyi" %% "pprint" % "0.9.0" % Test,
+    "org.scalamock" %% "scalamock" % "6.0.0" % Test,
+    "org.apache.pekko" %% "pekko-http" % "1.1.0" % Test,
     "com.dimafeng" %% "testcontainers-scala-postgresql" % testcontainersScalaVersion % Test,
     "com.dimafeng" %% "testcontainers-scala-scalatest" % testcontainersScalaVersion % Test,
   )
@@ -116,16 +117,15 @@ lazy val server = project.settings(
   Assets / WebKeys.packagePrefix := "public/",
   resolvers += Resolver.jcenterRepo,
   resolvers += "jitpack" at "https://jitpack.io",
-  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"),
   libraryDependencies ++= Seq(
     "com.google.code.findbugs" % "jsr305" % "3.0.2",
-    "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
-    "ch.qos.logback" % "logback-classic" % "1.2.3",
-    "com.vmunier" %% "scalajs-scripts" % "1.2.0",
-    "com.softwaremill.macwire" %% "macros" % "2.3.3",
-    "com.softwaremill.macwire" %% "util" % "2.3.3",
-    "com.github.cornerman.sloth" %%% "sloth" % "0.4.0",
-    "com.lihaoyi" %%% "scalatags" % "0.11.1",
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
+    "ch.qos.logback" % "logback-classic" % "1.5.12",
+    "com.vmunier" %% "scalajs-scripts" % "1.3.0",
+    "com.softwaremill.macwire" %% "macros" % "2.5.9",
+    "com.softwaremill.macwire" %% "util" % "2.5.9",
+    "com.github.cornerman.sloth" %%% "sloth" % "0.7.2",
+    "com.lihaoyi" %%% "scalatags" % "0.13.1",
     "com.lihaoyi" %%% "autowire" % "0.3.3",
     "org.http4s" %% "http4s-blaze-client" % http4sVersion,
     "org.http4s" %% "http4s-blaze-server" % http4sVersion,
@@ -135,8 +135,12 @@ lazy val server = project.settings(
     filters,
   ),
   libraryDependencies ++= Seq(
-    "org.webjars" %% "webjars-play" % "2.8.13",
+    "org.webjars" %% "webjars-play" % "3.0.1",
     "org.webjars.npm" % "font-awesome" % "4.7.0",
+  ),
+  libraryDependencies ++= Seq(
+    "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.1" % Test,
+    "org.scalatest" %% "scalatest" % "3.2.19" % Test,
   ),
   Compile / compile := ((Compile / compile) dependsOn scalaJSPipeline).value,
   routesGenerator := InjectedRoutesGenerator
@@ -152,21 +156,20 @@ lazy val ingestor = project.settings(
   dockerRepository := Some("grogs"),
   libraryDependencies ++= Seq(
     "com.google.code.findbugs" % "jsr305" % "3.0.2",
-    "com.softwaremill.macwire" %% "macros" % "2.5.6",
-    "com.softwaremill.macwire" %% "util" % "2.5.6",
+    "com.softwaremill.macwire" %% "macros" % "2.5.9",
+    "com.softwaremill.macwire" %% "util" % "2.5.9",
     ws,
-    "org.scalatest" %% "scalatest" % "3.1.4" % Test,
-  ),
-  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3")
+    "org.scalatest" %% "scalatest" % "3.2.19" % Test,
+  )
 ).enablePlugins(GitVersioning, DeployPlugin, JavaAppPackaging).dependsOn(domain).configs(IntegrationTest)
 
 
 lazy val shared = crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure).settings(
   libraryDependencies ++= Seq(
-    "io.circe" %%% "circe-core" % "0.14.1",
-    "io.circe" %%% "circe-generic" % "0.14.1",
-    "io.circe" %%% "circe-parser" % "0.14.1",
-    "org.typelevel" %%% "cats-effect" % "3.3.5",
+    "io.circe" %%% "circe-core" % "0.14.10",
+    "io.circe" %%% "circe-generic" % "0.14.10",
+    "io.circe" %%% "circe-parser" % "0.14.10",
+    "org.typelevel" %%% "cats-effect" % catsEffectVersion,
   ),
   commonSettings,
 ).jsConfigure(_ enablePlugins ScalaJSWeb).enablePlugins(GitVersioning)

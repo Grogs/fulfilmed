@@ -1,12 +1,12 @@
-name: CI
+name: Pull Request CI
 
 on:
-  push:
+  pull_request:
     branches:
       - master
 
 jobs:
-  build:
+  test:
 
     runs-on: ubuntu-latest
 
@@ -18,5 +18,5 @@ jobs:
       with:
         distribution: 'temurin'
         java-version: 21
-    - name: Test
+    - name: Run tests
       run: sbt test

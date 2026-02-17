@@ -3,7 +3,7 @@ import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 lazy val commonSettings = Seq(
   organization := "com.fulfilmed",
   git.baseVersion := "1.8",
-  scalaVersion := "3.3.7",
+  scalaVersion := "3.8.1",
   Test / testOptions += Tests.Argument("-oT"),
   scalacOptions ++= Seq(
     "-Ykind-projector"  // Enable kind-projector syntax in Scala 3
@@ -26,6 +26,7 @@ Docker/publish := {
 
 val testcontainersScalaVersion = "0.41.4"
 val http4sVersion = "0.23.28"
+val catsEffectVersion = "3.6.3"
 
 lazy val client = project.enablePlugins(ScalaJSBundlerPlugin, ScalaJSWeb, GitVersioning).settings(
   commonSettings,
@@ -137,6 +138,10 @@ lazy val server = project.settings(
     "org.webjars" %% "webjars-play" % "3.0.1",
     "org.webjars.npm" % "font-awesome" % "4.7.0",
   ),
+  libraryDependencies ++= Seq(
+    "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.1" % Test,
+    "org.scalatest" %% "scalatest" % "3.2.19" % Test,
+  ),
   Compile / compile := ((Compile / compile) dependsOn scalaJSPipeline).value,
   routesGenerator := InjectedRoutesGenerator
 )
@@ -164,7 +169,7 @@ lazy val shared = crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure
     "io.circe" %%% "circe-core" % "0.14.10",
     "io.circe" %%% "circe-generic" % "0.14.10",
     "io.circe" %%% "circe-parser" % "0.14.10",
-    "org.typelevel" %%% "cats-effect" % "3.5.7",
+    "org.typelevel" %%% "cats-effect" % catsEffectVersion,
   ),
   commonSettings,
 ).jsConfigure(_ enablePlugins ScalaJSWeb).enablePlugins(GitVersioning)
